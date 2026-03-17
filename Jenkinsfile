@@ -1,15 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Forge CI/CD Pipeline — Jenkins
+// Forge Platform — CI/CD Pipeline (Jenkins)
 //
-// Stages:  Lint → Test → Build → Security → Release
-// Requirements: Docker Pipeline plugin, Credentials plugin, Git plugin
+// This pipeline lives in forge-deploy and orchestrates builds across all
+// three repositories: forge-backend, forge-frontend, and forge-deploy.
 //
-// Version is derived from git tag (v2026.03.0 → 2026.03.0).
+// Stages:  Checkout → Lint → Test → Build → Security → Release
+//
+// Version is derived from git tag on forge-deploy (v2026.03.0 → 2026.03.0).
 // For non-tag builds, commit SHA is used.
 //
-// Jenkins picks up tags automatically when:
-//   - Multibranch Pipeline: "Discover tags" enabled in Branch Sources
-//   - Classic Pipeline: "Build when a tag is pushed" trigger
+// Jenkins credentials required:
+//   - forge-git-creds:      SSH key for git.cloudforyour.work
+//   - forge-dockerhub-creds: DockerHub username/password (krlex)
 ///////////////////////////////////////////////////////////////////////////////
 
 pipeline {
@@ -19,7 +21,17 @@ pipeline {
         PYTHON_VERSION   = '3.12'
         NODE_VERSION     = '20'
         DOCKER_BUILDKIT  = '1'
-        // Derive version from git tag or commit SHA
+
+        // Git repositories
+        BACKEND_REPO     = 'git@git.cloudforyour.work:forge-platform/forge-backend.git'
+        FRONTEND_REPO    = 'git@git.cloudforyour.work:forge-platform/forge-frontend.git'
+        GIT_BRANCH_NAME  = "${env.BRANCH_NAME ?: 'main'}"
+
+        // Docker images
+        BACKEND_IMAGE    = 'krlex/forge-backend'
+        FRONTEND_IMAGE   = 'krlex/forge-frontend'
+
+        // Version from git tag or commit SHA
         GIT_TAG          = sh(script: 'git describe --tags --exact-match 2>/dev/null || echo ""', returnStdout: true).trim()
         VERSION          = sh(script: '''
             TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
@@ -30,9 +42,6 @@ pipeline {
             fi
         ''', returnStdout: true).trim()
         IS_TAG_BUILD     = sh(script: 'git describe --tags --exact-match 2>/dev/null && echo true || echo false', returnStdout: true).trim()
-        // Container registry — configure in Jenkins credentials
-        REGISTRY         = credentials('forge-registry-url')
-        IMAGE_NAME       = credentials('forge-image-name')
     }
 
     options {
@@ -43,16 +52,41 @@ pipeline {
     }
 
     stages {
-        // ─── Info ────────────────────────────────────────────────────────
+        // ─── Info ──────────────────────────────────────────────────────
         stage('Info') {
             steps {
-                echo "Git tag: ${GIT_TAG ?: '(none — branch build)'}"
                 echo "Version: ${VERSION}"
                 echo "Tag build: ${IS_TAG_BUILD}"
+                echo "Branch: ${GIT_BRANCH_NAME}"
             }
         }
 
-        // ─── Lint ────────────────────────────────────────────────────────
+        // ─── Checkout ──────────────────────────────────────────────────
+        // Clone backend and frontend repos alongside forge-deploy
+        stage('Checkout') {
+            parallel {
+                stage('Checkout Backend') {
+                    steps {
+                        dir('forge-backend') {
+                            git branch: "${GIT_BRANCH_NAME}",
+                                credentialsId: 'forge-git-creds',
+                                url: "${BACKEND_REPO}"
+                        }
+                    }
+                }
+                stage('Checkout Frontend') {
+                    steps {
+                        dir('forge-frontend') {
+                            git branch: "${GIT_BRANCH_NAME}",
+                                credentialsId: 'forge-git-creds',
+                                url: "${FRONTEND_REPO}"
+                        }
+                    }
+                }
+            }
+        }
+
+        // ─── Lint ──────────────────────────────────────────────────────
         stage('Lint') {
             parallel {
                 stage('Python Lint') {
@@ -63,11 +97,13 @@ pipeline {
                         }
                     }
                     steps {
-                        sh '''
-                            pip install --no-cache-dir -q flake8
-                            echo "=== Flake8 (Python lint) ==="
-                            flake8 forge/ --count --statistics
-                        '''
+                        dir('forge-backend') {
+                            sh '''
+                                pip install --no-cache-dir -q flake8
+                                echo "=== Flake8 (Python lint) ==="
+                                flake8 forge/ --count --statistics
+                            '''
+                        }
                     }
                 }
                 stage('Frontend Lint') {
@@ -78,7 +114,7 @@ pipeline {
                         }
                     }
                     steps {
-                        dir('forge/ui_next') {
+                        dir('forge-frontend') {
                             sh '''
                                 npm ci --prefer-offline
                                 echo "=== TypeScript check ==="
@@ -90,7 +126,7 @@ pipeline {
             }
         }
 
-        // ─── Test ────────────────────────────────────────────────────────
+        // ─── Test ──────────────────────────────────────────────────────
         stage('Test') {
             parallel {
                 stage('Python Unit Tests') {
@@ -101,18 +137,20 @@ pipeline {
                         }
                     }
                     steps {
-                        sh '''
-                            apt-get update -qq && apt-get install -y -qq \
-                                git libpq-dev libldap2-dev libsasl2-dev \
-                                libxmlsec1-dev pkg-config gcc
-                            pip install --no-cache-dir \
-                                -r requirements/requirements.txt \
-                                -r requirements/requirements_dev.txt
-                            pip install --no-cache-dir -e .
+                        dir('forge-backend') {
+                            sh '''
+                                apt-get update -qq && apt-get install -y -qq \
+                                    git libpq-dev libldap2-dev libsasl2-dev \
+                                    libxmlsec1-dev pkg-config gcc
+                                pip install --no-cache-dir \
+                                    -r requirements/requirements.txt \
+                                    -r requirements/requirements_dev.txt
+                                pip install --no-cache-dir -e .
 
-                            echo "=== Python unit tests ==="
-                            python -m pytest forge/main/tests/unit/ -x -q --tb=short
-                        '''
+                                echo "=== Python unit tests ==="
+                                python -m pytest forge/main/tests/unit/ -x -q --tb=short
+                            '''
+                        }
                     }
                     post {
                         always {
@@ -128,7 +166,7 @@ pipeline {
                         }
                     }
                     steps {
-                        dir('forge/ui_next') {
+                        dir('forge-frontend') {
                             sh '''
                                 npm ci --prefer-offline
                                 echo "=== Frontend unit tests (Vitest) ==="
@@ -140,58 +178,52 @@ pipeline {
             }
         }
 
-        // ─── Build ──────────────────────────────────────────────────────
+        // ─── Build ─────────────────────────────────────────────────────
         stage('Build') {
             when {
                 anyOf {
-                    branch 'modernization'
-                    branch 'devel'
                     branch 'main'
+                    branch 'devel'
                     buildingTag()
                 }
             }
             parallel {
-                stage('Build CentOS') {
+                stage('Build Backend Image') {
                     steps {
-                        sh """
-                            echo "=== Building CentOS image (${VERSION}) ==="
-                            make Dockerfile.dev
-                            docker build \
-                                -f Dockerfile.dev \
-                                -t forge:${VERSION}-centos \
-                                -t forge:centos-latest \
-                                .
-                        """
+                        dir('forge-backend') {
+                            sh """
+                                echo "=== Building backend image (${VERSION}) ==="
+                                docker build \
+                                    --build-arg VERSION=${VERSION} \
+                                    --build-arg SETUPTOOLS_SCM_PRETEND_VERSION=${VERSION} \
+                                    -t ${BACKEND_IMAGE}:${VERSION} \
+                                    -t ${BACKEND_IMAGE}:latest \
+                                    .
+                            """
+                        }
                     }
                 }
-                stage('Build Ubuntu') {
+                stage('Build Frontend Image') {
                     steps {
-                        sh """
-                            echo "=== Building Ubuntu image (${VERSION}) ==="
-                            pip3 install ansible-core 2>/dev/null || true
-                            ansible-playbook \
-                                -e ansible_python_interpreter=python3 \
-                                tools/ansible/dockerfile.yml \
-                                -e dockerfile_name=Dockerfile.ubuntu \
-                                -e build_dev=False \
-                                -e receptor_image=quay.io/ansible/receptor:devel \
-                                -e dockerfile_template=Dockerfile.ubuntu.j2
-                            docker build \
-                                -f Dockerfile.ubuntu \
-                                -t forge:${VERSION}-ubuntu \
-                                -t forge:ubuntu-latest \
-                                .
-                        """
+                        dir('forge-frontend') {
+                            sh """
+                                echo "=== Building frontend image (${VERSION}) ==="
+                                docker build \
+                                    -t ${FRONTEND_IMAGE}:${VERSION} \
+                                    -t ${FRONTEND_IMAGE}:latest \
+                                    .
+                            """
+                        }
                     }
                 }
             }
         }
 
-        // ─── Security ───────────────────────────────────────────────────
+        // ─── Security ──────────────────────────────────────────────────
         stage('Security') {
             when {
                 anyOf {
-                    branch 'modernization'
+                    branch 'main'
                     branch 'devel'
                     buildingTag()
                 }
@@ -205,58 +237,79 @@ pipeline {
                         }
                     }
                     steps {
-                        sh '''
-                            pip install --no-cache-dir -q pip-audit
-                            echo "=== pip-audit (Python CVE scan) ==="
-                            pip-audit -r requirements/requirements.txt --desc || true
-                        '''
+                        dir('forge-backend') {
+                            sh '''
+                                pip install --no-cache-dir -q pip-audit
+                                echo "=== pip-audit (Python CVE scan) ==="
+                                pip-audit -r requirements/requirements.txt --desc || true
+                            '''
+                        }
                     }
                 }
-                stage('Trivy Scan') {
+                stage('Trivy Backend') {
                     steps {
-                        sh '''
-                            echo "=== Trivy container scan ==="
+                        sh """
+                            echo "=== Trivy scan: backend ==="
                             docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 aquasec/trivy:latest image \
                                 --exit-code 0 \
                                 --severity CRITICAL \
-                                forge:centos-latest || true
+                                ${BACKEND_IMAGE}:latest || true
+                        """
+                    }
+                }
+                stage('Trivy Frontend') {
+                    steps {
+                        sh """
+                            echo "=== Trivy scan: frontend ==="
                             docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 aquasec/trivy:latest image \
                                 --exit-code 0 \
                                 --severity CRITICAL \
-                                forge:ubuntu-latest || true
-                        '''
+                                ${FRONTEND_IMAGE}:latest || true
+                        """
                     }
                 }
             }
         }
 
-        // ─── Release ────────────────────────────────────────────────────
-        // Only runs when building a git tag (v2026.03.0, v2026.04.1, etc.)
+        // ─── Release ───────────────────────────────────────────────────
+        // Push images to DockerHub. Runs on main branch or git tags.
         stage('Release') {
             when {
-                buildingTag()
+                anyOf {
+                    branch 'main'
+                    buildingTag()
+                }
             }
             steps {
                 script {
-                    echo "=== Releasing Forge ${VERSION} (from tag ${GIT_TAG}) ==="
-                    docker.withRegistry("https://${REGISTRY}", 'forge-registry-creds') {
-                        sh """
-                            # Tag and push CentOS (default)
-                            docker tag forge:centos-latest ${REGISTRY}/${IMAGE_NAME}:${VERSION}-centos
-                            docker tag forge:centos-latest ${REGISTRY}/${IMAGE_NAME}:${VERSION}
-                            docker tag forge:centos-latest ${REGISTRY}/${IMAGE_NAME}:latest
-                            docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}-centos
-                            docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}
-                            docker push ${REGISTRY}/${IMAGE_NAME}:latest
+                    echo "=== Releasing Forge ${VERSION} ==="
+                    withCredentials([usernamePassword(
+                        credentialsId: 'forge-dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        '''
+                    }
 
-                            # Tag and push Ubuntu
-                            docker tag forge:ubuntu-latest ${REGISTRY}/${IMAGE_NAME}:${VERSION}-ubuntu
-                            docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}-ubuntu
-                        """
+                    sh """
+                        # Push backend
+                        docker push ${BACKEND_IMAGE}:${VERSION}
+                        docker push ${BACKEND_IMAGE}:latest
+
+                        # Push frontend
+                        docker push ${FRONTEND_IMAGE}:${VERSION}
+                        docker push ${FRONTEND_IMAGE}:latest
+                    """
+
+                    // If tag build, also push version-specific tags
+                    if (env.IS_TAG_BUILD == 'true') {
+                        echo "Tag build — pushed ${VERSION} and latest"
                     }
                 }
             }
@@ -272,8 +325,9 @@ pipeline {
         }
         cleanup {
             sh """
-                docker rmi forge:centos-latest forge:ubuntu-latest 2>/dev/null || true
-                docker rmi forge:${VERSION}-centos forge:${VERSION}-ubuntu 2>/dev/null || true
+                docker rmi ${BACKEND_IMAGE}:${VERSION} ${BACKEND_IMAGE}:latest 2>/dev/null || true
+                docker rmi ${FRONTEND_IMAGE}:${VERSION} ${FRONTEND_IMAGE}:latest 2>/dev/null || true
+                docker logout 2>/dev/null || true
             """
         }
     }

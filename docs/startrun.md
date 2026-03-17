@@ -137,6 +137,24 @@ management command. `awx-manage` still works via symlink for backward compatibil
 | L2 | Full Package Rename (awx→forge) | **COMPLETED** |
 | 10 | Repository Separation | **COMPLETED** |
 | 11 | AWX→Forge File Rename | **COMPLETED** |
+| 12 | Centralized CI/CD Pipeline | **COMPLETED** |
+
+### CI/CD Pipeline (COMPLETED 2026-03-17)
+
+Centralized Jenkinsfile in `forge-deploy` that orchestrates all three repos:
+
+```
+Checkout (backend + frontend) → Lint → Test → Build → Security → Release
+```
+
+- Pipeline clones `forge-backend` and `forge-frontend` from Git
+- Runs Python lint (flake8) + frontend lint (tsc) in parallel
+- Runs Python unit tests (pytest) + frontend tests (vitest) in parallel
+- Builds both Docker images (`krlex/forge-backend`, `krlex/forge-frontend`)
+- Security scans: pip-audit + Trivy container scan
+- Release: pushes versioned images to DockerHub on `main` branch or git tags
+
+Jenkins credentials: `forge-git-creds` (SSH), `forge-dockerhub-creds` (DockerHub)
 
 ---
 
