@@ -261,13 +261,13 @@ docker compose logs nginx
 docker compose exec forge-task supervisorctl status
 # All 4 must be RUNNING: receptor, dispatcher, callback-receiver, wsrelay
 
-docker compose exec forge-web awx-manage list_instances
+docker compose exec forge-web forge-manage list_instances
 ```
 
 ### Forgotten admin password
 
 ```bash
-docker compose exec forge-web awx-manage update_password --username=admin --password=NewPass123!
+docker compose exec forge-web forge-manage update_password --username=admin --password=NewPass123!
 ```
 
 ---
@@ -304,8 +304,8 @@ docker run -d --name forge-task \
   krlex/forge-backend:latest launch_awx_task.sh
 
 # On the control node:
-docker compose exec forge-web awx-manage provision_instance --hostname=exec-node-1 --node-type=execution
-docker compose exec forge-web awx-manage register_queue --queuename=default --hostnames=exec-node-1
+docker compose exec forge-web forge-manage provision_instance --hostname=exec-node-1 --node-type=execution
+docker compose exec forge-web forge-manage register_queue --queuename=default --hostnames=exec-node-1
 ```
 
 ### Recommended Hardware

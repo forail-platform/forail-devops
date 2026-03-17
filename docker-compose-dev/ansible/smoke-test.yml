@@ -14,8 +14,8 @@
     - name: Reset admin password
       shell: |
         docker exec -i tools_awx_1 bash <<EOSH
-          awx-manage update_password --username=admin --password=password
-          awx-manage create_preload_data
+          forge-manage update_password --username=admin --password=password
+          forge-manage create_preload_data
         EOSH
 
     - block:

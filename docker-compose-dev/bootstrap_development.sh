@@ -32,39 +32,39 @@ if [ ! -d "/awx_devel/forge/ui_next/build/forge" ]; then
     cp /awx_devel/forge/ui_next/placeholder_index_forge.html /awx_devel/forge/ui_next/build/forge/index_forge.html
 fi
 
-if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
+if output=$(forge-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
     echo $output
 fi
 echo "Admin password: ${DJANGO_SUPERUSER_PASSWORD}"
 
-awx-manage create_preload_data
-awx-manage register_default_execution_environments
+forge-manage create_preload_data
+forge-manage register_default_execution_environments
 
-awx-manage provision_instance --hostname="$(hostname)" --node_type="$MAIN_NODE_TYPE"
-awx-manage add_receptor_address --instance="$(hostname)" --address="$(hostname)" --port=2222 --canonical
+forge-manage provision_instance --hostname="$(hostname)" --node_type="$MAIN_NODE_TYPE"
+forge-manage add_receptor_address --instance="$(hostname)" --address="$(hostname)" --port=2222 --canonical
 
-awx-manage register_queue --queuename=controlplane --instance_percent=100
-awx-manage register_queue --queuename=default --instance_percent=100
+forge-manage register_queue --queuename=controlplane --instance_percent=100
+forge-manage register_queue --queuename=default --instance_percent=100
 
 if [[ -n "$RUN_MIGRATIONS" ]]; then
     for (( i=1; i<$CONTROL_PLANE_NODE_COUNT; i++ )); do
         for (( j=i + 1; j<=$CONTROL_PLANE_NODE_COUNT; j++ )); do
-            awx-manage register_peers "awx-$i" --peers "awx-$j"
+            forge-manage register_peers "awx-$i" --peers "awx-$j"
         done
     done
 
     if [[ $EXECUTION_NODE_COUNT > 0 ]]; then
-        awx-manage provision_instance --hostname="receptor-hop" --node_type="hop"
-        awx-manage add_receptor_address --instance="receptor-hop" --address="receptor-hop" --port=5555 --canonical
-        awx-manage register_peers "receptor-hop" --peers "awx-1"
+        forge-manage provision_instance --hostname="receptor-hop" --node_type="hop"
+        forge-manage add_receptor_address --instance="receptor-hop" --address="receptor-hop" --port=5555 --canonical
+        forge-manage register_peers "receptor-hop" --peers "awx-1"
         for (( e=1; e<=$EXECUTION_NODE_COUNT; e++ )); do
-            awx-manage provision_instance --hostname="receptor-$e" --node_type="execution"
-            awx-manage register_peers "receptor-$e" --peers "receptor-hop"
+            forge-manage provision_instance --hostname="receptor-$e" --node_type="execution"
+            forge-manage register_peers "receptor-$e" --peers "receptor-hop"
         done
     fi
 fi
 
 # Create resource entries when using Minikube
 if [[ -n "$MINIKUBE_CONTAINER_GROUP" ]]; then
-    awx-manage shell < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
+    forge-manage shell < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
 fi

@@ -129,8 +129,8 @@ docker compose logs -f forge-web
 docker compose logs -f forge-task
 
 # Django management commands
-docker compose exec forge-web awx-manage shell
-docker compose exec forge-web awx-manage check_instance_ready
+docker compose exec forge-web forge-manage shell
+docker compose exec forge-web forge-manage check_instance_ready
 
 # Restart a single service
 docker compose restart forge-web

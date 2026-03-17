@@ -1,4 +1,4 @@
-#!/usr/bin/awx-python
+#!/usr/bin/forge-python
 import sys
 from importlib.metadata import distribution
 

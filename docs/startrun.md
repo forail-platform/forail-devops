@@ -85,6 +85,21 @@ Full production stack deployed and verified in Vagrant VM (Ubuntu 24.04):
 - **Frontend**: React SPA served via forge-frontend container, proxied by nginx
 - **252 Django migrations** applied successfully
 
+### AWX→Forge File Rename (COMPLETED 2026-03-17)
+
+All remaining `awx*` files renamed to `forge*` across all repositories:
+
+- `awx-python` → `forge-python` (Python venv wrapper script)
+- `awx_settings.py` → `forge_settings.py` (Django settings module)
+- `awx-spud-reading.svg` → removed (old AWX mascot icon)
+- `awx-autoreload` → `forge-autoreload` (dev file watcher)
+- `awx-manage` (dev wrapper) → `forge-manage`
+- All `awx-manage` references in scripts → `forge-manage`
+- Backward compatibility: `awx-manage` and `awx-python` symlinks preserved in Docker image
+
+**Result**: Zero `awx*` files remaining in any repository. `forge-manage` is the primary
+management command. `awx-manage` still works via symlink for backward compatibility.
+
 ### Previous Work (from monolithic phase)
 
 - AWX 24.6.1 cloned, `modernization` branch created
@@ -121,6 +136,7 @@ Full production stack deployed and verified in Vagrant VM (Ubuntu 24.04):
 | L1 | User-Facing Rebranding | **COMPLETED** |
 | L2 | Full Package Rename (awx→forge) | **COMPLETED** |
 | 10 | Repository Separation | **COMPLETED** |
+| 11 | AWX→Forge File Rename | **COMPLETED** |
 
 ---
 

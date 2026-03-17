@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 
-awx-manage check_instance_ready --skip-checks >/dev/null 2>&1
+forge-manage check_instance_ready --skip-checks >/dev/null 2>&1
