@@ -1,222 +1,129 @@
 digraph ForgeArchitecture {
     rankdir=TB;
-    bgcolor="#f8f9fa";
+    bgcolor="#1e1e2e";
     fontname="Helvetica Neue,Helvetica,Arial,sans-serif";
-    node [fontname="Helvetica Neue,Helvetica,Arial,sans-serif", fontsize=10, style="filled",
-          shape="box", penwidth=1.2, margin="0.15,0.08"];
-    edge [fontname="Helvetica Neue,Helvetica,Arial,sans-serif", fontsize=8, penwidth=1.0,
-          color="#78909c", fontcolor="#546e7a"];
-    graph [fontname="Helvetica Neue,Helvetica,Arial,sans-serif", fontsize=11, fontcolor="#37474f"];
+    node [fontname="Helvetica Neue,Helvetica,Arial,sans-serif", fontsize=11, style="filled",
+          shape="box", penwidth=1.5, margin="0.2,0.1", fontcolor="#cdd6f4"];
+    edge [fontname="Helvetica Neue,Helvetica,Arial,sans-serif", fontsize=9, penwidth=1.2,
+          color="#6c7086", fontcolor="#a6adc8"];
+    graph [fontname="Helvetica Neue,Helvetica,Arial,sans-serif", fontsize=12, fontcolor="#cdd6f4"];
     compound=true;
     newrank=true;
     splines=true;
-    nodesep=0.5;
-    ranksep=0.7;
-    pad=0.4;
+    nodesep=0.6;
+    ranksep=0.8;
+    pad=0.5;
+
+    // ── Source Repositories ──
+    subgraph cluster_source {
+        label="  Source Repositories  ";
+        labeljust="c";
+        style="filled,rounded,bold";
+        fillcolor="#313244";
+        color="#89b4fa";
+        fontcolor="#89b4fa";
+        penwidth=2;
+        margin=20;
+
+        backend [label="forge-backend\n(Django / Python)",
+                 fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
+                 shape="box", style="filled,rounded"];
+        frontend [label="forge-frontend\n(React / TypeScript)",
+                  fillcolor="#1e1e2e", color="#a6e3a1", fontcolor="#a6e3a1",
+                  shape="box", style="filled,rounded"];
+    }
+
+    // ── Docker Registry ──
+    registry [label="Docker Registry\n(DockerHub)",
+              fillcolor="#313244", color="#f9e2af", fontcolor="#f9e2af",
+              shape="box", style="filled,rounded", penwidth=2];
+
+    // ── Deployment ──
+    subgraph cluster_deploy {
+        label="  forge-deploy (docker-compose)  ";
+        labeljust="c";
+        style="filled,rounded,bold";
+        fillcolor="#313244";
+        color="#cba6f7";
+        fontcolor="#cba6f7";
+        penwidth=2;
+        margin=20;
+
+        web [label="forge-web\n(uwsgi + daphne)",
+             fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
+             shape="box", style="filled,rounded"];
+        task [label="forge-task\n(dispatcher + receptor)",
+              fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
+              shape="box", style="filled,rounded"];
+        fe [label="forge-frontend\n(nginx + React SPA)",
+            fillcolor="#1e1e2e", color="#a6e3a1", fontcolor="#a6e3a1",
+            shape="box", style="filled,rounded"];
+        init [label="forge-init\n(migrations)",
+              fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
+              shape="box", style="filled,rounded"];
+    }
+
+    // ── Infrastructure ──
+    subgraph cluster_infra {
+        label="  Infrastructure  ";
+        labeljust="c";
+        style="filled,rounded,bold";
+        fillcolor="#313244";
+        color="#f38ba8";
+        fontcolor="#f38ba8";
+        penwidth=2;
+        margin=20;
+
+        nginx [label="nginx\n(TLS + routing)",
+               fillcolor="#1e1e2e", color="#f9e2af", fontcolor="#f9e2af",
+               shape="box", style="filled,rounded"];
+        postgres [label="PostgreSQL\n:5432",
+                  fillcolor="#1e1e2e", color="#f38ba8", fontcolor="#f38ba8",
+                  shape="cylinder"];
+        redis [label="Redis\n:6379",
+               fillcolor="#1e1e2e", color="#f38ba8", fontcolor="#f38ba8",
+               shape="cylinder"];
+    }
 
     // ── Users ──
-    users [label="End Users\n(Browser / API Client)", shape="ellipse",
-           fillcolor="#eceff1", color="#90a4ae", fontcolor="#37474f", fontsize=11, penwidth=1.5];
+    users [label="Users\n(Browser / API)",
+           shape="ellipse", fillcolor="#313244", color="#6c7086",
+           fontcolor="#cdd6f4", fontsize=11];
 
-    // ── External Nginx ──
-    subgraph cluster_nginx_ext {
-        label="  NGINX (External)  ";
-        labeljust="c";
-        style="filled,rounded,bold";
-        fillcolor="#fff8e1";
-        color="#f9a825";
-        fontcolor="#f57f17";
-        penwidth=2;
-        margin=16;
-
-        nginx_ext [label="TLS Termination  •  Rate Limiting\nSecurity Headers  •  HTTP→HTTPS",
-                   fillcolor="#fff9c4", color="#fbc02d", fontcolor="#e65100",
-                   shape="component", fontsize=9];
-    }
-
-    // ══════════════════════════════════════════════
-    // ── Web Container ──
-    // ══════════════════════════════════════════════
-    subgraph cluster_web {
-        label="  forge-web  ";
-        labeljust="c";
-        style="filled,rounded,bold";
-        fillcolor="#e3f2fd";
-        color="#1976d2";
-        fontcolor="#0d47a1";
-        penwidth=2;
-        margin=20;
-
-        subgraph cluster_web_proxy {
-            label="Process Management (supervisord)";
-            labeljust="c";
-            style="filled,rounded,dashed";
-            fillcolor="#e1f5fe";
-            color="#90caf9";
-            fontcolor="#1565c0";
-            penwidth=1;
-            margin=12;
-
-            nginx_int [label="Nginx\n:8013\nRouting + Static",
-                       fillcolor="#bbdefb", color="#1976d2", fontcolor="#0d47a1",
-                       shape="box", style="filled,rounded"];
-            uwsgi [label="uWSGI\n:8050\nWSGI (sync)",
-                   fillcolor="#bbdefb", color="#1976d2", fontcolor="#0d47a1",
-                   shape="box", style="filled,rounded"];
-            daphne [label="Daphne\n:8051\nASGI (WebSocket)",
-                    fillcolor="#bbdefb", color="#1976d2", fontcolor="#0d47a1",
-                    shape="box", style="filled,rounded"];
-        }
-
-        subgraph cluster_django {
-            label="  Django Application  ";
-            labeljust="c";
-            style="filled,rounded";
-            fillcolor="#e8eaf6";
-            color="#5c6bc0";
-            fontcolor="#283593";
-            penwidth=1.5;
-            margin=14;
-
-            api [label="REST API\n(DRF Views)", fillcolor="#c5cae9", color="#5c6bc0",
-                 fontcolor="#1a237e", shape="box", style="filled,rounded"];
-            serializers [label="Serializers\nValidation", fillcolor="#c5cae9", color="#5c6bc0",
-                         fontcolor="#1a237e", shape="box", style="filled,rounded"];
-            models_orm [label="Models / ORM\nSignals • RBAC", fillcolor="#c5cae9", color="#5c6bc0",
-                        fontcolor="#1a237e", shape="box", style="filled,rounded"];
-            sso [label="SSO\nLDAP • SAML\nOAuth2", fillcolor="#c5cae9", color="#5c6bc0",
-                 fontcolor="#1a237e", shape="box", style="filled,rounded"];
-        }
-    }
-
-    // ══════════════════════════════════════════════
-    // ── Task Container ──
-    // ══════════════════════════════════════════════
-    subgraph cluster_task {
-        label="  forge-task  ";
-        labeljust="c";
-        style="filled,rounded,bold";
-        fillcolor="#e8f5e9";
-        color="#388e3c";
-        fontcolor="#1b5e20";
-        penwidth=2;
-        margin=20;
-
-        subgraph cluster_task_procs {
-            label="Process Management (supervisord)";
-            labeljust="c";
-            style="filled,rounded,dashed";
-            fillcolor="#f1f8e9";
-            color="#a5d6a7";
-            fontcolor="#2e7d32";
-            penwidth=1;
-            margin=12;
-
-            dispatcher [label="Dispatcher\nCelery Worker\nCapacity Mgmt",
-                        fillcolor="#c8e6c9", color="#388e3c", fontcolor="#1b5e20",
-                        shape="box", style="filled,rounded"];
-            callback [label="Callback\nReceiver\nEvent Ingestion",
-                      fillcolor="#c8e6c9", color="#388e3c", fontcolor="#1b5e20",
-                      shape="box", style="filled,rounded"];
-            wsrelay [label="WSRelay\nWebSocket\nBroadcast",
-                     fillcolor="#c8e6c9", color="#388e3c", fontcolor="#1b5e20",
-                     shape="box", style="filled,rounded"];
-            receptor [label="Receptor\n:2222\nMesh Network",
-                      fillcolor="#c8e6c9", color="#388e3c", fontcolor="#1b5e20",
-                      shape="box", style="filled,rounded"];
-        }
-
-        runner [label="Ansible Runner\n(Playbook Execution)",
-                fillcolor="#a5d6a7", color="#2e7d32", fontcolor="#1b5e20",
-                shape="box", style="filled,rounded,bold", penwidth=2, fontsize=10];
-    }
-
-    // ══════════════════════════════════════════════
-    // ── Data Layer ──
-    // ══════════════════════════════════════════════
-    subgraph cluster_data {
-        label="  Persistence Layer  ";
-        labeljust="c";
-        style="filled,rounded,bold";
-        fillcolor="#fce4ec";
-        color="#c62828";
-        fontcolor="#b71c1c";
-        penwidth=2;
-        margin=16;
-
-        postgres [label="PostgreSQL :5432\n\nModels • Job Events\nActivity Stream\nRBAC • Config",
-                  fillcolor="#ffcdd2", color="#c62828", fontcolor="#b71c1c",
-                  shape="cylinder", fontsize=10, penwidth=1.5];
-        redis [label="Redis :6379\n\nDB0: Celery Broker\n+ Channels\nDB1: Cache",
-               fillcolor="#ffcdd2", color="#c62828", fontcolor="#b71c1c",
-               shape="cylinder", fontsize=10, penwidth=1.5];
-    }
-
-    // ── Outputs ──
-    static [label="Static Assets\n/static/forge/",
-            fillcolor="#f3e5f5", color="#8e24aa", fontcolor="#4a148c",
-            shape="note", style="filled"];
-
-    ws_clients [label="Real-time Clients\n(WebSocket)",
-                shape="ellipse", fillcolor="#eceff1", color="#90a4ae",
-                fontcolor="#37474f", fontsize=10];
-
-    // ══════════════════════════════════════════════
     // ── Connections ──
-    // ══════════════════════════════════════════════
+
+    // Build → Registry
+    backend -> registry [label="  docker push  ", color="#89b4fa", fontcolor="#89b4fa"];
+    frontend -> registry [label="  docker push  ", color="#a6e3a1", fontcolor="#a6e3a1"];
+
+    // Registry → Deploy
+    registry -> web [label="  krlex/forge-backend  ", color="#f9e2af", fontcolor="#f9e2af"];
+    registry -> task [style="invis"];
+    registry -> fe [label="  krlex/forge-frontend  ", color="#a6e3a1", fontcolor="#a6e3a1"];
+    registry -> init [style="invis"];
+
+    // Deploy → Infra
+    web -> postgres [color="#f38ba8"];
+    web -> redis [color="#f38ba8"];
+    task -> postgres [color="#f38ba8"];
+    task -> redis [color="#f38ba8"];
+    init -> postgres [label="  migrations  ", color="#f38ba8", fontcolor="#f38ba8"];
+
+    // Nginx routing
+    nginx -> web [label="  /api  /sso  /ws  ", color="#89b4fa", fontcolor="#89b4fa"];
+    nginx -> fe [label="  /*  ", color="#a6e3a1", fontcolor="#a6e3a1"];
 
     // Users → Nginx
-    users -> nginx_ext [label="  HTTPS :443  ", color="#f57f17", fontcolor="#e65100",
-                        penwidth=2, arrowsize=0.8];
-
-    // Nginx ext → Nginx int
-    nginx_ext -> nginx_int [label="  HTTP :8013  ", color="#f57f17", fontcolor="#e65100",
-                            penwidth=1.5, arrowsize=0.8];
-
-    // Internal routing
-    nginx_int -> uwsgi [label="/api  /sso  /", color="#1976d2", fontcolor="#1565c0"];
-    nginx_int -> daphne [label="/websocket/", color="#1976d2", fontcolor="#1565c0"];
-    nginx_int -> static [label="/static/", color="#8e24aa", fontcolor="#6a1b9a"];
-
-    // WSGI/ASGI → Django
-    uwsgi -> api [color="#5c6bc0", arrowsize=0.7];
-    daphne -> api [color="#5c6bc0", arrowsize=0.7, style="dashed"];
-    api -> serializers [color="#5c6bc0", arrowsize=0.7];
-    serializers -> models_orm [color="#5c6bc0", arrowsize=0.7];
-    sso -> models_orm [color="#5c6bc0", arrowsize=0.7, style="dashed"];
-
-    // Django → Data
-    models_orm -> postgres [label="  SQL  ", color="#c62828", fontcolor="#c62828",
-                            penwidth=1.5, arrowsize=0.8];
-
-    // API → Redis (queue task)
-    api -> redis [label="  Queue task  ", color="#c62828", fontcolor="#c62828",
-                  arrowsize=0.8, style="dashed"];
-
-    // Task flow
-    redis -> dispatcher [label="  Read tasks  ", color="#c62828", fontcolor="#c62828",
-                         arrowsize=0.8];
-    dispatcher -> runner [label="  Start  ", color="#2e7d32", fontcolor="#2e7d32",
-                          penwidth=1.5, arrowsize=0.8];
-    runner -> callback [label="  Events (ZMQ)  ", color="#2e7d32", fontcolor="#2e7d32",
-                        arrowsize=0.8];
-    callback -> postgres [label="  Store  ", color="#c62828", fontcolor="#c62828",
-                          arrowsize=0.8];
-    callback -> wsrelay [color="#2e7d32", arrowsize=0.7];
-    wsrelay -> ws_clients [label="  Real-time updates  ", color="#546e7a", fontcolor="#37474f",
-                           penwidth=1.5, arrowsize=0.8];
-
-    // Receptor
-    receptor -> runner [label="  Remote exec  ", color="#2e7d32", fontcolor="#2e7d32",
-                        style="dashed", arrowsize=0.7];
+    users -> nginx [label="  HTTPS :443  ", color="#f9e2af", fontcolor="#f9e2af", penwidth=2];
 
     // Layout hints
-    {rank=same; postgres; redis}
-    {rank=same; ws_clients; static}
+    {rank=same; backend; frontend}
+    {rank=same; web; task; fe; init}
+    {rank=same; nginx; postgres; redis}
 
     // Title
     labelloc="t";
-    label="\n  Forge Platform — System Architecture  \n ";
+    label="\n  Forge Platform — Architecture  \n ";
     fontsize=16;
-    fontcolor="#1a237e";
+    fontcolor="#cdd6f4";
 }
