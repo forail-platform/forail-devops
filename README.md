@@ -1,37 +1,37 @@
-# Forge Deploy
+# Forge DevOps
 
-Deployment, infrastruktura i CI/CD za Forge platformu.
+Deployment, infrastructure, and CI/CD for the Forge platform.
 
-## Pregled
+## Overview
 
-Ovaj repo sadrži sve potrebno za deploy Forge platforme:
-- Docker Compose konfiguracija (produkcija + development)
+This repo contains everything needed to deploy the Forge platform:
+- Docker Compose configuration (production + development)
 - Nginx reverse proxy
 - SSL/TLS (Let's Encrypt)
-- Backup/restore skripte
-- CI/CD pipeline konfiguracija
-- Health check skripte
-- Receptor mesh konfiguracija
+- Backup/restore scripts
+- CI/CD pipeline configuration
+- Health check scripts
+- Receptor mesh configuration
 
 ## Quick Start
 
 ```bash
-# 1. Kloniraj repo
-git clone https://github.com/forgeplatform/forge-deploy.git
-cd forge-deploy
+# 1. Clone the repo
+git clone git@git.cloudforyour.work:forge-platform/forge-devops.git
+cd forge-devops
 
-# 2. Konfiguriši environment
+# 2. Configure environment
 cp .env.example .env
-# Uredi .env sa pravim vrijednostima
+# Edit .env with real values
 
-# 3. Pokreni
+# 3. Start
 docker compose up -d
 
-# 4. Provjeri health
+# 4. Check health
 ./scripts/healthcheck-web.sh
 ```
 
-## Arhitektura
+## Architecture
 
 ```
 ┌──────────────┐     ┌───────────────┐
@@ -46,7 +46,7 @@ docker compose up -d
                   │
                   ▼
        ┌─────────────────┐
-       │   forge-deploy   │
+       │   forge-devops   │
        │ docker-compose   │
        └────────┬────────┘
                 │
@@ -57,33 +57,33 @@ docker compose up -d
 └────────┘ └────────┘ └────────┘
 ```
 
-## Servisi
+## Services
 
-| Servis | Image | Port | Opis |
-|--------|-------|------|------|
+| Service | Image | Port | Description |
+|---------|-------|------|-------------|
 | nginx | nginx:latest | 443, 80 | Reverse proxy, SSL termination |
 | forge-web | krlex/forge-backend | 8013 | Django API + uWSGI |
 | forge-task | krlex/forge-backend | - | Celery worker + Dispatcher |
-| postgres | postgres:15 | 5432 | Baza podataka |
+| postgres | postgres:15 | 5432 | Database |
 | redis | redis:7 | 6379 | Cache + message broker |
 
-## Struktura
+## Structure
 
 ```
-forge-deploy/
-├── docker-compose.yml       # Produkcioni stack
+forge-devops/
+├── docker-compose.yml       # Production stack
 ├── docker-compose.dev.yml   # Development stack
 ├── docker/                  # Dockerfile templates
-├── nginx/                   # Nginx konfiguracija + SSL
-├── receptor/                # Receptor mesh konfiguracija
+├── nginx/                   # Nginx configuration + SSL
+├── receptor/                # Receptor mesh configuration
 ├── scripts/                 # Backup, restore, health checks
 ├── settings/                # Django production settings
-├── docs/                    # Sva dokumentacija
-├── .env.example             # Template za environment
+├── docs/                    # All documentation
+├── .env.example             # Environment template
 └── Jenkinsfile              # Jenkins pipeline
 ```
 
-## Dokumentacija
+## Documentation
 
 ### Deployment
 - [Architecture Overview](docs/01-architecture-overview.md)
@@ -92,7 +92,7 @@ forge-deploy/
 - [CI Pipeline Reference](docs/ci-pipeline-reference.md)
 - [Contributing Guide](docs/10-contributing-guide.md)
 
-### Planovi
+### Plans
 - [Separation Plan](docs/plan_separation.md)
 - [Development Plan](docs/plan_development.md)
 - [Detailed Plan](docs/plan_detailed.md)
@@ -114,7 +114,7 @@ forge-deploy/
 ./scripts/restore.sh /path/to/backup.sql.gz
 ```
 
-## Povezani repozitorijumi
+## Related Repositories
 
-- [forge-backend](https://github.com/forgeplatform/forge-backend) — Django API + Task Engine
-- [forge-frontend](https://github.com/forgeplatform/forge-frontend) — React UI
+- [forge-backend](https://git.cloudforyour.work/forge-platform/forge-backend) — Django API + Task Engine
+- [forge-frontend](https://git.cloudforyour.work/forge-platform/forge-frontend) — React UI

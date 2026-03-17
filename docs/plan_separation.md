@@ -1,45 +1,45 @@
-# Plan separacije projekta na zasebne repozitorijume
+# Project Separation Plan — Separate Repositories
 
-## Pregled
+## Overview
 
-Forge platforma se trenutno nalazi u jednom monorepo-u. Ovaj plan definiše razdvajanje na **5 nezavisnih repozitorijuma** koji se povezuju kroz CI/CD pipeline.
+The Forge platform currently resides in a single monorepo. This plan defines the separation into **5 independent repositories** connected through CI/CD pipelines.
 
 ```
-forgeplatform/
+forge-platform/
 ├── forge-backend        ← Django API + Task Engine + Celery
 ├── forge-frontend       ← React UI (Vite + Tailwind)
-├── forge-deploy         ← Docker, Compose, Nginx, CI/CD, infra
-├── forge-assistant      ← Ollama + ChromaDB RAG (buduće)
-└── forge-mobile         ← Android/iOS app (buduće)
+├── forge-devops         ← Docker, Compose, Nginx, CI/CD, infra
+├── forge-assistant      ← Ollama + ChromaDB RAG (future)
+└── forge-mobile         ← Android/iOS app (future)
 ```
 
 ---
 
-## Faza 1: forge-backend
+## Phase 1: forge-backend
 
-**Repo:** `forgeplatform/forge-backend`
+**Repo:** `forge-platform/forge-backend`
 
-### Šta ulazi:
-| Izvor (trenutni monorepo) | Odredište u novom repo-u |
+### What goes in:
+| Source (current monorepo) | Destination in new repo |
 |---|---|
-| `forge/` (Python paket) | `forge/` |
-| `forge/main/`, `forge/api/`, `forge/conf/`, `forge/sso/` | Isto |
+| `forge/` (Python package) | `forge/` |
+| `forge/main/`, `forge/api/`, `forge/conf/`, `forge/sso/` | Same |
 | `forge/settings/` | `forge/settings/` |
 | `manage.py` | `manage.py` |
 | `requirements/` | `requirements/` |
-| `tools/` (management skripte) | `tools/` |
+| `tools/` (management scripts) | `tools/` |
 | `setup.cfg`, `setup.py`, `pyproject.toml` | Root |
 
-### Dokumentacija koja ide uz backend:
+### Documentation included with backend:
 - `docs/wiki/02-backend-django.md`
 - `docs/wiki/04-task-engine.md`
 - `docs/wiki/05-authentication-rbac.md`
 - `docs/wiki/06-database-schema.md`
-- `docs/wiki/09-testing-guide.md` (Python dio)
+- `docs/wiki/09-testing-guide.md` (Python section)
 - `docs/wiki/11-api-reference.md`
 - `docs/wiki/12-configuration-reference.md`
 
-### CI/CD za backend repo:
+### CI/CD for backend repo:
 ```yaml
 # .gitlab-ci.yml
 stages:
@@ -47,23 +47,23 @@ stages:
   - test        # pytest (unit + functional)
   - build       # Docker image (forge-backend:tag)
   - security    # pip-audit, trivy
-  - publish     # Push image na registry
+  - publish     # Push image to registry
 ```
 
-### Artefakt:
-- Docker image: `krlex/forge-backend:<verzija>`
-- API dokumentacija (auto-generisana)
+### Artifact:
+- Docker image: `krlex/forge-backend:<version>`
+- API documentation (auto-generated)
 
 ---
 
-## Faza 2: forge-frontend
+## Phase 2: forge-frontend
 
-**Repo:** `forgeplatform/forge-frontend`
+**Repo:** `forge-platform/forge-frontend`
 
-### Šta ulazi:
-| Izvor (trenutni monorepo) | Odredište u novom repo-u |
+### What goes in:
+| Source (current monorepo) | Destination in new repo |
 |---|---|
-| `src/` (React aplikacija) | `src/` |
+| `src/` (React application) | `src/` |
 | `public/` | `public/` |
 | `index.html` | `index.html` |
 | `package.json`, `package-lock.json` | Root |
@@ -73,46 +73,46 @@ stages:
 | `postcss.config.js` | Root |
 | `.eslintrc.*` | Root |
 
-### Dokumentacija koja ide uz frontend:
+### Documentation included with frontend:
 - `docs/wiki/03-frontend-react.md`
-- `docs/wiki/09-testing-guide.md` (Frontend dio)
+- `docs/wiki/09-testing-guide.md` (Frontend section)
 
-### CI/CD za frontend repo:
+### CI/CD for frontend repo:
 ```yaml
 # .gitlab-ci.yml
 stages:
   - lint        # tsc --noEmit, eslint
   - test        # vitest
   - build       # vite build → static bundle
-  - publish     # Upload artefakta ili Docker image sa nginx
+  - publish     # Upload artifact or Docker image with nginx
 ```
 
-### Artefakt:
-- Build folder (`dist/`) — statički fajlovi
-- Opciono Docker image: `krlex/forge-frontend:<verzija>` (nginx + static files)
+### Artifact:
+- Build folder (`dist/`) — static files
+- Optional Docker image: `krlex/forge-frontend:<version>` (nginx + static files)
 
-### Konfiguracija:
-- API URL se konfiguriše kroz environment varijablu (`VITE_API_URL`)
-- Frontend se build-uje nezavisno od backend-a
-- Proxy konfiguracija u `vite.config.ts` za development
+### Configuration:
+- API URL is configured via environment variable (`VITE_API_URL`)
+- Frontend builds independently from the backend
+- Proxy configuration in `vite.config.ts` for development
 
 ---
 
-## Faza 3: forge-deploy
+## Phase 3: forge-devops
 
-**Repo:** `forgeplatform/forge-deploy`
+**Repo:** `forge-platform/forge-devops`
 
-### Šta ulazi:
-| Izvor (trenutni monorepo) | Odredište u novom repo-u |
+### What goes in:
+| Source (current monorepo) | Destination in new repo |
 |---|---|
 | `Dockerfile`, `Dockerfile.*` | `docker/` |
 | `docker-compose.yml` | Root |
-| `nginx/` konfiguracija | `nginx/` |
+| `nginx/` configuration | `nginx/` |
 | `Vagrantfile` | `vagrant/` |
-| Deployment skripte | `scripts/` |
-| SSL/TLS konfiguracija | `ssl/` |
+| Deployment scripts | `scripts/` |
+| SSL/TLS configuration | `ssl/` |
 
-### Dokumentacija koja ide uz deploy:
+### Documentation included with devops:
 - `docs/wiki/01-architecture-overview.md`
 - `docs/wiki/07-docker-deployment.md`
 - `docs/wiki/08-ci-cd-pipeline.md`
@@ -122,14 +122,14 @@ stages:
 - `docs/RELEASE_NOTES_*.md`
 - `docs/future_development_plan.md`
 
-### Struktura:
+### Structure:
 ```
-forge-deploy/
+forge-devops/
 ├── docker/
-│   ├── Dockerfile.backend      # Multi-stage za backend
-│   ├── Dockerfile.frontend     # Multi-stage za frontend (nginx)
-│   └── Dockerfile.assistant    # Ollama + RAG (buduće)
-├── docker-compose.yml          # Produkcioni stack
+│   ├── Dockerfile.backend      # Multi-stage for backend
+│   ├── Dockerfile.frontend     # Multi-stage for frontend (nginx)
+│   └── Dockerfile.assistant    # Ollama + RAG (future)
+├── docker-compose.yml          # Production stack
 ├── docker-compose.dev.yml      # Development stack
 ├── nginx/
 │   ├── nginx.conf
@@ -144,12 +144,12 @@ forge-deploy/
 ├── vagrant/
 │   └── Vagrantfile
 ├── docs/
-│   └── (sva deployment dokumentacija)
+│   └── (all deployment documentation)
 ├── .env.example
 └── README.md
 ```
 
-### Docker Compose (produkcija):
+### Docker Compose (production):
 ```yaml
 services:
   postgres:
@@ -161,39 +161,39 @@ services:
   forge-frontend:
     image: krlex/forge-frontend:${VERSION}
   forge-task:
-    image: krlex/forge-backend:${VERSION}   # isti image, drugi entrypoint
+    image: krlex/forge-backend:${VERSION}   # same image, different entrypoint
   nginx:
     # reverse proxy → frontend + backend API
 ```
 
-### CI/CD orchestracija:
+### CI/CD orchestration:
 ```
-forge-deploy repo je "glue" koji:
-1. Povlači verzije backend i frontend image-a
-2. Definiše kako se deploy-uje na server
-3. Sadrži docker-compose za produkciju
-4. Sadrži backup/restore skripte
-5. Sadrži health check i monitoring konfiguraciju
+The forge-devops repo is the "glue" that:
+1. Pulls backend and frontend image versions
+2. Defines how to deploy to the server
+3. Contains docker-compose for production
+4. Contains backup/restore scripts
+5. Contains health check and monitoring configuration
 ```
 
 ---
 
-## Faza 4: forge-assistant (buduće)
+## Phase 4: forge-assistant (future)
 
-**Repo:** `forgeplatform/forge-assistant`
+**Repo:** `forge-platform/forge-assistant`
 
-### Planirana struktura:
+### Planned structure:
 ```
 forge-assistant/
 ├── app/
 │   ├── main.py              # FastAPI/Django app
-│   ├── ollama_client.py     # Ollama LLM integracija
+│   ├── ollama_client.py     # Ollama LLM integration
 │   ├── rag/
 │   │   ├── indexer.py       # ChromaDB document indexing
 │   │   └── retriever.py     # RAG retrieval
 │   └── api/
 │       └── assistant.py     # /api/v2/assistant/ endpoint
-├── documents/               # Dokumenti za RAG indeksiranje
+├── documents/               # Documents for RAG indexing
 ├── Dockerfile
 ├── requirements.txt
 ├── docker-compose.yml       # Ollama + ChromaDB + Assistant
@@ -201,25 +201,25 @@ forge-assistant/
     └── chat_plan.md
 ```
 
-### Integracija:
-- Izlaže API koji frontend konzumira (`/api/v2/assistant/`)
-- SSE streaming za real-time odgovore
-- ChromaDB za vektorsko pretraživanje dokumentacije
-- Ollama za LLM inference (lokalno, bez cloud zavisnosti)
+### Integration:
+- Exposes an API consumed by the frontend (`/api/v2/assistant/`)
+- SSE streaming for real-time responses
+- ChromaDB for vector search over documentation
+- Ollama for LLM inference (local, no cloud dependency)
 
 ---
 
-## Faza 5: forge-mobile (buduće)
+## Phase 5: forge-mobile (future)
 
-**Repo:** `forgeplatform/forge-mobile`
+**Repo:** `forge-platform/forge-mobile`
 
-### Planirana struktura:
+### Planned structure:
 ```
 forge-mobile/
 ├── android/
 │   ├── app/src/main/kotlin/   # Kotlin + Jetpack Compose
 │   └── build.gradle.kts
-├── backend/                    # Go API za mobile-specific funkcije
+├── backend/                    # Go API for mobile-specific features
 │   ├── cmd/server/main.go
 │   ├── internal/
 │   │   ├── auth/              # JWT + biometric verification
@@ -233,28 +233,28 @@ forge-mobile/
 
 ---
 
-## Kako se repoi povezuju (CI/CD integracija)
+## How repositories connect (CI/CD integration)
 
-### Verzionisanje:
-- Svi repoi koriste **CalVer**: `YYYY.MM.PATCH` (npr. `2026.03.1`)
-- Git tagovi pokreću release pipeline
-- `forge-deploy` referencira verzije ostalih repoa
+### Versioning:
+- All repos use **CalVer**: `YYYY.MM.PATCH` (e.g., `2026.03.1`)
+- Git tags trigger the release pipeline
+- `forge-devops` references versions from other repos
 
 ### Release flow:
 ```
-1. Developer push-uje kod u forge-backend ili forge-frontend
-2. CI tog repo-a:
+1. Developer pushes code to forge-backend or forge-frontend
+2. That repo's CI:
    - lint → test → build → security → publish Docker image
-3. forge-deploy se ažurira sa novom verzijom:
-   - Ručno: update VERSION u .env ili docker-compose.yml
-   - Automatski: webhook/trigger koji ažurira verziju
-4. Deploy na server:
-   - git pull forge-deploy
+3. forge-devops is updated with the new version:
+   - Manual: update VERSION in .env or docker-compose.yml
+   - Automatic: webhook/trigger that updates the version
+4. Deploy to server:
+   - git pull forge-devops
    - docker compose pull
    - docker compose up -d
 ```
 
-### Dijagram povezivanja:
+### Connection diagram:
 ```
 ┌──────────────┐     ┌───────────────┐     ┌──────────────┐
 │ forge-backend│     │ forge-frontend│     │forge-assistant│
@@ -269,7 +269,7 @@ forge-mobile/
                           │ pull
                           ▼
               ┌───────────────────────┐
-              │     forge-deploy      │
+              │     forge-devops      │
               │  docker-compose.yml   │
               │  nginx, ssl, scripts  │
               └───────────┬───────────┘
@@ -282,37 +282,37 @@ forge-mobile/
 
 ---
 
-## Redosled izvršavanja
+## Execution Order
 
-| Korak | Akcija | Prioritet |
-|-------|--------|-----------|
-| 1 | Kreirati `forge-frontend` repo, izvući React kod | Visok |
-| 2 | Kreirati `forge-backend` repo, izvući Django kod | Visok |
-| 3 | Kreirati `forge-deploy` repo, definisati Docker Compose | Visok |
-| 4 | Podesiti CI/CD za svaki repo | Visok |
-| 5 | Testirati end-to-end sa separatnim image-ima | Visok |
-| 6 | Kreirati `forge-assistant` repo | Srednji |
-| 7 | Kreirati `forge-mobile` repo | Nizak |
+| Step | Action | Priority |
+|------|--------|----------|
+| 1 | Create `forge-frontend` repo, extract React code | High |
+| 2 | Create `forge-backend` repo, extract Django code | High |
+| 3 | Create `forge-devops` repo, define Docker Compose | High |
+| 4 | Set up CI/CD for each repo | High |
+| 5 | Test end-to-end with separate images | High |
+| 6 | Create `forge-assistant` repo | Medium |
+| 7 | Create `forge-mobile` repo | Low |
 
-### Korak 1-3: Razdvajanje (procjena: 1-2 sedmice)
-- Koristiti `git filter-branch` ili `git subtree split` za očuvanje istorije
-- Ažurirati sve reference i putanje
-- Verifikovati da svaki repo samostalno prolazi CI
+### Steps 1-3: Separation (estimate: 1-2 weeks)
+- Use `git filter-branch` or `git subtree split` to preserve history
+- Update all references and paths
+- Verify that each repo independently passes CI
 
-### Korak 4-5: CI/CD integracija (procjena: 1 sedmica)
-- GitLab CI za svaki repo
-- Docker Hub publish za svaki repo
-- `forge-deploy` orchestracija
+### Steps 4-5: CI/CD integration (estimate: 1 week)
+- GitLab CI for each repo
+- Docker Hub publish for each repo
+- `forge-devops` orchestration
 
-### Korak 6-7: Buduće komponente
-- Po `chat_plan.md` i `mobile_plan.md` vremenskim okvirima
+### Steps 6-7: Future components
+- Per `chat_plan.md` and `mobile_plan.md` timelines
 
 ---
 
-## Napomene
+## Notes
 
-- **Monorepo ostaje kao arhiva** — trenutni repo `awx` se zadržava u read-only modu kao referenca
-- **Dokumentacija se dijeli** — svaki repo dobija svoju relevantnu dokumentaciju
-- **Zajednički wiki** — `forge-deploy` sadrži arhitekturalni pregled i linkove ka svim repozitorijumima
-- **Docker image-i su jedini artefakt** — repoi ne zavise direktno jedan od drugog, samo preko Docker image-a
-- **Environment varijable** — sva konfiguracija između servisa ide kroz env varijable (12-factor app princip)
+- **Monorepo remains as archive** — the current `awx` repo is kept in read-only mode as a reference
+- **Documentation is split** — each repo gets its relevant documentation
+- **Shared wiki** — `forge-devops` contains the architectural overview and links to all repositories
+- **Docker images are the only artifact** — repos do not depend on each other directly, only via Docker images
+- **Environment variables** — all inter-service configuration goes through env variables (12-factor app principle)
