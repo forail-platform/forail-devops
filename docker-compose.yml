@@ -1,5 +1,5 @@
 x-forge-common: &forge-common
-  image: ${FORGE_IMAGE:-docker.io/forge-platform/forge}:${FORGE_TAG:-latest}
+  image: ${FORGE_BACKEND_IMAGE:-docker.io/krlex/forge-backend}:${FORGE_TAG:-latest}
   env_file: .env
   environment: &forge-env
     DATABASE_HOST: postgres
@@ -110,8 +110,8 @@ services:
       test: bash /etc/forge/healthcheck-web.sh
       interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 60s
+      retries: 10
+      start_period: 120s
     restart: unless-stopped
 
   # ── Task (dispatcher + callback receiver + wsrelay) ────
@@ -143,7 +143,19 @@ services:
       start_period: 120s
     restart: unless-stopped
 
-  # ── External nginx (TLS termination) ───────────────────
+  # ── Frontend (React UI served by nginx) ────────────────
+  forge-frontend:
+    image: ${FORGE_FRONTEND_IMAGE:-docker.io/krlex/forge-frontend}:${FORGE_TAG:-latest}
+    networks:
+      - forge
+    healthcheck:
+      test: wget -qO /dev/null http://127.0.0.1:80/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # ── External nginx (TLS termination + routing) ─────────
   nginx:
     image: nginx:1.27-alpine
     ports:
@@ -156,6 +168,8 @@ services:
       - forge
     depends_on:
       forge-web:
+        condition: service_healthy
+      forge-frontend:
         condition: service_healthy
     healthcheck:
       test: wget -qO /dev/null http://127.0.0.1:80/ || true
