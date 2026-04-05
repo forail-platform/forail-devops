@@ -188,7 +188,7 @@ within a workflow.
 
 ---
 
-### 2.5 Automation Analytics Dashboard
+### 2.5 Automation Analytics Dashboard --- COMPLETED (v2026.04.0)
 
 **Problem:** AWX provides basic metrics but no insight into automation value,
 trends, or efficiency. Managers cannot answer "how much time did automation
@@ -201,7 +201,7 @@ save this month?"
 - Dashboard with Recharts visualizations: job trends, host coverage map,
   template usage heatmap, failure analysis
 - Scheduled email reports: weekly/monthly automation summary
-- API: `/api/v2/analytics/` with date range filters
+- API: `/api/v2/forge_analytics/` with date range filters
 
 **Effort:** 3 weeks
 **Dependencies:** None (uses existing job data)
@@ -299,7 +299,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | 2.2 | Policy-as-Code (OPA) | Medium | 4-5w | P1 |
 | 2.3 | OIDC + WebAuthn | Medium | 3-4w | P1 |
 | 2.4 | Workflow Node Surveys | Medium | 2-3w | P1 |
-| 2.5 | Analytics Dashboard | Medium | 3w | P1 |
+| 2.5 | Analytics Dashboard | Medium | 3w | **DONE** |
 | 3.1 | Plugin Architecture | High | 8-12w | P2 |
 | 3.2 | Multi-Tenancy | High | 6-8w | P2 |
 | 3.3 | Kubernetes Operator | Medium | 6-8w | P2 |
