@@ -51,7 +51,7 @@ AAP 2.5+ has this as an exclusive feature.
 
 ---
 
-### 1.3 Drift Detection and Change Tracking
+### 1.3 Drift Detection and Change Tracking --- COMPLETED (v2026.04.0)
 
 **Problem:** AWX runs playbooks but does not track what changed between runs.
 There is no way to detect configuration drift or prove compliance.
@@ -292,7 +292,7 @@ Detailed plan in `docs/mobile_plan.md`:
 |---|---------|--------|--------|----------|
 | 1.1 | Dynamic Surveys | High | 2-3w | **DONE** |
 | 1.2 | Event-Driven Automation | High | 4-6w | **DONE** |
-| 1.3 | Drift Detection | High | 3-4w | P0 |
+| 1.3 | Drift Detection | High | 3-4w | **DONE** |
 | 1.4 | AI Assistant (Ollama) | High | 4w | **DONE** |
 | 1.5 | Audit Trail | Medium | 2-3w | **DONE** |
 | 2.1 | Self-Service Portal | High | 3-4w | P1 |
@@ -316,7 +316,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | Docker Compose deploy | Yes | No | No | Yes | Yes |
 | Dynamic surveys | Yes | No | No | No | No |
 | Event-driven (EDA) | Yes | No | Yes | No | No |
-| Drift detection | Planned | No | No | Yes | No |
+| Drift detection | Yes | No | No | Yes | No |
 | AI assistant | Yes | No | Yes | No | No |
 | Self-service portal | Planned | No | Yes | No | No |
 | Policy-as-Code | Planned | No | Planned | No | No |
