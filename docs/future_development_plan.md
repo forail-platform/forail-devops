@@ -171,7 +171,7 @@ phishing-resistant authentication.
 
 ---
 
-### 2.4 Workflow Survey Prompts per Node
+### 2.4 Workflow Survey Prompts per Node --- COMPLETED (v2026.04.0)
 
 **Problem:** Workflow job templates only support surveys at the workflow level.
 Users cannot prompt for different variables at individual job template nodes
@@ -298,7 +298,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | 2.1 | Self-Service Portal | High | 3-4w | P1 |
 | 2.2 | Policy-as-Code (OPA) | Medium | 4-5w | P1 |
 | 2.3 | OIDC + WebAuthn | Medium | 3-4w | P1 |
-| 2.4 | Workflow Node Surveys | Medium | 2-3w | P1 |
+| 2.4 | Workflow Node Surveys | Medium | 2-3w | **DONE** |
 | 2.5 | Analytics Dashboard | Medium | 3w | **DONE** |
 | 3.1 | Plugin Architecture | High | 8-12w | P2 |
 | 3.2 | Multi-Tenancy | High | 6-8w | P2 |
