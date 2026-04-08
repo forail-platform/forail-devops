@@ -31,6 +31,7 @@ inventories, credentials, and scheduled automation at scale.
 | 15 | [Event-Driven Automation](15-event-driven-automation.md) | Webhook rules, conditions, automated actions |
 | 16 | [Drift Detection](16-drift-detection.md) | Fact snapshots, change tracking, compliance alerts |
 | 17 | [Self-Service Portal](17-self-service-portal.md) | Catalog of curated automations with optional approval workflow |
+| 18 | [OIDC + WebAuthn](18-oidc-webauthn.md) | Modern SSO via OIDC and FIDO2 passwordless / MFA |
 
 ---
 

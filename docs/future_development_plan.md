@@ -164,23 +164,36 @@ signed playbooks can run on production inventories".
 
 ---
 
-### 2.3 Modern Authentication (OIDC + WebAuthn)
+### 2.3 Modern Authentication (OIDC + WebAuthn) --- COMPLETED (v2026.04.0)
 
 **Problem:** AWX supports LDAP, SAML, and social auth but lacks native OIDC
 and passwordless login. WebAuthn/passkeys are now the standard for
 phishing-resistant authentication.
 
-**Solution:**
-- Native OIDC provider integration (Okta, Azure AD/Entra ID, Keycloak,
-  Google Workspace) with automatic role mapping from claims
-- WebAuthn/FIDO2 support for passwordless login with hardware keys or
-  platform authenticators (fingerprint, Face ID)
-- Built-in TOTP MFA as a second factor option
-- API token scoping: per-token permissions, automatic expiry, forced rotation
-- Session management UI: view active sessions, revoke remote sessions
-
-**Effort:** 3-4 weeks
-**Dependencies:** `python-fido2` library, OIDC provider library
+**Delivered:**
+- OIDC client wired through the existing
+  `social_core.backends.open_id_connect.OpenIdConnectAuth` (no new
+  dependency — already vendored). Configuration via Settings → Generic
+  OIDC. New settings: button label, scope override, organization map,
+  team map. JIT user provisioning + org/team mapping reuses
+  `forge.sso.social_pipeline`.
+- WebAuthn / FIDO2 via `py_webauthn==2.5.2`:
+  * `WebAuthnCredential` model + 5-minute challenge stores.
+  * REST API at `/api/v2/webauthn/credentials/`,
+    `register/{begin,complete}/`, `authenticate/{begin,complete}/`.
+  * Replay protection via monotonic sign-count guard.
+  * Origin / RP-ID derived from request — same image works on any host.
+- Org-level MFA enforcement: `Organization.webauthn_required`
+  (`none`/`admins`/`all`) + `WebAuthnMfaEnforcementMiddleware` that
+  flips `session.mfa_pending` when policy applies.
+- Frontend: `/me/security` credential management page,
+  `/auth/mfa` post-primary-auth interstitial, **Sign in with security
+  key** and **Sign in with OIDC** buttons on the login page,
+  TopBar dropdown "Security" entry. Browser side uses
+  `@simplewebauthn/browser` v13.
+- 16 standalone backend tests (policy resolver, replay guard, TTL,
+  base64url helpers) + 5 frontend type-shape tests.
+- See `forge-backend/docs/18-oidc-webauthn.md` for the full architecture.
 
 ---
 
@@ -310,7 +323,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | 1.5 | Audit Trail | Medium | 2-3w | **DONE** |
 | 2.1 | Self-Service Portal | High | 3-4w | **DONE** |
 | 2.2 | Policy-as-Code (OPA) | Medium | 4-5w | P1 |
-| 2.3 | OIDC + WebAuthn | Medium | 3-4w | P1 |
+| 2.3 | OIDC + WebAuthn | Medium | 3-4w | **DONE** |
 | 2.4 | Workflow Node Surveys | Medium | 2-3w | **DONE** |
 | 2.5 | Analytics Dashboard | Medium | 3w | **DONE** |
 | 3.1 | Plugin Architecture | High | 8-12w | P2 |
