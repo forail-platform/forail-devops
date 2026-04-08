@@ -65,6 +65,17 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # ── OPA sidecar (Policy-as-Code) ───────────────────────
+  forge-opa:
+    image: openpolicyagent/opa:latest-rootless
+    command: ["run", "--server", "--addr", ":8181", "--log-level", "error"]
+    networks:
+      - forge
+    # OPA rootless image has no shell utilities; rely on the built-in
+    # /health endpoint via the docker network rather than an in-container
+    # healthcheck.
+    restart: unless-stopped
+
   # ── One-shot init (migrations, admin, provision) ───────
   forge-init:
     <<: *forge-common

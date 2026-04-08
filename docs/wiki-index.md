@@ -32,6 +32,7 @@ inventories, credentials, and scheduled automation at scale.
 | 16 | [Drift Detection](16-drift-detection.md) | Fact snapshots, change tracking, compliance alerts |
 | 17 | [Self-Service Portal](17-self-service-portal.md) | Catalog of curated automations with optional approval workflow |
 | 18 | [OIDC + WebAuthn](18-oidc-webauthn.md) | Modern SSO via OIDC and FIDO2 passwordless / MFA |
+| 19 | [Policy-as-Code (OPA)](19-policy-as-code.md) | Open Policy Agent rules evaluated before every launch |
 
 ---
 

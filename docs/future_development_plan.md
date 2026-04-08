@@ -144,23 +144,41 @@ automation without understanding templates, inventories, or credentials.
 
 ---
 
-### 2.2 Policy-as-Code
+### 2.2 Policy-as-Code --- COMPLETED (v2026.04.0)
 
 **Problem:** No governance framework to enforce rules like "production jobs
 must have approval", "credentials must rotate every 90 days", or "only
 signed playbooks can run on production inventories".
 
-**Solution:**
-- Policy engine using OPA (Open Policy Agent) with Rego rules
-- Pre-defined policy points: pre-launch, pre-credential-use, pre-schedule,
-  pre-inventory-sync
-- Built-in policy library: require approval for production, enforce MFA for
-  admin actions, restrict credential types per organization
-- Policy dashboard: violations, enforcement rate, exemptions
-- API: `/api/v2/policies/` CRUD + `/api/v2/policies/evaluate/` for testing
-
-**Effort:** 4-5 weeks
-**Dependencies:** OPA sidecar or embedded library
+**Delivered:**
+- `Policy` model storing Rego modules + metadata; pushed to a
+  `forge-opa` sidecar (OPA 0.69.0) on save via post_save signal.
+- `PolicyDecision` audit row per evaluation hit; full launch context
+  preserved as JSON.
+- `evaluator.evaluate_launch()` hooked into `JobTemplateLaunch.post`,
+  `WorkflowJobTemplateLaunch.post`, and `AdHocCommandList.create`,
+  strictly between `create_unified_job` and `signal_start`.
+- Three-tier enforcement: global `OPA_ENABLED` kill switch +
+  per-organization `policy_enforcement` (`none/warn/enforce`) +
+  per-policy `enforcement` (`warn/enforce`). Org `warn` caps any
+  policy from blocking. All combinations covered by a unit-tested
+  resolver.
+- Configurable fail mode: `OPA_FAIL_MODE=allow` (default, fail-open
+  with audit) or `deny` (fail-closed) when the OPA sidecar is
+  unreachable.
+- REST API at `/api/v2/policies/` (CRUD + enable/disable + dry-run
+  test endpoint) and `/api/v2/policy_decisions/` (audit log).
+- Frontend: Policies CRUD page with sync status badges, PolicyForm
+  with Rego editor and dry-run panel, PolicyDecisions audit log with
+  expandable context viewer. Compliance sidebar group extended with
+  Policies and Policy Decisions entries.
+- `forge-opa` sidecar added to `forge-deploy/docker-compose.yml`
+  (image `openpolicyagent/opa:0.69.0-rootless`, healthcheck against
+  `/health`).
+- 19 standalone backend tests + 6 frontend type-shape tests, 0 TS
+  errors.
+- See `forge-backend/docs/19-policy-as-code.md` for the full
+  architecture.
 
 ---
 
@@ -322,7 +340,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | 1.4 | AI Assistant (Ollama) | High | 4w | **DONE** |
 | 1.5 | Audit Trail | Medium | 2-3w | **DONE** |
 | 2.1 | Self-Service Portal | High | 3-4w | **DONE** |
-| 2.2 | Policy-as-Code (OPA) | Medium | 4-5w | P1 |
+| 2.2 | Policy-as-Code (OPA) | Medium | 4-5w | **DONE** |
 | 2.3 | OIDC + WebAuthn | Medium | 3-4w | **DONE** |
 | 2.4 | Workflow Node Surveys | Medium | 2-3w | **DONE** |
 | 2.5 | Analytics Dashboard | Medium | 3w | **DONE** |
