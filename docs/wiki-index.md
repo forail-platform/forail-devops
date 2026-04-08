@@ -30,6 +30,7 @@ inventories, credentials, and scheduled automation at scale.
 | 14 | [Audit Trail](14-audit-trail.md) | Activity stream + immutable audit events |
 | 15 | [Event-Driven Automation](15-event-driven-automation.md) | Webhook rules, conditions, automated actions |
 | 16 | [Drift Detection](16-drift-detection.md) | Fact snapshots, change tracking, compliance alerts |
+| 17 | [Self-Service Portal](17-self-service-portal.md) | Catalog of curated automations with optional approval workflow |
 
 ---
 

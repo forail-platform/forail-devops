@@ -112,22 +112,35 @@ auditing. No way to generate audit reports or track credential access.
 
 Features that position Forge as a modern platform beyond basic AWX capabilities.
 
-### 2.1 Self-Service Portal
+### 2.1 Self-Service Portal --- COMPLETED (v2026.04.0)
 
 **Problem:** Non-technical users (helpdesk, operations, managers) cannot use
 AWX without training. They need a simplified interface to run pre-approved
 automation without understanding templates, inventories, or credentials.
 
-**Solution:**
-- New "Service Catalog" model: curated list of automation actions with
-  friendly names, descriptions, icons, and form-based inputs
-- Simplified launch flow: select action, fill form, submit, see result
-- Approval workflow: optional manager approval before execution
-- Role: "Portal User" with access only to assigned catalog items
-- Separate `/portal` route in Forge UI (no sidebar, no admin features)
-
-**Effort:** 3-4 weeks
-**Dependencies:** RBAC extensions
+**Delivered:**
+- `ServiceCatalogItem` model wraps an existing JobTemplate or
+  WorkflowJobTemplate with portal metadata (icon, category, tags,
+  `requires_approval`, `approver_team`).
+- `ServiceRequest` lifecycle (`pending_approval` → `approved` /
+  `rejected` → `running` → `successful` / `failed` / `canceled`) with
+  `submit/approve/reject` methods and a post_save signal that mirrors
+  terminal UnifiedJob status back onto the linked request.
+- Approver permission model: superuser, `approver_team` membership, or
+  org admin fallback when no team is set.
+- REST API mounted at `/api/v2/service_catalog_items/` and
+  `/api/v2/service_requests/` (CRUD + `launch_data`, `submit`,
+  `approve`, `reject`, `pending_approvals` inbox).
+- Frontend: Service Portal (catalog grid), multi-step
+  `ServiceRequestDialog` (justification → workflow survey → per-node
+  surveys → confirm), My Requests, Approvals inbox, Catalog Admin CRUD.
+- Reuses existing launch pipeline (`create_unified_job`) and the
+  `SurveyQuestionInput` extracted from `WorkflowLaunchDialog` —
+  no duplication.
+- Tests: 22 standalone backend lifecycle tests + 10 frontend
+  type-shape tests.
+- See `forge-backend/docs/17-self-service-portal.md` for full
+  architecture.
 
 ---
 
@@ -295,7 +308,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | 1.3 | Drift Detection | High | 3-4w | **DONE** |
 | 1.4 | AI Assistant (Ollama) | High | 4w | **DONE** |
 | 1.5 | Audit Trail | Medium | 2-3w | **DONE** |
-| 2.1 | Self-Service Portal | High | 3-4w | P1 |
+| 2.1 | Self-Service Portal | High | 3-4w | **DONE** |
 | 2.2 | Policy-as-Code (OPA) | Medium | 4-5w | P1 |
 | 2.3 | OIDC + WebAuthn | Medium | 3-4w | P1 |
 | 2.4 | Workflow Node Surveys | Medium | 2-3w | **DONE** |
