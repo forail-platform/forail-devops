@@ -270,13 +270,81 @@ Long-term features for enterprise scale and ecosystem growth.
 
 ---
 
-### 3.2 Multi-Tenancy
+### 3.2 Multi-Tenancy --- COMPLETED (v2026.04.0)
 
-- Tenant isolation with row-level security (Django middleware)
-- Per-tenant resource quotas (concurrent jobs, API rate limits, storage)
-- Tenant-specific branding (logo, colors, domain)
-- Automated tenant provisioning via API
-- Cross-tenant access explicitly denied by default
+**Problem:** Forge had Organizations and per-org RBAC, but running a single
+install for multiple customers required trusting RBAC to be airtight, manually
+provisioning every customer's org/admin/team, manually enforcing "fair use"
+(there were no quotas — one noisy tenant could hog all Celery workers), and
+manually skinning the UI per customer.
+
+**Delivered (v1 — soft multi-tenancy, no new compose service):**
+- `Organization` extended with 11 additive fields: `is_tenant_root`,
+  `tenant_max_concurrent_jobs`, `tenant_max_daily_launches`,
+  `tenant_max_hosts`, `tenant_max_storage_mb`, `tenant_isolation_strict`,
+  `tenant_logo_url`, `tenant_primary_color`, `tenant_secondary_color`,
+  `tenant_custom_domain` (indexed), `tenant_contact_email`. All default to
+  safe values — existing orgs are untouched (zero-downtime migration
+  `0204_multi_tenancy`).
+- `TenantUsage` (OneToOne with Organization) — rolling counters for
+  concurrent jobs, launches-today, hosts_count, storage_mb_used, with a
+  `launches_today_window_start` for calendar-UTC day rollover.
+- `TenantQuotaEvent` — one audit row per quota decision (allow or block),
+  mirrors the `PolicyDecision` shape; cached `organization_name` so the row
+  survives org delete.
+- `TenantIsolationEvent` — v1 audit-only row for cross-tenant reads observed
+  when `tenant_isolation_strict=True` (blocking deferred to v2).
+- `forge/main/tenancy/` package: pure helpers (`check_quota_value`,
+  `is_window_expired`, `reset_daily_window`, `format_quota_message`,
+  `normalize_branding_host`, `validate_hex_color`), `quota.py` with
+  `check_tenant_quota` + `on_job_finished`, `provisioning.py` with atomic
+  `provision_tenant` (Org + admin User + default Team + TenantUsage in one
+  transaction), `branding.py` with `get_branding_for_host`, `usage.py` with
+  `recalculate_tenant_usage` drift reconciliation, `isolation.py`
+  middleware.
+- Launch hook inserted **before** Policy-as-Code and IaC Scanning in
+  `JobTemplateLaunch.post`, `WorkflowJobTemplateLaunch.post`, and
+  `AdHocCommandList.create`. Blocked launches return HTTP **429** with the
+  quota kind that tripped, inside the `forge.launch` OTel span
+  (adds `quota_blocked=<kind>` attribute for trace filtering).
+- Job-finished signal decrements `concurrent_jobs_count`; Celery beat
+  `recalculate_tenant_usage_all` runs every
+  `TENANCY_QUOTA_RECALC_INTERVAL_S` seconds and also reconciles the
+  concurrent counter against actual running UnifiedJob count.
+- Settings (System category): `TENANCY_ENABLED` (global kill switch,
+  default off), `TENANCY_DEFAULT_MAX_CONCURRENT_JOBS`,
+  `TENANCY_DEFAULT_MAX_DAILY_LAUNCHES`, `TENANCY_QUOTA_RECALC_INTERVAL_S`
+  (default 300s).
+- REST API: `/api/v2/tenants/` (superuser CRUD + provision + recalculate),
+  `/api/v2/tenant_quota_events/` (audit log), and
+  `/api/v2/branding/?host=<hostname>` — **PUBLIC** (no auth classes) so
+  the frontend can skin itself before login. Returns 404 on miss.
+- Frontend: `/tenants`, `/tenants/new`, `/tenants/:id`, `/tenants/:id/edit`,
+  `/tenant_quota_events` pages with usage bars, branding preview, color
+  pickers, quota inputs (empty = unlimited), danger-zone delete. NEW
+  sidebar group **Tenancy** (Building2 + Activity icons) above Compliance.
+- Boot-time branding: `src/branding/applyBranding.ts` called from
+  `src/main.tsx` **before** React mounts. Fetches
+  `/api/v2/branding/?host=window.location.hostname` with no credentials,
+  sets CSS variables `--forge-primary` / `--forge-secondary` on `:root`,
+  swaps the favicon and document title, caches in localStorage for 5 min.
+  Tailwind exposes the CSS vars as `colors.brand.primary`/`secondary`.
+- No new compose service — tenancy piggybacks on the existing `forge-web`
+  and `forge-task` containers and is gated by `TENANCY_ENABLED`.
+- Standalone tests in `tests_standalone/test_tenancy.py` cover all pure
+  helpers, QuotaResult aggregation, window rollover edge cases, branding
+  host normalization, and provisioning payload validation.
+- See `forge-backend/docs/22-multi-tenancy.md` for the full architecture.
+
+**Deferred to v2:**
+- Postgres row-level security policies (real DB-level isolation).
+- Strict-mode enforcement (cross-tenant reads blocked, not just audited).
+- Per-tenant API rate limiting at the middleware layer (token bucket).
+- Per-tenant Celery queues (single shared queue + quota is the v1 fairness
+  story).
+- Custom-domain TLS provisioning (Let's Encrypt automation).
+- Billing / metering hooks.
+- Tenant-scoped LDAP/SAML/OIDC federation.
 
 **Effort:** 6-8 weeks
 
@@ -392,7 +460,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | 2.4 | Workflow Node Surveys | Medium | 2-3w | **DONE** |
 | 2.5 | Analytics Dashboard | Medium | 3w | **DONE** |
 | 3.1 | Plugin Architecture | High | 8-12w | P2 |
-| 3.2 | Multi-Tenancy | High | 6-8w | P2 |
+| 3.2 | Multi-Tenancy | High | 6-8w | **DONE** |
 | 3.3 | Kubernetes Operator | Medium | 6-8w | P2 |
 | 3.4 | IaC Scanning | Medium | 3-4w | **DONE** |
 | 3.5 | Mobile App | Medium | 7w | P2 |
