@@ -33,6 +33,7 @@ inventories, credentials, and scheduled automation at scale.
 | 17 | [Self-Service Portal](17-self-service-portal.md) | Catalog of curated automations with optional approval workflow |
 | 18 | [OIDC + WebAuthn](18-oidc-webauthn.md) | Modern SSO via OIDC and FIDO2 passwordless / MFA |
 | 19 | [Policy-as-Code (OPA)](19-policy-as-code.md) | Open Policy Agent rules evaluated before every launch |
+| 20 | [IaC Scanning & Supply Chain Security](20-iac-scanning.md) | ansible-lint / checkov / pip-audit run over playbooks and requirements at launch time, with severity threshold + enforcement per scanner |
 
 ---
 

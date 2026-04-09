@@ -293,14 +293,61 @@ Long-term features for enterprise scale and ecosystem growth.
 
 ---
 
-### 3.4 IaC Scanning and Supply Chain Security
+### 3.4 IaC Scanning and Supply Chain Security --- COMPLETED (v2026.04.0)
 
-- Pre-run scanning of Ansible playbooks/roles for misconfigurations
-  (using Checkov, Ansible-lint, or custom rules)
-- Policy gates: block execution if scan finds critical issues
-- Collection/role provenance verification (signatures, checksums)
-- Scan results integrated into job output view
-- CVE scanning for Python dependencies in execution environments
+**Problem:** Policy-as-Code (Tier 2.2) gates launches on metadata (who,
+what, where) but never inspects the playbook body. Nothing prevents a
+playbook from disabling SELinux, embedding a secret, using `shell:`
+with unquoted user input, pulling an unpinned role, or importing a
+Python package with a known CVE.
+
+**Delivered:**
+- `Scanner` model — one row per configured tool (ansible-lint, checkov,
+  pip-audit) with severity threshold + enforcement + `applies_to`.
+- `ScanResult` audit row per scanner execution (status ok / warn /
+  blocked / error / timeout, duration, finding_count, highest severity,
+  truncated raw output, cached scanner_name so rows survive delete).
+- `ScanFinding` child row per finding at or above threshold
+  (rule_id, severity, file_path, line, message).
+- `forge/main/scanning/runner.py` — subprocess runner with per-scanner
+  timeout, project checkout path + playbook resolution, output parsing,
+  ScanResult + ScanFinding persistence, aggregate `ScanRunResult`.
+- Tool adapters in `forge/main/scanning/tools/` — one module per CLI
+  (`ansible-lint -f json --strict`, `checkov -o json`, `pip-audit
+  --format json`) with severity normalization to info/low/medium/
+  high/critical.
+- Pure helpers: `severity_at_or_above`, `effective_enforcement`,
+  `aggregate_status`, `fail_mode_decision` — unit-tested standalone.
+- Hook inserted **after** the Policy-as-Code hook in
+  `JobTemplateLaunch.post`, `WorkflowJobTemplateLaunch.post`, and
+  `AdHocCommandList.create`. Blocked launches return 403 with
+  `reasons`; warn launches append a one-liner to `job_explanation`.
+- Settings: `SCANNER_ENABLED` (master switch), `SCANNER_TIMEOUT_S`
+  (per-scanner subprocess timeout), `SCANNER_FAIL_MODE` (allow /
+  deny on timeout/crash), `SCANNER_RAW_OUTPUT_MAX` — all in the
+  Security category.
+- REST API at `/api/v2/scanners/` (CRUD + enable/disable) and
+  `/api/v2/scan_results/` (audit log with embedded findings).
+- Frontend: Scanners CRUD page with tool badge, severity threshold,
+  enforcement badge, last-run status, enable toggle; ScannerForm with
+  tool dropdown, severity selector, JSON config editor, applies_to
+  checkboxes; ScanResults audit table with status filter and finding
+  drawer. Compliance sidebar group extended with Scanners and Scan
+  Results entries.
+- Scanner CLIs bundled into the `forge-backend` image (installed into
+  `/var/lib/awx/venv/awx`), no new compose service — the existing
+  `forge_projects` volume is already mounted on every forge container.
+- Standalone backend tests for helpers, adapter parsers, applies_to
+  matching, and fail-mode resolver.
+- See `forge-backend/docs/20-iac-scanning.md` for the full
+  architecture.
+
+**Deferred to v2:**
+- Collection / role provenance verification (sigstore / checksums) —
+  needs a separate signing infrastructure conversation.
+- Live CVE feed for non-Python EE packages (system OS packages).
+- In-line annotations on the playbook source viewer.
+- Custom rule authoring UI.
 
 **Effort:** 3-4 weeks
 
@@ -347,7 +394,7 @@ Detailed plan in `docs/mobile_plan.md`:
 | 3.1 | Plugin Architecture | High | 8-12w | P2 |
 | 3.2 | Multi-Tenancy | High | 6-8w | P2 |
 | 3.3 | Kubernetes Operator | Medium | 6-8w | P2 |
-| 3.4 | IaC Scanning | Medium | 3-4w | P2 |
+| 3.4 | IaC Scanning | Medium | 3-4w | **DONE** |
 | 3.5 | Mobile App | Medium | 7w | P2 |
 | 3.6 | Observability (OTel) | Medium | 3-4w | P2 |
 
