@@ -66,6 +66,8 @@ A step-by-step guide for everyday use of the Forge Platform UI. Each section fol
 
 ## Dashboard
 
+![Dashboard](img/handbook/dashboard.png)
+
 The Dashboard is the landing page after login. It shows the overall health of the platform: recent jobs, success/failure rates, active hosts, and quick links.
 
 **Step by step**
@@ -83,6 +85,8 @@ The Dashboard is the landing page after login. It shows the overall health of th
 ---
 
 ## Jobs
+
+![Jobs](img/handbook/jobs.png)
 
 Jobs are individual runs of a Job Template. Use this view to launch, monitor, and inspect playbook executions.
 
@@ -114,6 +118,8 @@ restart_service: true
 
 ## Schedules
 
+![Schedules](img/handbook/schedules.png)
+
 Schedules trigger Job Templates automatically on a cron-like cadence.
 
 **Step by step**
@@ -142,6 +148,8 @@ Schedules trigger Job Templates automatically on a cron-like cadence.
 
 ## Activity
 
+![Activity](img/handbook/activity.png)
+
 A chronological feed of platform actions: who did what and when.
 
 **Step by step**
@@ -158,6 +166,8 @@ A chronological feed of platform actions: who did what and when.
 
 ## Audit Log
 
+![Audit Log](img/handbook/audit_log.png)
+
 Tamper-evident security log used for compliance reporting (SOC 2, ISO 27001).
 
 **Step by step**
@@ -173,6 +183,8 @@ Tamper-evident security log used for compliance reporting (SOC 2, ISO 27001).
 ---
 
 ## Analytics
+
+![Analytics](img/handbook/analytics.png)
 
 Visual KPIs across the whole platform: job throughput, MTTR, top failing templates.
 
@@ -192,6 +204,8 @@ Visual KPIs across the whole platform: job throughput, MTTR, top failing templat
 # AUTOMATION
 
 ## Event Rules
+
+![Event Rules](img/handbook/event_rules.png)
 
 Event Rules listen for incoming events (webhooks, alerts, message bus) and launch a Job Template when conditions match.
 
@@ -222,6 +236,8 @@ forward_vars:
 
 ## Event Logs
 
+![Event Logs](img/handbook/event_logs.png)
+
 Read-only history of every event the platform received and what rule (if any) consumed it.
 
 **Step by step**
@@ -237,6 +253,8 @@ Read-only history of every event the platform received and what rule (if any) co
 ---
 
 ## Outbound Webhooks
+
+![Outbound Webhooks](img/handbook/outbound_webhooks.png)
 
 Send platform events to external systems (Slack, PagerDuty, ServiceNow).
 
@@ -271,6 +289,8 @@ payload: |
 
 ## Service Portal
 
+![Service Portal](img/handbook/service_portal.png)
+
 End-user catalog: lets non-admins request pre-approved automations without touching templates directly.
 
 **Step by step (as end user)**
@@ -294,6 +314,8 @@ End-user catalog: lets non-admins request pre-approved automations without touch
 
 ## My Requests
 
+![My Requests](img/handbook/my_requests.png)
+
 Tracks the status of requests you submitted from the Service Portal.
 
 **Step by step**
@@ -309,6 +331,8 @@ Tracks the status of requests you submitted from the Service Portal.
 ---
 
 ## Approvals
+
+![Approvals](img/handbook/approvals.png)
 
 Queue of items waiting for an approver. Items appear here when a Service Portal entry is configured to require approval.
 
@@ -326,6 +350,8 @@ Queue of items waiting for an approver. Items appear here when a Service Portal 
 ---
 
 ## Catalog Admin
+
+![Catalog Admin](img/handbook/catalog_admin.png)
 
 Where admins create and manage Service Portal entries.
 
@@ -356,6 +382,8 @@ Where admins create and manage Service Portal entries.
 
 ## Tenants
 
+![Tenants](img/handbook/tenants.png)
+
 A tenant is an isolated workspace (org-of-orgs) with its own data, quotas, and members. Used for multi-tenant deployments.
 
 **Step by step**
@@ -384,6 +412,8 @@ owner: acme-admin@example.com
 
 ## Quota Events
 
+![Quota Events](img/handbook/quota_events.png)
+
 Audit feed of quota changes and quota-exceeded events per tenant.
 
 **Step by step**
@@ -401,6 +431,8 @@ Audit feed of quota changes and quota-exceeded events per tenant.
 # COMPLIANCE
 
 ## Drift Detections
+
+![Drift Detections](img/handbook/drift_detections.png)
 
 Compares the current state of a host against a known-good fact baseline.
 
@@ -422,6 +454,8 @@ Compares the current state of a host against a known-good fact baseline.
 
 ## Drift Alerts
 
+![Drift Alerts](img/handbook/drift_alerts.png)
+
 Alerts opened automatically when a drift detection finds a mismatch.
 
 **Step by step**
@@ -437,6 +471,8 @@ Alerts opened automatically when a drift detection finds a mismatch.
 ---
 
 ## Alert Rules
+
+![Alert Rules](img/handbook/alert_rules.png)
 
 Rules that decide which drift findings become alerts and at which severity.
 
@@ -465,6 +501,8 @@ notify: slack-secops
 
 ## Fact Snapshots
 
+![Fact Snapshots](img/handbook/fact_snapshots.png)
+
 A point-in-time capture of host facts. Used as drift baselines.
 
 **Step by step**
@@ -485,6 +523,8 @@ A point-in-time capture of host facts. Used as drift baselines.
 ---
 
 ## Policies
+
+![Policies](img/handbook/policies.png)
 
 Policy-as-Code rules (OPA / Rego) that gate job execution and approvals.
 
@@ -513,6 +553,8 @@ deny[msg] {
 
 ## Policy Decisions
 
+![Policy Decisions](img/handbook/policy_decisions.png)
+
 History of every policy evaluation: who triggered it, what the input was, and the verdict.
 
 **Step by step**
@@ -528,6 +570,8 @@ History of every policy evaluation: who triggered it, what the input was, and th
 ---
 
 ## Scanners
+
+![Scanners](img/handbook/scanners.png)
 
 Configured IaC / image / dependency scanners (Trivy, Checkov, …).
 
@@ -552,6 +596,8 @@ Configured IaC / image / dependency scanners (Trivy, Checkov, …).
 
 ## Scan Results
 
+![Scan Results](img/handbook/scan_results.png)
+
 Findings from the configured scanners.
 
 **Step by step**
@@ -568,6 +614,8 @@ Findings from the configured scanners.
 ---
 
 ## Observability
+
+![Observability](img/handbook/observability.png)
 
 Live OpenTelemetry view of the platform itself: traces, metrics, logs.
 
@@ -587,6 +635,8 @@ Live OpenTelemetry view of the platform itself: traces, metrics, logs.
 # RESOURCES
 
 ## Templates
+
+![Templates](img/handbook/templates.png)
 
 Job Templates wrap a project + playbook + inventory + credentials + survey into a launchable unit.
 
@@ -623,6 +673,8 @@ variables:
 
 ## Inventories
 
+![Inventories](img/handbook/inventories.png)
+
 Logical group of hosts. May be static, sourced from a file, or synced from a cloud (AWS / Azure / GCP).
 
 **Step by step — create static inventory**
@@ -645,6 +697,8 @@ Logical group of hosts. May be static, sourced from a file, or synced from a clo
 ---
 
 ## Hosts
+
+![Hosts](img/handbook/hosts.png)
 
 Individual machines (or endpoints) that belong to one or more inventories.
 
@@ -670,6 +724,8 @@ variables:
 ---
 
 ## Projects
+
+![Projects](img/handbook/projects.png)
 
 A Project is a Git checkout containing playbooks, roles, and collections.
 
@@ -700,6 +756,8 @@ A Project is a Git checkout containing playbooks, roles, and collections.
 
 ## Credentials
 
+![Credentials](img/handbook/credentials.png)
+
 Encrypted secret store: SSH keys, passwords, cloud tokens, vault keys.
 
 **Step by step**
@@ -725,6 +783,8 @@ Encrypted secret store: SSH keys, passwords, cloud tokens, vault keys.
 
 ## Organizations
 
+![Organizations](img/handbook/organizations.png)
+
 Top-level container for users, teams, projects, inventories, templates.
 
 **Step by step**
@@ -741,6 +801,8 @@ Top-level container for users, teams, projects, inventories, templates.
 ---
 
 ## Users
+
+![Users](img/handbook/users.png)
 
 Local and SSO-mapped users.
 
@@ -765,6 +827,8 @@ Local and SSO-mapped users.
 
 ## Teams
 
+![Teams](img/handbook/teams.png)
+
 A Team groups users so permissions can be granted in bulk.
 
 **Step by step**
@@ -785,6 +849,8 @@ A Team groups users so permissions can be granted in bulk.
 
 ## Instances
 
+![Instances](img/handbook/instances.png)
+
 Physical or virtual nodes that run jobs (control plane + execution plane).
 
 **Step by step**
@@ -800,6 +866,8 @@ Physical or virtual nodes that run jobs (control plane + execution plane).
 ---
 
 ## Instance Groups
+
+![Instance Groups](img/handbook/instance_groups.png)
 
 Logical pools of instances. Templates can be pinned to a group (e.g., `gpu-pool`, `eu-west-pool`).
 
@@ -822,6 +890,8 @@ Logical pools of instances. Templates can be pinned to a group (e.g., `gpu-pool`
 ---
 
 ## Execution Environments
+
+![Execution Environments](img/handbook/execution_environments.png)
 
 Container images that hold the runtime (Python, collections, binaries) used to run jobs.
 
@@ -849,6 +919,8 @@ credential: harbor-pull
 
 ## Notifications
 
+![Notifications](img/handbook/notifications.png)
+
 Channels Forge can send messages to (email, Slack, PagerDuty, MS Teams, webhooks).
 
 **Step by step**
@@ -872,6 +944,8 @@ Channels Forge can send messages to (email, Slack, PagerDuty, MS Teams, webhooks
 
 ## Topology
 
+![Topology](img/handbook/topology.png)
+
 Visual map of the cluster: control nodes, hop nodes, execution nodes, mesh links.
 
 **Step by step**
@@ -888,6 +962,8 @@ Visual map of the cluster: control nodes, hop nodes, execution nodes, mesh links
 ---
 
 ## Settings
+
+![Settings](img/handbook/settings.png)
 
 Global platform configuration: auth, system, jobs, UI, logging, license.
 
