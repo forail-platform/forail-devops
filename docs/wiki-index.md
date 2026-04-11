@@ -36,6 +36,16 @@ inventories, credentials, and scheduled automation at scale.
 | 20 | [IaC Scanning & Supply Chain Security](20-iac-scanning.md) | ansible-lint / checkov / pip-audit run over playbooks and requirements at launch time, with severity threshold + enforcement per scanner |
 | 21 | [Observability (OpenTelemetry)](../../forge-backend/docs/21-observability.md) | OTel traces + metrics emitted from Django and Celery, OTLP Collector sidecar, Grafana dashboard, k8s manifest stubs |
 | 22 | [Multi-Tenancy (v1)](../../forge-backend/docs/22-multi-tenancy.md) | Soft multi-tenancy layered on Organization: per-tenant quotas (concurrent jobs, daily launches, hosts, storage), tenant branding with public lookup endpoint, automated provisioning API, cross-tenant audit |
+| 23 | [Recommendations Engine](../../forge-backend/docs/23-recommendations.md) | Rule-based engine that surfaces actionable platform-health hints (no scanners, default admin password, tenant near quota, …) on the Dashboard and inside wizards, with a single `GET /api/v2/recommendations/` endpoint |
+
+---
+
+## Operator Handbooks
+
+| Handbook | Audience | Description |
+|----------|----------|-------------|
+| [User Handbook](HANDBOOK.md) | End users | Click-through guide for every sidebar entry: Dashboard, Jobs, Templates, Wizards, Compliance, Tenancy, Admin. Step-by-step with example values. |
+| [Admin Handbook](ADMIN_HANDBOOK.md) | Operators | Install, backup, restore, upgrade, scaling, observability, security, troubleshooting. Step-by-step with example commands. |
 
 ---
 
