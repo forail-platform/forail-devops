@@ -12,6 +12,11 @@
 //   node screenshots.mjs dashboard       # only one shot id
 //
 // Output: ../img/handbook/<id>.png
+//
+// Each shot may highlight elements three ways:
+//   { kind: 'label', text: 'Name', n: 1 }                         # form field by Label text
+//   { kind: 'role',  role: 'button', name: 'Create Inventory', n: 2 } # by ARIA role
+//   { kind: 'css',   selector: 'main h1', n: 3 }                  # raw CSS selector
 
 import { chromium } from 'playwright'
 import { mkdir } from 'node:fs/promises'
@@ -31,38 +36,121 @@ const ANNOTATE_CSS = `
   outline-offset: 3px !important;
   box-shadow: 0 0 0 8px rgba(255, 59, 48, 0.18) !important;
   border-radius: 6px !important;
-  position: relative !important;
 }
-[data-forge-callout]::before {
-  content: attr(data-forge-callout);
-  position: absolute;
-  top: -14px;
-  left: -14px;
-  z-index: 99999;
+.forge-callout-badge {
+  position: absolute !important;
+  z-index: 999999;
   background: #ff3b30;
   color: white;
-  font: 700 14px/1 system-ui, sans-serif;
-  width: 28px;
-  height: 28px;
+  font: 700 15px/1 system-ui, -apple-system, sans-serif;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
   pointer-events: none;
+  border: 2px solid white;
 }
 `
 
-/** Highlight one element matching selector with a numbered callout. */
+/**
+ * Annotate elements. All matching is done inside the page (page.evaluate),
+ * which works even when shadcn/Radix labels are not associated via htmlFor.
+ *
+ * Each item: { kind: 'label'|'role'|'css', n: <number>, ... }
+ */
 async function annotate(page, items) {
-  for (const { selector, n } of items) {
-    await page.evaluate(({ sel, num }) => {
-      const els = document.querySelectorAll(sel)
-      if (!els.length) return
-      const el = els[0]
-      el.setAttribute('data-forge-highlight', '')
-      el.setAttribute('data-forge-callout', String(num))
-    }, { sel: selector, num: n })
+  const failed = await page.evaluate((items) => {
+    const failures = []
+
+    function normText(s) {
+      return (s || '').trim().replace(/\s+/g, ' ').replace(/\s*\*\s*$/, '')
+    }
+
+    function findByLabelText(text) {
+      const want = normText(text)
+      const labels = Array.from(document.querySelectorAll('label'))
+      const lbl = labels.find((l) => normText(l.textContent) === want)
+      if (!lbl) return null
+
+      // (a) <label for="x"> + <... id="x">
+      const id = lbl.getAttribute('for')
+      if (id) {
+        const el = document.getElementById(id)
+        if (el) return el
+      }
+      // (b) input nested directly inside the label
+      const nested = lbl.querySelector('input, select, textarea, button, [role="combobox"]')
+      if (nested) return nested
+      // (c) sibling/descendant inside the same form-row container
+      let container = lbl.parentElement
+      for (let i = 0; i < 4 && container; i++) {
+        const el = container.querySelector('input, select, textarea, [role="combobox"], button[type="button"]')
+        if (el && el !== lbl && !lbl.contains(el)) return el
+        container = container.parentElement
+      }
+      // (d) follow-sibling traversal
+      let sib = lbl.nextElementSibling
+      while (sib) {
+        if (sib.matches('input, select, textarea, button, [role="combobox"]')) return sib
+        const inner = sib.querySelector('input, select, textarea, [role="combobox"]')
+        if (inner) return inner
+        sib = sib.nextElementSibling
+      }
+      // Last resort: highlight the label's container
+      return lbl.parentElement || lbl
+    }
+
+    function findByRole(role, namePattern) {
+      const rx = new RegExp(namePattern, 'i')
+      // role=button → button, [role="button"]; role=link → a, [role="link"]
+      const tagMap = { button: 'button, [role="button"]', link: 'a, [role="link"]' }
+      const sel = tagMap[role] || `[role="${role}"]`
+      const els = Array.from(document.querySelectorAll(sel))
+      return els.find((el) => rx.test(el.textContent || el.getAttribute('aria-label') || ''))
+    }
+
+    function placeBadge(target, n) {
+      const rect = target.getBoundingClientRect()
+      const badge = document.createElement('div')
+      badge.className = 'forge-callout-badge'
+      badge.textContent = String(n)
+      // Position absolutely on the document so the badge stays put even
+      // when the page is scrolled for full-page screenshots.
+      badge.style.left = `${rect.left + window.scrollX - 14}px`
+      badge.style.top = `${rect.top + window.scrollY - 14}px`
+      document.body.appendChild(badge)
+    }
+
+    for (const it of items) {
+      let target = null
+      if (it.kind === 'label') target = findByLabelText(it.text)
+      else if (it.kind === 'role') target = findByRole(it.role, it.namePattern)
+      else if (it.kind === 'css') target = document.querySelector(it.selector)
+
+      if (!target) {
+        failures.push({ n: it.n, kind: it.kind, key: it.text || it.namePattern || it.selector })
+        continue
+      }
+      target.setAttribute('data-forge-highlight', '')
+      placeBadge(target, it.n)
+    }
+
+    return failures
+  }, items.map((it) => ({
+    n: it.n,
+    kind: it.kind,
+    text: it.text,
+    selector: it.selector,
+    role: it.role,
+    // Convert RegExp to source string for serialization
+    namePattern: it.name instanceof RegExp ? it.name.source : it.name,
+  })))
+
+  for (const f of failed) {
+    console.warn(`  ! callout ${f.n} (${f.kind}): no match for "${f.key}"`)
   }
 }
 
@@ -87,152 +175,274 @@ async function login(page) {
   await page.waitForLoadState('networkidle')
 }
 
-/** Helper: navigate, settle, optionally annotate, capture full-page. */
-async function listPage(page, path, callouts = []) {
+/** Helper: navigate, settle, annotate. */
+async function go(page, path, callouts = []) {
   await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' })
   await page.waitForTimeout(500)
   await annotate(page, callouts)
 }
 
-const HEADING = 'main h1, main h2'
-const PRIMARY_BTN = 'main button.bg-primary, main button[class*="bg-primary"], main a[class*="bg-primary"]'
-const FIRST_BTN = 'main button:not([aria-label*="back"]):not([aria-label*="close"])'
+// Common selectors
+const SEARCH = 'input[placeholder*="earch"]'
 
 const SHOTS = {
+  // ============================================================
   // VIEWS
+  // ============================================================
   dashboard: async (p) => {
-    await p.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
-    await p.waitForTimeout(800)
-    await annotate(p, [
-      { selector: HEADING, n: 1 },
-      { selector: 'main [class*="card"], main [class*="Card"]', n: 2 },
+    await go(p, '/dashboard', [
+      { kind: 'css', selector: 'main h1', n: 1 },
+      { kind: 'role', role: 'link', name: /Getting Started/i, n: 2 },
     ])
   },
-  jobs: (p) => listPage(p, '/jobs', [
-    { selector: HEADING, n: 1 },
-    { selector: 'main input[type="search"], main input[placeholder*="earch"]', n: 2 },
+  jobs: (p) => go(p, '/jobs', [
+    { kind: 'css', selector: SEARCH, n: 1 },
+    { kind: 'role', role: 'button', name: /Refresh/i, n: 2 },
   ]),
-  schedules: (p) => listPage(p, '/schedules', [
-    { selector: HEADING, n: 1 },
+  schedules: (p) => go(p, '/schedules', [
+    { kind: 'role', role: 'link', name: /Create Schedule|Add Schedule|New Schedule/i, n: 1 },
   ]),
-  activity: (p) => listPage(p, '/activity', [
-    { selector: HEADING, n: 1 },
+  schedules_new: (p) => go(p, '/schedules/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Template', n: 2 },
+    { kind: 'label', text: 'Frequency', n: 3 },
+    { kind: 'label', text: 'Start Date/Time', n: 4 },
+    { kind: 'role', role: 'button', name: /Create Schedule/i, n: 5 },
   ]),
-  audit_log: (p) => listPage(p, '/audit', [
-    { selector: HEADING, n: 1 },
+  activity: (p) => go(p, '/activity', [
+    { kind: 'css', selector: SEARCH, n: 1 },
   ]),
-  analytics: (p) => listPage(p, '/analytics', [
-    { selector: HEADING, n: 1 },
+  audit_log: (p) => go(p, '/audit', [
+    { kind: 'css', selector: SEARCH, n: 1 },
+  ]),
+  analytics: (p) => go(p, '/analytics', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
 
+  // ============================================================
   // AUTOMATION
-  event_rules: (p) => listPage(p, '/event_rules', [
-    { selector: HEADING, n: 1 },
+  // ============================================================
+  event_rules: (p) => go(p, '/event_rules', [
+    { kind: 'role', role: 'link', name: /Create Event Rule|New Event Rule|Add/i, n: 1 },
   ]),
-  event_logs: (p) => listPage(p, '/event_logs', [
-    { selector: HEADING, n: 1 },
+  event_rules_new: (p) => go(p, '/event_rules/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Source Type', n: 2 },
+    { kind: 'label', text: 'Webhook Path', n: 3 },
+    { kind: 'role', role: 'button', name: /Add Condition/i, n: 4 },
+    { kind: 'role', role: 'button', name: /Add Action/i, n: 5 },
+    { kind: 'role', role: 'button', name: /Create Event Rule/i, n: 6 },
   ]),
-  outbound_webhooks: (p) => listPage(p, '/outbound_webhooks', [
-    { selector: HEADING, n: 1 },
+  event_logs: (p) => go(p, '/event_logs', [
+    { kind: 'css', selector: 'main h1', n: 1 },
+  ]),
+  outbound_webhooks: (p) => go(p, '/outbound_webhooks', [
+    { kind: 'role', role: 'link', name: /Create|New|Add/i, n: 1 },
+  ]),
+  outbound_webhooks_new: (p) => go(p, '/outbound_webhooks/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Target URL', n: 2 },
+    { kind: 'role', role: 'button', name: /Job Failed/i, n: 3 },
+    { kind: 'role', role: 'button', name: /Create Outbound Webhook/i, n: 4 },
   ]),
 
+  // ============================================================
   // SELF-SERVICE
-  service_portal: (p) => listPage(p, '/service_portal', [
-    { selector: HEADING, n: 1 },
+  // ============================================================
+  service_portal: (p) => go(p, '/service_portal', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  my_requests: (p) => listPage(p, '/my_requests', [
-    { selector: HEADING, n: 1 },
+  my_requests: (p) => go(p, '/my_requests', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  approvals: (p) => listPage(p, '/service_approvals', [
-    { selector: HEADING, n: 1 },
+  approvals: (p) => go(p, '/service_approvals', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  catalog_admin: (p) => listPage(p, '/service_catalog', [
-    { selector: HEADING, n: 1 },
+  catalog_admin: (p) => go(p, '/service_catalog', [
+    { kind: 'role', role: 'link', name: /Add Item|Create|New/i, n: 1 },
+  ]),
+  catalog_admin_new: (p) => go(p, '/service_catalog/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Category', n: 2 },
+    { kind: 'label', text: 'Underlying template', n: 3 },
+    { kind: 'label', text: 'Requires approval before launch', n: 4 },
+    { kind: 'role', role: 'button', name: /^Save$/i, n: 5 },
   ]),
 
+  // ============================================================
   // TENANCY
-  tenants: (p) => listPage(p, '/tenants', [
-    { selector: HEADING, n: 1 },
+  // ============================================================
+  tenants: (p) => go(p, '/tenants', [
+    { kind: 'role', role: 'link', name: /Create Tenant|New|Add/i, n: 1 },
   ]),
-  quota_events: (p) => listPage(p, '/tenant_quota_events', [
-    { selector: HEADING, n: 1 },
+  tenants_new: (p) => go(p, '/tenants/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Admin username', n: 2 },
+    { kind: 'label', text: 'Admin password', n: 3 },
+    { kind: 'label', text: 'Max concurrent jobs', n: 4 },
+    { kind: 'role', role: 'button', name: /^Save$/i, n: 5 },
+  ]),
+  quota_events: (p) => go(p, '/tenant_quota_events', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
 
+  // ============================================================
   // COMPLIANCE
-  drift_detections: (p) => listPage(p, '/drift_detections', [
-    { selector: HEADING, n: 1 },
+  // ============================================================
+  drift_detections: (p) => go(p, '/drift_detections', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  drift_alerts: (p) => listPage(p, '/drift_alerts', [
-    { selector: HEADING, n: 1 },
+  drift_alerts: (p) => go(p, '/drift_alerts', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  alert_rules: (p) => listPage(p, '/drift_alert_rules', [
-    { selector: HEADING, n: 1 },
+  alert_rules: (p) => go(p, '/drift_alert_rules', [
+    { kind: 'role', role: 'link', name: /Create Alert Rule|New|Add/i, n: 1 },
   ]),
-  fact_snapshots: (p) => listPage(p, '/fact_snapshots', [
-    { selector: HEADING, n: 1 },
+  alert_rules_new: (p) => go(p, '/drift_alert_rules/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Host Filter (fnmatch pattern)', n: 2 },
+    { kind: 'label', text: 'Minimum Severity', n: 3 },
+    { kind: 'role', role: 'button', name: /Create Alert Rule/i, n: 4 },
   ]),
-  policies: (p) => listPage(p, '/policies', [
-    { selector: HEADING, n: 1 },
+  fact_snapshots: (p) => go(p, '/fact_snapshots', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  policy_decisions: (p) => listPage(p, '/policy_decisions', [
-    { selector: HEADING, n: 1 },
+  policies: (p) => go(p, '/policies', [
+    { kind: 'role', role: 'link', name: /Create Policy|New|Add/i, n: 1 },
   ]),
-  scanners: (p) => listPage(p, '/scanners', [
-    { selector: HEADING, n: 1 },
+  policies_new: (p) => go(p, '/policies/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Enforcement', n: 2 },
+    { kind: 'label', text: 'Rego module', n: 3 },
+    { kind: 'role', role: 'button', name: /^Save$/i, n: 4 },
   ]),
-  scan_results: (p) => listPage(p, '/scan_results', [
-    { selector: HEADING, n: 1 },
+  policy_decisions: (p) => go(p, '/policy_decisions', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  observability: (p) => listPage(p, '/observability', [
-    { selector: HEADING, n: 1 },
+  scanners: (p) => go(p, '/scanners', [
+    { kind: 'role', role: 'link', name: /Create Scanner|New|Add/i, n: 1 },
+  ]),
+  scanners_new: (p) => go(p, '/scanners/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Tool', n: 2 },
+    { kind: 'label', text: 'Severity threshold', n: 3 },
+    { kind: 'role', role: 'button', name: /^Save$/i, n: 4 },
+  ]),
+  scan_results: (p) => go(p, '/scan_results', [
+    { kind: 'css', selector: 'main h1', n: 1 },
+  ]),
+  observability: (p) => go(p, '/observability', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
 
+  // ============================================================
   // RESOURCES
-  templates: (p) => listPage(p, '/templates', [
-    { selector: HEADING, n: 1 },
+  // ============================================================
+  templates: (p) => go(p, '/templates', [
+    { kind: 'css', selector: SEARCH, n: 1 },
+    { kind: 'role', role: 'link', name: /Job Template/i, n: 2 },
   ]),
-  inventories: (p) => listPage(p, '/inventories', [
-    { selector: HEADING, n: 1 },
+  templates_new: (p) => go(p, '/templates/job_template/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Inventory', n: 2 },
+    { kind: 'label', text: 'Project', n: 3 },
+    { kind: 'label', text: 'Playbook', n: 4 },
+    { kind: 'label', text: 'Limit', n: 5 },
+    { kind: 'role', role: 'button', name: /Create Template/i, n: 6 },
   ]),
-  hosts: (p) => listPage(p, '/hosts', [
-    { selector: HEADING, n: 1 },
+  inventories: (p) => go(p, '/inventories', [
+    { kind: 'css', selector: SEARCH, n: 1 },
+    { kind: 'role', role: 'link', name: /Create Inventory|New|Add/i, n: 2 },
   ]),
-  projects: (p) => listPage(p, '/projects', [
-    { selector: HEADING, n: 1 },
+  inventories_new: (p) => go(p, '/inventories/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Description', n: 2 },
+    { kind: 'label', text: 'Organization', n: 3 },
+    { kind: 'label', text: 'Inventory Type', n: 4 },
+    { kind: 'role', role: 'button', name: /Create Inventory/i, n: 5 },
   ]),
-  credentials: (p) => listPage(p, '/credentials', [
-    { selector: HEADING, n: 1 },
+  hosts: (p) => go(p, '/hosts', [
+    { kind: 'css', selector: 'main h1', n: 1 },
+  ]),
+  projects: (p) => go(p, '/projects', [
+    { kind: 'css', selector: SEARCH, n: 1 },
+    { kind: 'role', role: 'link', name: /Create Project|New|Add/i, n: 2 },
+  ]),
+  projects_new: (p) => go(p, '/projects/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'SCM Type', n: 2 },
+    { kind: 'label', text: 'SCM URL', n: 3 },
+    { kind: 'label', text: 'SCM Branch', n: 4 },
+    { kind: 'role', role: 'button', name: /Create Project/i, n: 5 },
+  ]),
+  credentials: (p) => go(p, '/credentials', [
+    { kind: 'css', selector: SEARCH, n: 1 },
+    { kind: 'role', role: 'link', name: /Create Credential|New|Add/i, n: 2 },
+  ]),
+  credentials_new: (p) => go(p, '/credentials/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Credential Type', n: 2 },
+    { kind: 'label', text: 'Organization', n: 3 },
+    { kind: 'role', role: 'button', name: /Create Credential/i, n: 4 },
   ]),
 
+  // ============================================================
   // ACCESS
-  organizations: (p) => listPage(p, '/organizations', [
-    { selector: HEADING, n: 1 },
+  // ============================================================
+  organizations: (p) => go(p, '/organizations', [
+    { kind: 'role', role: 'link', name: /Create Organization|New|Add/i, n: 1 },
   ]),
-  users: (p) => listPage(p, '/users', [
-    { selector: HEADING, n: 1 },
+  organizations_new: (p) => go(p, '/organizations/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Description', n: 2 },
+    { kind: 'label', text: 'Max Hosts', n: 3 },
+    { kind: 'role', role: 'button', name: /Create Organization/i, n: 4 },
   ]),
-  teams: (p) => listPage(p, '/teams', [
-    { selector: HEADING, n: 1 },
+  users: (p) => go(p, '/users', [
+    { kind: 'role', role: 'link', name: /Create User|New|Add/i, n: 1 },
+  ]),
+  users_new: (p) => go(p, '/users/new', [
+    { kind: 'label', text: 'Username', n: 1 },
+    { kind: 'label', text: 'Email', n: 2 },
+    { kind: 'label', text: 'Password', n: 3 },
+    { kind: 'role', role: 'button', name: /Superuser/i, n: 4 },
+    { kind: 'role', role: 'button', name: /Create User/i, n: 5 },
+  ]),
+  teams: (p) => go(p, '/teams', [
+    { kind: 'role', role: 'link', name: /Create Team|New|Add/i, n: 1 },
+  ]),
+  teams_new: (p) => go(p, '/teams/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Description', n: 2 },
+    { kind: 'label', text: 'Organization', n: 3 },
+    { kind: 'role', role: 'button', name: /Create Team/i, n: 4 },
   ]),
 
+  // ============================================================
   // ADMIN
-  instances: (p) => listPage(p, '/instances', [
-    { selector: HEADING, n: 1 },
+  // ============================================================
+  instances: (p) => go(p, '/instances', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  instance_groups: (p) => listPage(p, '/instance_groups', [
-    { selector: HEADING, n: 1 },
+  instance_groups: (p) => go(p, '/instance_groups', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  execution_environments: (p) => listPage(p, '/execution_environments', [
-    { selector: HEADING, n: 1 },
+  execution_environments: (p) => go(p, '/execution_environments', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
-  notifications: (p) => listPage(p, '/notification_templates', [
-    { selector: HEADING, n: 1 },
+  notifications: (p) => go(p, '/notification_templates', [
+    { kind: 'role', role: 'link', name: /Create|New|Add/i, n: 1 },
   ]),
-  topology: (p) => listPage(p, '/topology', [
-    { selector: HEADING, n: 1 },
+  notifications_new: (p) => go(p, '/notification_templates/new', [
+    { kind: 'label', text: 'Name', n: 1 },
+    { kind: 'label', text: 'Notification Type', n: 2 },
+    { kind: 'role', role: 'button', name: /^Create$/i, n: 3 },
   ]),
-  settings: (p) => listPage(p, '/settings', [
-    { selector: HEADING, n: 1 },
+  topology: (p) => go(p, '/topology', [
+    { kind: 'css', selector: 'main h1', n: 1 },
+  ]),
+  settings: (p) => go(p, '/settings', [
+    { kind: 'css', selector: 'main h1', n: 1 },
   ]),
 }
 
@@ -269,7 +479,7 @@ async function main() {
       await page.screenshot({ path: out, fullPage: true })
       console.log(`✓ ${id}`)
     } catch (e) {
-      console.error(`✗ ${id}: ${e.message}`)
+      console.error(`✗ ${id}: ${e.message.split('\n')[0]}`)
     }
   }
 

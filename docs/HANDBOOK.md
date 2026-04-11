@@ -68,6 +68,11 @@ A step-by-step guide for everyday use of the Forge Platform UI. Each section fol
 
 ![Dashboard](img/handbook/dashboard.png)
 
+**What each marker means:**
+
+1. **Page heading** — confirms you are on the Dashboard.
+2. **Getting Started banner** — links to the wizard that walks you through the first install (org, project, inventory, credential, template).
+
 The Dashboard is the landing page after login. It shows the overall health of the platform: recent jobs, success/failure rates, active hosts, and quick links.
 
 **Step by step**
@@ -87,6 +92,11 @@ The Dashboard is the landing page after login. It shows the overall health of th
 ## Jobs
 
 ![Jobs](img/handbook/jobs.png)
+
+**What each marker means:**
+
+1. **Search box** — filter the jobs list by name or id, e.g. type `Deploy` to find every run of the Deploy Webapp template.
+2. **Refresh** — re-fetch the list (auto-refresh runs on a timer too).
 
 Jobs are individual runs of a Job Template. Use this view to launch, monitor, and inspect playbook executions.
 
@@ -120,7 +130,23 @@ restart_service: true
 
 ![Schedules](img/handbook/schedules.png)
 
+**What each marker means:**
+
+1. **Create Schedule** — opens the form below.
+
 Schedules trigger Job Templates automatically on a cron-like cadence.
+
+**Create Schedule**
+
+![Create Schedule](img/handbook/schedules_new.png)
+
+**What each marker means:**
+
+1. **Name** — short, descriptive id, e.g. `nightly-db-backup`.
+2. **Template** — the Job Template to launch on the schedule, e.g. `Backup PostgreSQL`.
+3. **Frequency** — None / Minute / Hour / Day / Week / Month — pick the cadence.
+4. **Start Date/Time** — when the first run should fire, e.g. `2026-04-12 02:00`.
+5. **Create Schedule** — submits the form.
 
 **Step by step**
 
@@ -150,6 +176,10 @@ Schedules trigger Job Templates automatically on a cron-like cadence.
 
 ![Activity](img/handbook/activity.png)
 
+**What each marker means:**
+
+1. **Page heading** — Activity is read-only; use the column headers and filters to narrow the feed.
+
 A chronological feed of platform actions: who did what and when.
 
 **Step by step**
@@ -168,6 +198,10 @@ A chronological feed of platform actions: who did what and when.
 
 ![Audit Log](img/handbook/audit_log.png)
 
+**What each marker means:**
+
+1. **Page heading** — use the column header filters to narrow by event type, severity, actor, or date range.
+
 Tamper-evident security log used for compliance reporting (SOC 2, ISO 27001).
 
 **Step by step**
@@ -185,6 +219,10 @@ Tamper-evident security log used for compliance reporting (SOC 2, ISO 27001).
 ## Analytics
 
 ![Analytics](img/handbook/analytics.png)
+
+**What each marker means:**
+
+1. **Page heading** — switch tabs across the top to see Overview / Job Trends / Host Health / Top Failures.
 
 Visual KPIs across the whole platform: job throughput, MTTR, top failing templates.
 
@@ -207,7 +245,24 @@ Visual KPIs across the whole platform: job throughput, MTTR, top failing templat
 
 ![Event Rules](img/handbook/event_rules.png)
 
+**What each marker means:**
+
+1. **Create Event Rule** — opens the form below.
+
 Event Rules listen for incoming events (webhooks, alerts, message bus) and launch a Job Template when conditions match.
+
+**Create Event Rule**
+
+![Create Event Rule](img/handbook/event_rules_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `restart-on-prometheus-crit`.
+2. **Source Type** — webhook / kafka / alertmanager / etc.
+3. **Webhook Path** — URL suffix the source will hit, e.g. `/prom-crit`.
+4. **Add Condition** — add JSONPath / regex match rules.
+5. **Add Action** — what to launch when conditions match (Job Template, Workflow).
+6. **Create Event Rule** — submits the form.
 
 **Step by step**
 
@@ -238,6 +293,10 @@ forward_vars:
 
 ![Event Logs](img/handbook/event_logs.png)
 
+**What each marker means:**
+
+1. **Page heading** — read-only feed of received events; click a row to see the raw payload.
+
 Read-only history of every event the platform received and what rule (if any) consumed it.
 
 **Step by step**
@@ -256,7 +315,22 @@ Read-only history of every event the platform received and what rule (if any) co
 
 ![Outbound Webhooks](img/handbook/outbound_webhooks.png)
 
+**What each marker means:**
+
+1. **Create Outbound Webhook** — opens the form below.
+
 Send platform events to external systems (Slack, PagerDuty, ServiceNow).
+
+**Create Outbound Webhook**
+
+![Create Outbound Webhook](img/handbook/outbound_webhooks_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `slack-failed-jobs`.
+2. **Target URL** — full https URL of the receiving endpoint, e.g. `https://hooks.slack.com/services/T0/B0/XYZ`.
+3. **Trigger toggles** (Job Started / Succeeded / Failed / etc.) — pick which events fire the webhook.
+4. **Create Outbound Webhook** — submits the form.
 
 **Step by step**
 
@@ -291,6 +365,10 @@ payload: |
 
 ![Service Portal](img/handbook/service_portal.png)
 
+**What each marker means:**
+
+1. **Page heading** — end-user catalog. Browse tiles or use search.
+
 End-user catalog: lets non-admins request pre-approved automations without touching templates directly.
 
 **Step by step (as end user)**
@@ -316,6 +394,10 @@ End-user catalog: lets non-admins request pre-approved automations without touch
 
 ![My Requests](img/handbook/my_requests.png)
 
+**What each marker means:**
+
+1. **Page heading** — your submitted requests with their current status.
+
 Tracks the status of requests you submitted from the Service Portal.
 
 **Step by step**
@@ -333,6 +415,10 @@ Tracks the status of requests you submitted from the Service Portal.
 ## Approvals
 
 ![Approvals](img/handbook/approvals.png)
+
+**What each marker means:**
+
+1. **Page heading** — pending requests waiting for an approver. Click a row to read details and Approve / Reject.
 
 Queue of items waiting for an approver. Items appear here when a Service Portal entry is configured to require approval.
 
@@ -353,7 +439,23 @@ Queue of items waiting for an approver. Items appear here when a Service Portal 
 
 ![Catalog Admin](img/handbook/catalog_admin.png)
 
+**What each marker means:**
+
+1. **Add Item** — opens the form below.
+
 Where admins create and manage Service Portal entries.
+
+**Create Catalog Item**
+
+![Create Catalog Item](img/handbook/catalog_admin_new.png)
+
+**What each marker means:**
+
+1. **Name** — what end users will see in the Service Portal, e.g. `New Dev VM`.
+2. **Category** — groups items in the portal, e.g. `Compute`.
+3. **Underlying template** — the Job Template that will run when a request is approved.
+4. **Requires approval** — toggle on to route requests through Approvals; off to auto-launch.
+5. **Save** — publishes the catalog item.
 
 **Step by step**
 
@@ -384,7 +486,23 @@ Where admins create and manage Service Portal entries.
 
 ![Tenants](img/handbook/tenants.png)
 
+**What each marker means:**
+
+1. **Create Tenant** — opens the form below.
+
 A tenant is an isolated workspace (org-of-orgs) with its own data, quotas, and members. Used for multi-tenant deployments.
+
+**Create Tenant**
+
+![Create Tenant](img/handbook/tenants_new.png)
+
+**What each marker means:**
+
+1. **Name** — slug-friendly id, e.g. `acme-corp`.
+2. **Admin username** — bootstrap admin login for the tenant, e.g. `acme-admin`.
+3. **Admin password** — strong password for the bootstrap admin.
+4. **Max concurrent jobs** — quota cap for parallel jobs, e.g. `20`.
+5. **Save** — provisions the tenant atomically (org + admin + team + quotas).
 
 **Step by step**
 
@@ -414,6 +532,10 @@ owner: acme-admin@example.com
 
 ![Quota Events](img/handbook/quota_events.png)
 
+**What each marker means:**
+
+1. **Page heading** — read-only audit feed of quota changes and quota-exceeded events.
+
 Audit feed of quota changes and quota-exceeded events per tenant.
 
 **Step by step**
@@ -433,6 +555,10 @@ Audit feed of quota changes and quota-exceeded events per tenant.
 ## Drift Detections
 
 ![Drift Detections](img/handbook/drift_detections.png)
+
+**What each marker means:**
+
+1. **Page heading** — list of drift detection runs. Click any row for the per-host findings.
 
 Compares the current state of a host against a known-good fact baseline.
 
@@ -456,6 +582,10 @@ Compares the current state of a host against a known-good fact baseline.
 
 ![Drift Alerts](img/handbook/drift_alerts.png)
 
+**What each marker means:**
+
+1. **Page heading** — open alerts opened by drift detections. Use status filter to narrow by `open` / `acked` / `resolved`.
+
 Alerts opened automatically when a drift detection finds a mismatch.
 
 **Step by step**
@@ -474,7 +604,22 @@ Alerts opened automatically when a drift detection finds a mismatch.
 
 ![Alert Rules](img/handbook/alert_rules.png)
 
+**What each marker means:**
+
+1. **Create Alert Rule** — opens the form below.
+
 Rules that decide which drift findings become alerts and at which severity.
+
+**Create Alert Rule**
+
+![Create Alert Rule](img/handbook/alert_rules_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `ssh-port-must-be-22`.
+2. **Host Filter** — fnmatch pattern (e.g. `prod-*`) to scope the rule.
+3. **Minimum Severity** — info / warn / crit — minimum severity that opens an alert.
+4. **Create Alert Rule** — submits the form.
 
 **Step by step**
 
@@ -503,6 +648,10 @@ notify: slack-secops
 
 ![Fact Snapshots](img/handbook/fact_snapshots.png)
 
+**What each marker means:**
+
+1. **Page heading** — list of point-in-time fact captures used as drift baselines.
+
 A point-in-time capture of host facts. Used as drift baselines.
 
 **Step by step**
@@ -526,7 +675,22 @@ A point-in-time capture of host facts. Used as drift baselines.
 
 ![Policies](img/handbook/policies.png)
 
+**What each marker means:**
+
+1. **Create Policy** — opens the form below.
+
 Policy-as-Code rules (OPA / Rego) that gate job execution and approvals.
+
+**Create Policy**
+
+![Create Policy](img/handbook/policies_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `dba-only-drop-db`.
+2. **Enforcement** — `enforce` (block on deny) or `warn` (record only).
+3. **Rego module** — the OPA Rego source that returns deny / allow.
+4. **Save** — validates and stores the policy.
 
 **Step by step**
 
@@ -555,6 +719,10 @@ deny[msg] {
 
 ![Policy Decisions](img/handbook/policy_decisions.png)
 
+**What each marker means:**
+
+1. **Page heading** — read-only history of every OPA evaluation. Filter by Verdict / User / Policy.
+
 History of every policy evaluation: who triggered it, what the input was, and the verdict.
 
 **Step by step**
@@ -573,7 +741,22 @@ History of every policy evaluation: who triggered it, what the input was, and th
 
 ![Scanners](img/handbook/scanners.png)
 
+**What each marker means:**
+
+1. **Create Scanner** — opens the form below.
+
 Configured IaC / image / dependency scanners (Trivy, Checkov, …).
+
+**Create Scanner**
+
+![Create Scanner](img/handbook/scanners_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `trivy-prod`.
+2. **Tool** — Trivy / Checkov / ansible-lint / pip-audit.
+3. **Severity threshold** — minimum severity that fails a job, e.g. `high`.
+4. **Save** — registers the scanner.
 
 **Step by step**
 
@@ -598,6 +781,10 @@ Configured IaC / image / dependency scanners (Trivy, Checkov, …).
 
 ![Scan Results](img/handbook/scan_results.png)
 
+**What each marker means:**
+
+1. **Page heading** — read-only findings from configured scanners. Filter by severity / scanner / date.
+
 Findings from the configured scanners.
 
 **Step by step**
@@ -616,6 +803,10 @@ Findings from the configured scanners.
 ## Observability
 
 ![Observability](img/handbook/observability.png)
+
+**What each marker means:**
+
+1. **Page heading** — live OpenTelemetry view (traces, metrics, logs). Pick a tab and search.
 
 Live OpenTelemetry view of the platform itself: traces, metrics, logs.
 
@@ -638,7 +829,25 @@ Live OpenTelemetry view of the platform itself: traces, metrics, logs.
 
 ![Templates](img/handbook/templates.png)
 
+**What each marker means:**
+
+1. **Search box** — filter templates by name, e.g. type `Deploy`.
+2. **+ Job Template** — opens the create form below.
+
 Job Templates wrap a project + playbook + inventory + credentials + survey into a launchable unit.
+
+**Create Job Template**
+
+![Create Job Template](img/handbook/templates_new.png)
+
+**What each marker means:**
+
+1. **Name** — short, descriptive id, e.g. `Deploy Webapp`.
+2. **Inventory** — pick the target hosts, e.g. `Production Web`.
+3. **Project** — the Git project that contains the playbook, e.g. `Demo Project`.
+4. **Playbook** — the YAML file inside the project to run, e.g. `deploy.yml`.
+5. **Limit** — host pattern to scope the run, e.g. `webservers` or `webservers:!web03`.
+6. **Create Template** — submits the form.
 
 **Step by step**
 
@@ -675,7 +884,24 @@ variables:
 
 ![Inventories](img/handbook/inventories.png)
 
+**What each marker means:**
+
+1. **Search box** — filter the inventories list.
+2. **Create Inventory** — opens the form below.
+
 Logical group of hosts. May be static, sourced from a file, or synced from a cloud (AWS / Azure / GCP).
+
+**Create Inventory**
+
+![Create Inventory](img/handbook/inventories_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `Production Web`.
+2. **Description** — free-text purpose, e.g. `Web tier — production hosts`.
+3. **Organization** — which org owns this inventory, e.g. `Default`.
+4. **Inventory Type** — `Standard` for a static list, `Smart` for a dynamic host filter.
+5. **Create Inventory** — submits the form.
 
 **Step by step — create static inventory**
 
@@ -699,6 +925,10 @@ Logical group of hosts. May be static, sourced from a file, or synced from a clo
 ## Hosts
 
 ![Hosts](img/handbook/hosts.png)
+
+**What each marker means:**
+
+1. **Page heading** — flat list of all hosts across all inventories. Click a host to see its facts and group memberships.
 
 Individual machines (or endpoints) that belong to one or more inventories.
 
@@ -727,7 +957,24 @@ variables:
 
 ![Projects](img/handbook/projects.png)
 
+**What each marker means:**
+
+1. **Search box** — filter projects by name.
+2. **Create Project** — opens the form below.
+
 A Project is a Git checkout containing playbooks, roles, and collections.
+
+**Create Project**
+
+![Create Project](img/handbook/projects_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `webapp-iac`.
+2. **SCM Type** — `git` (GitHub / GitLab / Bitbucket / self-hosted).
+3. **SCM URL** — clone URL, e.g. `git@github.com:acme/webapp-iac.git`.
+4. **SCM Branch** — branch / tag / sha to check out, e.g. `main`.
+5. **Create Project** — submits the form and triggers the first sync.
 
 **Step by step**
 
@@ -758,7 +1005,23 @@ A Project is a Git checkout containing playbooks, roles, and collections.
 
 ![Credentials](img/handbook/credentials.png)
 
+**What each marker means:**
+
+1. **Search box** — filter credentials.
+2. **Create Credential** — opens the form below.
+
 Encrypted secret store: SSH keys, passwords, cloud tokens, vault keys.
+
+**Create Credential**
+
+![Create Credential](img/handbook/credentials_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `ssh-prod`.
+2. **Credential Type** — Machine / SCM / Vault / AWS / Azure / GCP / etc.
+3. **Organization** — which org owns this credential.
+4. **Create Credential** — submits the form (encrypted at rest).
 
 **Step by step**
 
@@ -785,7 +1048,22 @@ Encrypted secret store: SSH keys, passwords, cloud tokens, vault keys.
 
 ![Organizations](img/handbook/organizations.png)
 
+**What each marker means:**
+
+1. **Create Organization** — opens the form below.
+
 Top-level container for users, teams, projects, inventories, templates.
+
+**Create Organization**
+
+![Create Organization](img/handbook/organizations_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `Platform`.
+2. **Description** — purpose of the org, e.g. `Core platform engineering org`.
+3. **Max Hosts** — soft cap for the org, leave 0 for unlimited.
+4. **Create Organization** — submits the form.
 
 **Step by step**
 
@@ -804,7 +1082,23 @@ Top-level container for users, teams, projects, inventories, templates.
 
 ![Users](img/handbook/users.png)
 
+**What each marker means:**
+
+1. **Create User** — opens the form below.
+
 Local and SSO-mapped users.
+
+**Create User**
+
+![Create User](img/handbook/users_new.png)
+
+**What each marker means:**
+
+1. **Username** — login id, e.g. `alice`.
+2. **Email** — contact address, e.g. `alice@example.com`.
+3. **Password** — strong initial password (user can change later).
+4. **Superuser toggle** — grants full admin rights; leave off for normal users.
+5. **Create User** — submits the form.
 
 **Step by step — create a local user**
 
@@ -829,7 +1123,22 @@ Local and SSO-mapped users.
 
 ![Teams](img/handbook/teams.png)
 
+**What each marker means:**
+
+1. **Create Team** — opens the form below.
+
 A Team groups users so permissions can be granted in bulk.
+
+**Create Team**
+
+![Create Team](img/handbook/teams_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `webapp-devs`.
+2. **Description** — purpose, e.g. `Engineers who deploy the webapp`.
+3. **Organization** — parent org for the team.
+4. **Create Team** — submits the form.
 
 **Step by step**
 
@@ -851,6 +1160,10 @@ A Team groups users so permissions can be granted in bulk.
 
 ![Instances](img/handbook/instances.png)
 
+**What each marker means:**
+
+1. **Page heading** — list of cluster nodes. Click any row to enable / disable a node or adjust its capacity.
+
 Physical or virtual nodes that run jobs (control plane + execution plane).
 
 **Step by step**
@@ -868,6 +1181,10 @@ Physical or virtual nodes that run jobs (control plane + execution plane).
 ## Instance Groups
 
 ![Instance Groups](img/handbook/instance_groups.png)
+
+**What each marker means:**
+
+1. **Page heading** — logical pools of instances. Click a group to manage members and policy.
 
 Logical pools of instances. Templates can be pinned to a group (e.g., `gpu-pool`, `eu-west-pool`).
 
@@ -892,6 +1209,10 @@ Logical pools of instances. Templates can be pinned to a group (e.g., `gpu-pool`
 ## Execution Environments
 
 ![Execution Environments](img/handbook/execution_environments.png)
+
+**What each marker means:**
+
+1. **Page heading** — container images that hold the runtime for jobs. Click any row to edit pull policy or registry credential.
 
 Container images that hold the runtime (Python, collections, binaries) used to run jobs.
 
@@ -921,7 +1242,21 @@ credential: harbor-pull
 
 ![Notifications](img/handbook/notifications.png)
 
+**What each marker means:**
+
+1. **Create** — opens the form below.
+
 Channels Forge can send messages to (email, Slack, PagerDuty, MS Teams, webhooks).
+
+**Create Notification Template**
+
+![Create Notification Template](img/handbook/notifications_new.png)
+
+**What each marker means:**
+
+1. **Name** — short id, e.g. `slack-secops`.
+2. **Notification Type** — Email / Slack / PagerDuty / Webhook / MS Teams / etc.
+3. **Create** — submits the form (next step asks for type-specific fields like Slack token + channel).
 
 **Step by step**
 
@@ -946,6 +1281,10 @@ Channels Forge can send messages to (email, Slack, PagerDuty, MS Teams, webhooks
 
 ![Topology](img/handbook/topology.png)
 
+**What each marker means:**
+
+1. **Page heading** — visual mesh map of the cluster. Drag to pan, scroll to zoom, click nodes / links for detail.
+
 Visual map of the cluster: control nodes, hop nodes, execution nodes, mesh links.
 
 **Step by step**
@@ -964,6 +1303,10 @@ Visual map of the cluster: control nodes, hop nodes, execution nodes, mesh links
 ## Settings
 
 ![Settings](img/handbook/settings.png)
+
+**What each marker means:**
+
+1. **Page heading** — global platform configuration grouped by category (Authentication, System, Jobs, UI, Logging, License).
 
 Global platform configuration: auth, system, jobs, UI, logging, license.
 
