@@ -135,6 +135,12 @@ services:
   forge-task:
     <<: *forge-common
     command: launch_awx_task.sh
+    # podman (used by ansible-runner for EE process isolation) needs
+    # cgroup, user-namespace and mount capabilities that are not granted
+    # to an ordinary Docker container. Running privileged is the simplest
+    # working setup; a tighter cap_add/security_opt list is possible but
+    # fragile across kernels and not worth the complexity here.
+    privileged: true
     volumes:
       - ./settings/settings.py:/etc/tower/settings.py:ro
       - ./settings/database.py:/etc/tower/conf.d/database.py:ro
