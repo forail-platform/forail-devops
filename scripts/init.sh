@@ -37,6 +37,9 @@ forge-manage register_queue --skip-checks --queuename=default      --instance_pe
 echo "==> Creating preload data..."
 forge-manage create_preload_data --skip-checks 2>/dev/null || true
 
+echo "==> Registering default execution environments..."
+forge-manage register_default_execution_environments --skip-checks
+
 echo "==> Setting CSRF trusted origins..."
 CSRF_ORIGINS="${FORGE_CSRF_TRUSTED_ORIGINS:-https://localhost,https://localhost:8043}"
 forge-manage shell -c "
