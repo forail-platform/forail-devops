@@ -25,6 +25,7 @@ pipeline {
         // Git repositories
         BACKEND_REPO     = 'git@git.cloudforyour.work:forge-platform/forge-backend.git'
         FRONTEND_REPO    = 'git@git.cloudforyour.work:forge-platform/forge-frontend.git'
+        ASSISTANT_REPO   = 'git@git.cloudforyour.work:forge-platform/forge-assistant.git'
         GIT_BRANCH_NAME  = "${env.BRANCH_NAME ?: 'main'}"
 
         // Docker images (Harbor registry)
@@ -84,6 +85,15 @@ pipeline {
                         }
                     }
                 }
+                stage('Checkout Assistant') {
+                    steps {
+                        dir('forge-assistant') {
+                            git branch: "${GIT_BRANCH_NAME}",
+                                credentialsId: 'forge-git-creds',
+                                url: "${ASSISTANT_REPO}"
+                        }
+                    }
+                }
             }
         }
 
@@ -130,7 +140,29 @@ pipeline {
         // ─── Test ──────────────────────────────────────────────────────
         stage('Test') {
             parallel {
-                stage('Python Unit Tests') {
+                stage('Backend Standalone Tests') {
+                    agent {
+                        docker {
+                            image "python:${PYTHON_VERSION}-slim"
+                            args '--user root'
+                        }
+                    }
+                    steps {
+                        dir('forge-backend') {
+                            sh '''
+                                pip install --no-cache-dir -q pyyaml jinja2
+                                echo "=== Backend standalone tests (no Django) ==="
+                                python -m pytest tests_standalone/ -v \
+                                    -o "addopts=" \
+                                    --ignore=tests_standalone/test_integration.py \
+                                    --ignore=tests_standalone/test_audit_trail.py \
+                                    --ignore=tests_standalone/test_dynamic_survey_standalone.py \
+                                    --tb=short
+                            '''
+                        }
+                    }
+                }
+                stage('Backend Unit Tests') {
                     agent {
                         docker {
                             image "python:${PYTHON_VERSION}-slim"
@@ -148,8 +180,13 @@ pipeline {
                                     -r requirements/requirements_dev.txt
                                 pip install --no-cache-dir -e .
 
-                                echo "=== Python unit tests ==="
+                                echo "=== Backend unit tests ==="
                                 python -m pytest forge/main/tests/unit/ -x -q --tb=short
+
+                                echo "=== Backend script-based tests ==="
+                                python tests_standalone/test_integration.py
+                                python tests_standalone/test_audit_trail.py
+                                python tests_standalone/test_dynamic_survey_standalone.py
                             '''
                         }
                     }
@@ -159,7 +196,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Frontend Unit Tests') {
+                stage('Frontend Tests') {
                     agent {
                         docker {
                             image "node:${NODE_VERSION}-slim"
@@ -170,8 +207,25 @@ pipeline {
                         dir('forge-frontend') {
                             sh '''
                                 npm ci --prefer-offline
-                                echo "=== Frontend unit tests (Vitest) ==="
+                                echo "=== Frontend tests (Vitest) ==="
                                 npx vitest run
+                            '''
+                        }
+                    }
+                }
+                stage('Assistant Tests') {
+                    agent {
+                        docker {
+                            image "python:${PYTHON_VERSION}-slim"
+                            args '--user root'
+                        }
+                    }
+                    steps {
+                        dir('forge-assistant') {
+                            sh '''
+                                pip install --no-cache-dir -r requirements-dev.txt
+                                echo "=== Assistant tests (pytest) ==="
+                                python -m pytest tests/ -v --tb=short
                             '''
                         }
                     }
