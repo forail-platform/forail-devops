@@ -34,7 +34,7 @@ digraph ForgeArchitecture {
     }
 
     // ── Docker Registry ──
-    registry [label="Harbor Registry\n(registry.cloudforyour.work)",
+    registry [label="Harbor Registry\n(ghcr.io)",
               fillcolor="#313244", color="#f9e2af", fontcolor="#f9e2af",
               shape="box", style="filled,rounded", penwidth=2];
 

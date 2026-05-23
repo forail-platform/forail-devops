@@ -96,7 +96,7 @@ Both have `allow_failure: true` — they report vulnerabilities but don't block 
 | Job | Destination | Trigger |
 |-----|-------------|---------|
 | `release:gitlab-registry` | GitLab Container Registry | Automatic on tag |
-| `release:harbor` | Harbor (`registry.cloudforyour.work`) | **Manual** (click to deploy) |
+| `release:harbor` | Harbor (`ghcr.io`) | **Manual** (click to deploy) |
 
 The CentOS image is tagged as the primary (`:latest`, `:${VERSION}`).
 Ubuntu is available as `:${VERSION}-ubuntu`.
@@ -149,7 +149,7 @@ workflow:
 |----------|-------------|-------------|
 | `HARBOR_USER` | Yes | Harbor registry username |
 | `HARBOR_TOKEN` | Yes (masked) | Harbor registry access token |
-| `HARBOR_REGISTRY` | Yes | Registry URL (`registry.cloudforyour.work`) |
+| `HARBOR_REGISTRY` | Yes | Registry URL (`ghcr.io`) |
 
 ---
 

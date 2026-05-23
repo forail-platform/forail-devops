@@ -55,7 +55,7 @@ stages:
 ```
 
 ### Artifact:
-- Docker image: `registry.cloudforyour.work/forge-platform/forge-backend:<version>`
+- Docker image: `ghcr.io/forgeplatform/forge-backend:<version>`
 - API documentation (auto-generated)
 
 ---
@@ -93,7 +93,7 @@ stages:
 
 ### Artifact:
 - Build folder (`dist/`) — static files
-- Optional Docker image: `registry.cloudforyour.work/forge-platform/forge-frontend:<version>` (nginx + static files)
+- Optional Docker image: `ghcr.io/forgeplatform/forge-frontend:<version>` (nginx + static files)
 
 ### Configuration:
 - API URL is configured via environment variable (`VITE_API_URL`)
@@ -161,11 +161,11 @@ services:
   redis:
     image: redis:7
   forge-backend:
-    image: registry.cloudforyour.work/forge-platform/forge-backend:${VERSION}
+    image: ghcr.io/forgeplatform/forge-backend:${VERSION}
   forge-frontend:
-    image: registry.cloudforyour.work/forge-platform/forge-frontend:${VERSION}
+    image: ghcr.io/forgeplatform/forge-frontend:${VERSION}
   forge-task:
-    image: registry.cloudforyour.work/forge-platform/forge-backend:${VERSION}   # same image, different entrypoint
+    image: ghcr.io/forgeplatform/forge-backend:${VERSION}   # same image, different entrypoint
   nginx:
     # reverse proxy → frontend + backend API
 ```
@@ -267,8 +267,8 @@ forge-mobile/
        │ publish             │ publish              │ publish
        ▼                     ▼                      ▼
 ┌─────────────────────────────────────────────────────────┐
-│              Harbor Registry (registry.cloudforyour.work)                │
-│  registry.cloudforyour.work/forge-platform/forge-backend   registry.cloudforyour.work/forge-platform/forge-frontend   forge-platform/... │
+│              Harbor Registry (ghcr.io)                │
+│  ghcr.io/forgeplatform/forge-backend   ghcr.io/forgeplatform/forge-frontend   forge-platform/... │
 └─────────────────────────┬───────────────────────────────┘
                           │ pull
                           ▼

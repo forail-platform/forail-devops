@@ -29,7 +29,7 @@ builds across all three repositories: `forge-backend`, `forge-frontend`, and `fo
 | Build Frontend | `docker build` → `forge-platform/forge-frontend` | Build error |
 | Security (pip-audit) | CVE scan on Python deps | Critical CVE |
 | Security (Trivy) | Container image scan (backend + frontend) | CRITICAL CVE |
-| Release | `docker push` to Harbor (`registry.cloudforyour.work`) | Only on `main` or tags |
+| Release | `docker push` to Harbor (`ghcr.io`) | Only on `main` or tags |
 
 ### Stage Conditions
 
@@ -45,8 +45,8 @@ builds across all three repositories: `forge-backend`, `forge-frontend`, and `fo
 
 | Credential ID | Type | Description |
 |---------------|------|-------------|
-| `forge-git-creds` | SSH Key | Access to `git.cloudforyour.work` repos |
-| `forge-harbor-creds` | Username/Password | Harbor login (`registry.cloudforyour.work`) |
+| `forge-git-creds` | SSH Key | Access to GitLab origin remote (internal CI only) |
+| `forge-harbor-creds` | Username/Password | Harbor login (`ghcr.io`) |
 
 ---
 
@@ -54,10 +54,10 @@ builds across all three repositories: `forge-backend`, `forge-frontend`, and `fo
 
 | Image | Source | Description |
 |-------|--------|-------------|
-| `registry.cloudforyour.work/forge-platform/forge-backend:latest` | `forge-backend/Dockerfile` | Django API + task engine |
-| `registry.cloudforyour.work/forge-platform/forge-backend:<version>` | Same | Version-tagged |
-| `registry.cloudforyour.work/forge-platform/forge-frontend:latest` | `forge-frontend/Dockerfile` | React SPA + nginx |
-| `registry.cloudforyour.work/forge-platform/forge-frontend:<version>` | Same | Version-tagged |
+| `ghcr.io/forgeplatform/forge-backend:latest` | `forge-backend/Dockerfile` | Django API + task engine |
+| `ghcr.io/forgeplatform/forge-backend:<version>` | Same | Version-tagged |
+| `ghcr.io/forgeplatform/forge-frontend:latest` | `forge-frontend/Dockerfile` | React SPA + nginx |
+| `ghcr.io/forgeplatform/forge-frontend:<version>` | Same | Version-tagged |
 
 ---
 
@@ -99,7 +99,7 @@ DJANGO_SETTINGS_MODULE=forge.settings.development \
 pip install pip-audit && pip-audit -r requirements/requirements.txt
 
 # Build image
-docker build -t registry.cloudforyour.work/forge-platform/forge-backend:latest .
+docker build -t ghcr.io/forgeplatform/forge-backend:latest .
 ```
 
 ### Frontend
@@ -114,7 +114,7 @@ npx tsc --noEmit
 npx vitest run
 
 # Build image
-docker build -t registry.cloudforyour.work/forge-platform/forge-frontend:latest .
+docker build -t ghcr.io/forgeplatform/forge-frontend:latest .
 ```
 
 ---
