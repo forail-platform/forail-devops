@@ -10,10 +10,10 @@ Forge Platform uses a separated architecture with independent Docker images:
 
 | Service | Image | Purpose |
 |---------|-------|---------|
-| forge-web | `registry.cloudforyour.work/forge-platform/forge-backend` | Django API (uwsgi + daphne + nginx-internal) |
-| forge-task | `registry.cloudforyour.work/forge-platform/forge-backend` | Task execution (dispatcher, callback, receptor) |
-| forge-init | `registry.cloudforyour.work/forge-platform/forge-backend` | One-shot: migrations, admin user, provisioning |
-| forge-frontend | `registry.cloudforyour.work/forge-platform/forge-frontend` | React SPA served by nginx |
+| forge-web | `ghcr.io/forgeplatform/forge-backend` | Django API (uwsgi + daphne + nginx-internal) |
+| forge-task | `ghcr.io/forgeplatform/forge-backend` | Task execution (dispatcher, callback, receptor) |
+| forge-init | `ghcr.io/forgeplatform/forge-backend` | One-shot: migrations, admin user, provisioning |
+| forge-frontend | `ghcr.io/forgeplatform/forge-frontend` | React SPA served by nginx |
 | postgres | `postgres:15-alpine` | Database |
 | redis | `redis:7-alpine` | Cache and message broker |
 | nginx | `nginx:1.27-alpine` | TLS termination, routing |
@@ -45,8 +45,8 @@ Each service waits for the previous one to be healthy before starting.
 
 ```bash
 cd forge-backend
-docker build -t registry.cloudforyour.work/forge-platform/forge-backend:latest .
-docker push registry.cloudforyour.work/forge-platform/forge-backend:latest
+docker build -t ghcr.io/forgeplatform/forge-backend:latest .
+docker push ghcr.io/forgeplatform/forge-backend:latest
 ```
 
 The Dockerfile is a multi-stage build:
@@ -57,8 +57,8 @@ The Dockerfile is a multi-stage build:
 
 ```bash
 cd forge-frontend
-docker build -t registry.cloudforyour.work/forge-platform/forge-frontend:latest .
-docker push registry.cloudforyour.work/forge-platform/forge-frontend:latest
+docker build -t ghcr.io/forgeplatform/forge-frontend:latest .
+docker push ghcr.io/forgeplatform/forge-frontend:latest
 ```
 
 The Dockerfile is a multi-stage build:
@@ -142,8 +142,8 @@ docker compose up -d
 | `FORGE_ADMIN_EMAIL` | `admin@example.com` | Admin email |
 | `FORGE_NODE_NAME` | `forge-node` | Instance hostname |
 | `FORGE_NODE_TYPE` | `hybrid` | `hybrid`, `control`, or `execution` |
-| `FORGE_BACKEND_IMAGE` | `registry.cloudforyour.work/forge-platform/forge-backend` | Backend Docker image |
-| `FORGE_FRONTEND_IMAGE` | `registry.cloudforyour.work/forge-platform/forge-frontend` | Frontend Docker image |
+| `FORGE_BACKEND_IMAGE` | `ghcr.io/forgeplatform/forge-backend` | Backend Docker image |
+| `FORGE_FRONTEND_IMAGE` | `ghcr.io/forgeplatform/forge-frontend` | Frontend Docker image |
 | `FORGE_TAG` | `latest` | Image tag |
 | `NGINX_HTTP_PORT` | `80` | External HTTP port |
 | `NGINX_HTTPS_PORT` | `443` | External HTTPS port |
@@ -301,7 +301,7 @@ docker run -d --name forge-task \
   -e REDIS_HOST=redis.example.com \
   -e FORGE_NODE_TYPE=execution \
   -e FORGE_NODE_NAME=exec-node-1 \
-  registry.cloudforyour.work/forge-platform/forge-backend:latest launch_awx_task.sh
+  ghcr.io/forgeplatform/forge-backend:latest launch_awx_task.sh
 
 # On the control node:
 docker compose exec forge-web forge-manage provision_instance --hostname=exec-node-1 --node-type=execution

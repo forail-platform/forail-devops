@@ -428,7 +428,7 @@ Execution nodes run Ansible jobs. Add more when you exhaust capacity.
    docker run -d --name forge-receptor \
      -e RECEPTOR_NODE_TYPE=execution \
      -e RECEPTOR_PEER=tcp://control.forge.example.com:2222 \
-     registry.cloudforyour.work/forge-platform/forge-receptor:2026.04.0
+     ghcr.io/forgeplatform/forge-receptor:2026.04.0
    ```
 3. In the UI: **Admin → Instances → Add** and register the new node:
 
@@ -455,7 +455,7 @@ Hop nodes relay traffic across network boundaries (e.g. DMZ → internal).
    docker run -d --name forge-receptor \
      -e RECEPTOR_NODE_TYPE=hop \
      -e RECEPTOR_PEER=tcp://control.forge.example.com:2222 \
-     registry.cloudforyour.work/forge-platform/forge-receptor:2026.04.0
+     ghcr.io/forgeplatform/forge-receptor:2026.04.0
    ```
 3. In the UI: **Admin → Instances → Add** with **Node Type = hop**.
 4. From any execution node behind the hop, set its peer to the hop instead of the control node.
@@ -634,7 +634,7 @@ sudo ufw enable
 3. Patch the host OS monthly (`unattended-upgrades` on Debian/Ubuntu).
 4. Run scheduled image scans:
    ```bash
-   trivy image registry.cloudforyour.work/forge-platform/forge-backend:2026.04.0
+   trivy image ghcr.io/forgeplatform/forge-backend:2026.04.0
    ```
 
 ---
@@ -794,8 +794,8 @@ Symptom: browser shows nginx 502 Bad Gateway.
 | `FORGE_ALLOWED_HOSTS` | no | `*` | Django ALLOWED_HOSTS |
 | `FORGE_NODE_NAME` | no | `forge-node` | This node's name in mesh |
 | `FORGE_NODE_TYPE` | no | `hybrid` | `control` / `execution` / `hybrid` |
-| `FORGE_BACKEND_IMAGE` | no | `registry.cloudforyour.work/forge-platform/forge-backend` | Backend image |
-| `FORGE_FRONTEND_IMAGE` | no | `registry.cloudforyour.work/forge-platform/forge-frontend` | Frontend image |
+| `FORGE_BACKEND_IMAGE` | no | `ghcr.io/forgeplatform/forge-backend` | Backend image |
+| `FORGE_FRONTEND_IMAGE` | no | `ghcr.io/forgeplatform/forge-frontend` | Frontend image |
 | `FORGE_TAG` | no | `latest` | Image tag (use a real version, not `latest`) |
 | `BACKUP_RETENTION_DAYS` | no | `7` | Days of backups to keep |
 

@@ -31,7 +31,7 @@ Standalone production deployment for Forge (based on AWX). No Ansible templating
 ## Prerequisites
 
 - Docker Engine 24+ and Docker Compose v2
-- A built Forge image (pull from Harbor: `registry.cloudforyour.work/forge-platform/forge`)
+- A built Forge image (pull from `ghcr.io/forgeplatform/forge-backend` and `ghcr.io/forgeplatform/forge-frontend`)
 - TLS certificate and private key (for production HTTPS)
 
 ## Quick Start

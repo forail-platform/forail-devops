@@ -16,8 +16,8 @@ Forge Platform is split into three independent repositories:
 
 | Repository | Description | Registry |
 |------------|-------------|----------|
-| `forge-backend` | Django REST API, task engine, receptor | `registry.cloudforyour.work/forge-platform/forge-backend` |
-| `forge-frontend` | React UI (Vite + TypeScript) | `registry.cloudforyour.work/forge-platform/forge-frontend` |
+| `forge-backend` | Django REST API, task engine, receptor | `ghcr.io/forgeplatform/forge-backend` |
+| `forge-frontend` | React UI (Vite + TypeScript) | `ghcr.io/forgeplatform/forge-frontend` |
 | `forge-deploy` | Docker Compose, nginx, settings, scripts | — |
 
 ### Service Architecture
@@ -71,8 +71,8 @@ The monolithic AWX codebase was separated into three independent repos:
 
 ### Docker Images on Harbor
 
-- `registry.cloudforyour.work/forge-platform/forge-backend:latest` — Ubuntu 24.04, Python 3.12, receptor, supervisor
-- `registry.cloudforyour.work/forge-platform/forge-frontend:latest` — nginx 1.27-alpine serving built React assets
+- `ghcr.io/forgeplatform/forge-backend:latest` — Ubuntu 24.04, Python 3.12, receptor, supervisor
+- `ghcr.io/forgeplatform/forge-frontend:latest` — nginx 1.27-alpine serving built React assets
 
 ### Production Deployment (VERIFIED 2026-03-17)
 
@@ -152,7 +152,7 @@ Checkout (backend + frontend) → Lint → Test → Build → Security → Relea
 - Runs Python unit tests (pytest) + frontend tests (vitest) in parallel
 - Builds both Docker images (`forge-platform/forge-backend`, `forge-platform/forge-frontend`)
 - Security scans: pip-audit + Trivy container scan
-- Release: pushes versioned images to Harbor (`registry.cloudforyour.work`) on `main` branch or git tags
+- Release: pushes versioned images to `ghcr.io/forgeplatform/*` on `main` branch or git tags
 
 Jenkins credentials: `forge-git-creds` (SSH), `forge-harbor-creds` (Harbor)
 
@@ -214,16 +214,16 @@ docker compose up -d
 
 ```bash
 cd forge-backend
-docker build -t registry.cloudforyour.work/forge-platform/forge-backend:latest .
-docker push registry.cloudforyour.work/forge-platform/forge-backend:latest
+docker build -t ghcr.io/forgeplatform/forge-backend:latest .
+docker push ghcr.io/forgeplatform/forge-backend:latest
 ```
 
 ### Frontend
 
 ```bash
 cd forge-frontend
-docker build -t registry.cloudforyour.work/forge-platform/forge-frontend:latest .
-docker push registry.cloudforyour.work/forge-platform/forge-frontend:latest
+docker build -t ghcr.io/forgeplatform/forge-frontend:latest .
+docker push ghcr.io/forgeplatform/forge-frontend:latest
 ```
 
 ---

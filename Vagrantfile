@@ -90,7 +90,7 @@ FORGE_ALLOWED_HOSTS=*
 FORGE_CSRF_TRUSTED_ORIGINS=https://192.168.56.22,https://localhost:8443,https://forge.local
 FORGE_NODE_NAME=forge-node
 FORGE_NODE_TYPE=hybrid
-FORGE_IMAGE=registry.cloudforyour.work/forge-platform/forge-backend
+FORGE_IMAGE=ghcr.io/forgeplatform/forge-backend
 FORGE_TAG=latest
 ENVFILE
         echo "Generated .env with random secrets."

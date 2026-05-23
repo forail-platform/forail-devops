@@ -1,5 +1,5 @@
 x-forge-common: &forge-common
-  image: ${FORGE_BACKEND_IMAGE:-registry.cloudforyour.work/forge-platform/forge-backend}:${FORGE_TAG:-latest}
+  image: ${FORGE_BACKEND_IMAGE:-ghcr.io/forgeplatform/forge-backend}:${FORGE_TAG:-latest}
   env_file: .env
   environment: &forge-env
     DATABASE_HOST: postgres
@@ -174,7 +174,7 @@ services:
 
   # ── Frontend (React UI served by nginx) ────────────────
   forge-frontend:
-    image: ${FORGE_FRONTEND_IMAGE:-registry.cloudforyour.work/forge-platform/forge-frontend}:${FORGE_TAG:-latest}
+    image: ${FORGE_FRONTEND_IMAGE:-ghcr.io/forgeplatform/forge-frontend}:${FORGE_TAG:-latest}
     networks:
       - forge
     healthcheck:

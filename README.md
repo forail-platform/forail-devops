@@ -17,7 +17,7 @@ This repo contains everything needed to deploy the Forge platform:
 
 ```bash
 # 1. Clone the repo
-git clone git@git.cloudforyour.work:forge-platform/forge-devops.git
+git clone https://github.com/forgeplatform/forge-devops.git
 cd forge-devops
 
 # 2. Configure environment
@@ -62,8 +62,8 @@ docker compose up -d
 | Service | Image | Port | Description |
 |---------|-------|------|-------------|
 | nginx | nginx:latest | 443, 80 | Reverse proxy, SSL termination |
-| forge-web | registry.cloudforyour.work/forge-platform/forge-backend | 8013 | Django API + uWSGI |
-| forge-task | registry.cloudforyour.work/forge-platform/forge-backend | - | Celery worker + Dispatcher |
+| forge-web | ghcr.io/forgeplatform/forge-backend | 8013 | Django API + uWSGI |
+| forge-task | ghcr.io/forgeplatform/forge-backend | - | Celery worker + Dispatcher |
 | postgres | postgres:15 | 5432 | Database |
 | redis | redis:7 | 6379 | Cache + message broker |
 
@@ -116,5 +116,13 @@ forge-devops/
 
 ## Related Repositories
 
-- [forge-backend](https://git.cloudforyour.work/forge-platform/forge-backend) — Django API + Task Engine
-- [forge-frontend](https://git.cloudforyour.work/forge-platform/forge-frontend) — React UI
+- [forge-backend](https://github.com/forgeplatform/forge-backend) — Django API + Task Engine
+- [forge-frontend](https://github.com/forgeplatform/forge-frontend) — React UI
+
+## Project History
+
+The Forge platform is a modernized fork of [Ansible AWX](https://github.com/ansible/awx), licensed under the Apache License 2.0. See [forge-backend/NOTICE](https://github.com/forgeplatform/forge-backend/blob/main/NOTICE) for full attribution.
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE).
