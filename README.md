@@ -1,5 +1,7 @@
 # Forge DevOps
 
+[![CI](https://github.com/forgeplatform/forge-devops/actions/workflows/ci.yml/badge.svg)](https://github.com/forgeplatform/forge-devops/actions/workflows/ci.yml)
+
 Deployment, infrastructure, and CI/CD for the Forge platform.
 
 ## Overview
