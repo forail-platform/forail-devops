@@ -9,6 +9,7 @@ For day-to-day UI usage, see the companion [User Handbook](HANDBOOK.md).
 ## Table of Contents
 
 ### Install & First Boot
+
 - [Prerequisites](#prerequisites)
 - [Installation (Docker Compose)](#installation-docker-compose)
 - [First-Time Setup](#first-time-setup)
@@ -16,6 +17,7 @@ For day-to-day UI usage, see the companion [User Handbook](HANDBOOK.md).
 - [Initial Admin Hardening](#initial-admin-hardening)
 
 ### Day-2 Operations
+
 - [Starting and Stopping the Stack](#starting-and-stopping-the-stack)
 - [Inspecting Logs](#inspecting-logs)
 - [Health Checks](#health-checks)
@@ -25,23 +27,27 @@ For day-to-day UI usage, see the companion [User Handbook](HANDBOOK.md).
 - [Rolling Back](#rolling-back)
 
 ### Scaling & Topology
+
 - [Adding an Execution Node](#adding-an-execution-node)
 - [Adding a Hop Node](#adding-a-hop-node)
 - [Tuning Capacity](#tuning-capacity)
 - [Switching to Kubernetes](#switching-to-kubernetes)
 
 ### Observability
+
 - [Enabling OpenTelemetry](#enabling-opentelemetry)
 - [Grafana Dashboards](#grafana-dashboards)
 - [Audit Log Export](#audit-log-export)
 
 ### Security
+
 - [Rotating Secrets](#rotating-secrets)
 - [User & SSO Setup](#user--sso-setup)
 - [Firewall & Network Hardening](#firewall--network-hardening)
 - [Security Updates](#security-updates)
 
 ### Troubleshooting
+
 - [Stack Won't Come Up](#stack-wont-come-up)
 - [Database Connection Errors](#database-connection-errors)
 - [Jobs Stuck in Pending](#jobs-stuck-in-pending)
@@ -51,6 +57,7 @@ For day-to-day UI usage, see the companion [User Handbook](HANDBOOK.md).
 - [Reset Admin Password](#reset-admin-password)
 
 ### Reference
+
 - [Service Map](#service-map)
 - [Environment Variables](#environment-variables)
 - [File Layout](#file-layout)
@@ -92,28 +99,38 @@ The standard installation uses the compose file shipped in this repo.
 **Step by step**
 
 1. Clone or copy `forge-deploy` to the target host:
+
    ```bash
    git clone https://github.com/forgeplatform/forge-deploy.git /opt/forge
    cd /opt/forge
    ```
+
 2. Copy the example env file and edit it:
+
    ```bash
    cp .env.example .env
    $EDITOR .env
    ```
+
 3. Fill in the **required** variables (see [Environment Variables](#environment-variables)).
 4. Pull the images:
+
    ```bash
    docker compose pull
    ```
+
 5. Bring the stack up:
+
    ```bash
    docker compose up -d
    ```
+
 6. Tail the init container until it finishes:
+
    ```bash
    docker compose logs -f forge-init
    ```
+
 7. When you see `==> Init complete.` you can hit `https://<your-host>` in a browser.
 
 **Example `.env` for first install**
@@ -148,11 +165,11 @@ What to do the first time you log in.
 
 **Example values**
 
-| Field | Value |
-|---|---|
-| Base URL | `https://forge.example.com` |
-| First org | `Platform` |
-| Named admin | `krstan` / strong password |
+| Field       | Value                       |
+| ----------- | --------------------------- |
+| Base URL    | `https://forge.example.com` |
+| First org   | `Platform`                  |
+| Named admin | `krstan` / strong password  |
 
 ---
 
@@ -163,23 +180,32 @@ Forge ships with a self-signed cert. Replace it with a real one before exposing 
 **Step by step — Let's Encrypt with certbot**
 
 1. Stop the nginx service so port 80 is free for the ACME challenge:
+
    ```bash
    docker compose stop nginx
    ```
+
 2. Run certbot in standalone mode:
+
    ```bash
    sudo certbot certonly --standalone -d forge.example.com
    ```
+
 3. Copy the new cert/key into the nginx mount point:
+
    ```bash
    sudo cp /etc/letsencrypt/live/forge.example.com/fullchain.pem nginx/ssl/forge.crt
    sudo cp /etc/letsencrypt/live/forge.example.com/privkey.pem   nginx/ssl/forge.key
    ```
+
 4. Restart nginx:
+
    ```bash
    docker compose up -d nginx
    ```
+
 5. Verify:
+
    ```bash
    curl -I https://forge.example.com
    ```
@@ -290,18 +316,25 @@ Daily backups are mandatory. Forge ships `scripts/backup.sh` which dumps Postgre
 **Step by step**
 
 1. Run a one-off backup to verify it works:
+
    ```bash
    docker compose exec postgres /scripts/backup.sh
    ```
+
 2. Inspect the result:
+
    ```bash
    ls -lh /var/lib/awx/backups/
    ```
+
 3. Schedule a nightly cron on the host:
+
    ```cron
    0 2 * * * docker compose -f /opt/forge/docker-compose.yml exec -T postgres /scripts/backup.sh >> /var/log/forge-backup.log 2>&1
    ```
+
 4. Copy the backups off-host (S3, rsync, etc.):
+
    ```cron
    30 2 * * * aws s3 sync /var/lib/awx/backups/ s3://acme-forge-backups/
    ```
@@ -326,17 +359,23 @@ Daily backups are mandatory. Forge ships `scripts/backup.sh` which dumps Postgre
 **Step by step**
 
 1. **Stop** the application services so nothing writes to the DB:
+
    ```bash
    docker compose stop forge-web forge-task
    ```
+
 2. Run the restore (omit the filename to use the most recent backup):
+
    ```bash
    docker compose exec -T postgres /scripts/restore.sh /var/lib/awx/backups/forge_backup_20260411_020000.sql.gz
    ```
+
 3. Restart the application:
+
    ```bash
    docker compose up -d forge-web forge-task
    ```
+
 4. Verify in the UI: log in and check **Activity** for the expected history.
 
 **Example — restore yesterday's backup**
@@ -347,7 +386,7 @@ docker compose exec -T postgres /scripts/restore.sh
 docker compose up -d forge-web forge-task
 ```
 
-> **Warning:** Restore is destructive. The current database is **overwritten** by the dump. Always take a fresh backup *before* restoring an old one.
+> **Warning:** Restore is destructive. The current database is **overwritten** by the dump. Always take a fresh backup _before_ restoring an old one.
 
 ---
 
@@ -360,25 +399,35 @@ Upgrading is a tag bump + pull + up.
 1. Read the [release notes](RELEASE_NOTES_v2026.04.0.md) for breaking changes.
 2. Take a backup (see [Backup](#backup)).
 3. Edit `.env` and bump `FORGE_TAG`:
+
    ```ini
    FORGE_TAG=2026.05.0
    ```
+
 4. Pull the new images:
+
    ```bash
    docker compose pull
    ```
+
 5. Bring the new stack up — `forge-init` runs migrations automatically:
+
    ```bash
    docker compose up -d
    ```
+
 6. Tail init:
+
    ```bash
    docker compose logs -f forge-init
    ```
+
 7. Smoke-test:
+
    ```bash
    curl -fsS https://forge.example.com/api/v2/ping/
    ```
+
 8. Watch **Jobs** for 10 minutes — make sure new launches work.
 
 **Example — minor version bump**
@@ -397,14 +446,18 @@ If an upgrade fails, roll back the tag and restore the pre-upgrade backup.
 **Step by step**
 
 1. Set the previous tag in `.env`:
+
    ```ini
    FORGE_TAG=2026.04.0
    ```
+
 2. Pull and bring up:
+
    ```bash
    docker compose pull
    docker compose up -d
    ```
+
 3. **If migrations were applied** during the failed upgrade, you must also restore the pre-upgrade DB dump (see [Restore](#restore)).
 4. Verify and notify users.
 
@@ -424,18 +477,20 @@ Execution nodes run Ansible jobs. Add more when you exhaust capacity.
 
 1. Provision a new host with Docker.
 2. On the new host, install Receptor and bring it up as an execution node, pointing at the control node:
+
    ```bash
    docker run -d --name forge-receptor \
      -e RECEPTOR_NODE_TYPE=execution \
      -e RECEPTOR_PEER=tcp://control.forge.example.com:2222 \
      ghcr.io/forgeplatform/forge-receptor:2026.04.0
    ```
+
 3. In the UI: **Admin → Instances → Add** and register the new node:
 
-   | Field | Value |
-   |---|---|
-   | Hostname | `worker-eu-03` |
-   | Node Type | `execution` |
+   | Field          | Value          |
+   | -------------- | -------------- |
+   | Hostname       | `worker-eu-03` |
+   | Node Type      | `execution`    |
    | Instance Group | `eu-west-pool` |
 
 4. Wait until the node shows **Ready** in **Topology**.
@@ -451,12 +506,14 @@ Hop nodes relay traffic across network boundaries (e.g. DMZ → internal).
 
 1. Provision the hop host inside the boundary.
 2. Run a Receptor container with `RECEPTOR_NODE_TYPE=hop`:
+
    ```bash
    docker run -d --name forge-receptor \
      -e RECEPTOR_NODE_TYPE=hop \
      -e RECEPTOR_PEER=tcp://control.forge.example.com:2222 \
      ghcr.io/forgeplatform/forge-receptor:2026.04.0
    ```
+
 3. In the UI: **Admin → Instances → Add** with **Node Type = hop**.
 4. From any execution node behind the hop, set its peer to the hop instead of the control node.
 5. Confirm in **Topology** that the hop appears between the control and the workers.
@@ -487,18 +544,25 @@ The `k8s/` folder contains baseline manifests if you outgrow Docker Compose.
 
 1. Read [`k8s/`](../k8s/) — it includes Deployments, Services, ConfigMap, Secret, Ingress.
 2. Create a namespace:
+
    ```bash
    kubectl create namespace forge
    ```
+
 3. Create the secrets (translate your `.env`):
+
    ```bash
    kubectl -n forge create secret generic forge-env --from-env-file=.env
    ```
+
 4. Apply the manifests:
+
    ```bash
    kubectl -n forge apply -f k8s/
    ```
+
 5. Watch the rollout:
+
    ```bash
    kubectl -n forge get pods -w
    ```
@@ -517,6 +581,7 @@ The stack ships with `forge-otel-collector`. You only need to point it at your b
 
 1. Edit `otel/collector-config.yaml`.
 2. Set the exporter endpoint:
+
    ```yaml
    exporters:
      otlphttp:
@@ -524,10 +589,13 @@ The stack ships with `forge-otel-collector`. You only need to point it at your b
        headers:
          authorization: "Bearer YOUR_TOKEN"
    ```
+
 3. Restart the collector:
+
    ```bash
    docker compose restart forge-otel-collector
    ```
+
 4. In **Settings → Observability**, set:
    - **OTLP Endpoint** = `http://forge-otel-collector:4318`
    - **Sampling rate** = `0.1` (10%)
@@ -558,6 +626,7 @@ For SOC 2 / ISO 27001 evidence collection.
 2. Filter by date range (e.g. last quarter).
 3. Click **Export → CSV**.
 4. Hash and store the CSV alongside your evidence pack:
+
    ```bash
    sha256sum audit-2026Q1.csv > audit-2026Q1.csv.sha256
    ```
@@ -574,14 +643,18 @@ Secrets to rotate periodically: `FORGE_SECRET_KEY`, `POSTGRES_PASSWORD`, `FORGE_
 
 1. **Take a backup first.**
 2. Generate a new key:
+
    ```bash
    openssl rand -hex 25
    ```
+
 3. Edit `.env`, replace `FORGE_SECRET_KEY=...`.
 4. Restart web + task:
+
    ```bash
    docker compose up -d forge-web forge-task
    ```
+
 5. **All sessions are invalidated** — users must re-login. Encrypted credentials in the DB are unaffected (they use a separate Fernet key).
 
 > **Never** rotate the database encryption key (used for credential storage) without first re-encrypting all credentials. That procedure is a separate runbook.
@@ -596,7 +669,7 @@ Secrets to rotate periodically: `FORGE_SECRET_KEY`, `POSTGRES_PASSWORD`, `FORGE_
 2. Fill in:
    - **Provider URL** — `https://login.example.com`
    - **Client ID** — `forge-prod`
-   - **Client Secret** — *(from IdP)*
+   - **Client Secret** — _(from IdP)_
    - **Redirect URI** — `https://forge.example.com/sso/complete/oidc/`
 3. Save → click **Test** to verify discovery.
 4. Test login from a private browser window.
@@ -633,6 +706,7 @@ sudo ufw enable
 2. Run `docker compose pull` weekly to pick up base-image patches when you bump tag.
 3. Patch the host OS monthly (`unattended-upgrades` on Debian/Ubuntu).
 4. Run scheduled image scans:
+
    ```bash
    trivy image ghcr.io/forgeplatform/forge-backend:2026.04.0
    ```
@@ -664,9 +738,11 @@ Symptom: web service logs show `could not connect to server: Connection refused`
 1. Is postgres running? `docker compose ps postgres`
 2. Logs: `docker compose logs --tail=100 postgres`
 3. Can the web container reach it?
+
    ```bash
    docker compose exec forge-web pg_isready -h postgres -U forge
    ```
+
 4. If postgres is healthy but web cannot connect → check `POSTGRES_PASSWORD` matches in `.env` and the DB volume.
 5. If postgres won't start → look for `PANIC` lines (disk full, corrupt WAL).
 
@@ -674,7 +750,7 @@ Symptom: web service logs show `could not connect to server: Connection refused`
 
 ## Jobs Stuck in Pending
 
-Symptom: jobs sit in *Pending* and never start.
+Symptom: jobs sit in _Pending_ and never start.
 
 **Step by step**
 
@@ -683,6 +759,7 @@ Symptom: jobs sit in *Pending* and never start.
 3. Check Redis: `docker compose exec redis redis-cli ping` should return `PONG`.
 4. Check Receptor: `docker compose exec forge-task receptorctl status`.
 5. As a last resort, restart the task service:
+
    ```bash
    docker compose restart forge-task
    ```
@@ -695,13 +772,17 @@ Symptom: jobs sit in *Pending* and never start.
 
 1. Open **Topology** — any red links?
 2. From the control node:
+
    ```bash
    docker compose exec forge-task receptorctl status
    ```
+
 3. From a worker:
+
    ```bash
    docker exec forge-receptor receptorctl status
    ```
+
 4. Verify TCP reachability between nodes on **2222**.
 5. Restart the affected receptor container.
 
@@ -727,11 +808,14 @@ Symptom: browser shows nginx 502 Bad Gateway.
 
 1. `df -h` — which mount?
 2. If `/var/lib/docker` → prune unused images:
+
    ```bash
    docker image prune -af --filter "until=168h"
    ```
+
 3. If the backup directory → lower `BACKUP_RETENTION_DAYS` and rerun backup.
 4. If Postgres data dir → check for runaway audit log growth, vacuum:
+
    ```bash
    docker compose exec postgres psql -U forge -d forge -c "VACUUM FULL VERBOSE;"
    ```
@@ -743,17 +827,22 @@ Symptom: browser shows nginx 502 Bad Gateway.
 **Step by step**
 
 1. Exec into the web container:
+
    ```bash
    docker compose exec forge-web bash
    ```
+
 2. Run the management command:
+
    ```bash
    awx-manage changepassword admin
    ```
+
 3. Enter the new password twice.
 4. Log in via the UI.
 
 > If `admin` was disabled and you have no other admin user:
+>
 > ```bash
 > docker compose exec forge-web awx-manage createsuperuser
 > ```
@@ -764,40 +853,40 @@ Symptom: browser shows nginx 502 Bad Gateway.
 
 ## Service Map
 
-| Service | Image | Port (internal) | Purpose |
-|---|---|---|---|
-| `postgres` | `postgres:15` | 5432 | Application database |
-| `redis` | `redis:7` | 6379 | Cache + Celery broker |
-| `forge-init` | `forge-backend` | — | Migrations + initial setup, exits on success |
-| `forge-web` | `forge-backend` | 8050 (uWSGI), 8051 (Daphne) | REST API + WebSocket |
-| `forge-task` | `forge-backend` | — | Celery workers + dispatcher + ws relay |
-| `forge-frontend` | `forge-frontend` | 80 | Static React UI |
-| `forge-opa` | `openpolicyagent/opa` | 8181 | Policy-as-Code sidecar |
-| `forge-otel-collector` | `otel/collector` | 4317/4318 | OpenTelemetry pipeline |
-| `nginx` | `nginx` | 80 / 443 | TLS terminator + edge router |
+| Service                | Image                 | Port (internal)             | Purpose                                      |
+| ---------------------- | --------------------- | --------------------------- | -------------------------------------------- |
+| `postgres`             | `postgres:15`         | 5432                        | Application database                         |
+| `redis`                | `redis:7`             | 6379                        | Cache + Celery broker                        |
+| `forge-init`           | `forge-backend`       | —                           | Migrations + initial setup, exits on success |
+| `forge-web`            | `forge-backend`       | 8050 (uWSGI), 8051 (Daphne) | REST API + WebSocket                         |
+| `forge-task`           | `forge-backend`       | —                           | Celery workers + dispatcher + ws relay       |
+| `forge-frontend`       | `forge-frontend`      | 80                          | Static React UI                              |
+| `forge-opa`            | `openpolicyagent/opa` | 8181                        | Policy-as-Code sidecar                       |
+| `forge-otel-collector` | `otel/collector`      | 4317/4318                   | OpenTelemetry pipeline                       |
+| `nginx`                | `nginx`               | 80 / 443                    | TLS terminator + edge router                 |
 
 ---
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `POSTGRES_PASSWORD` | yes | — | DB password |
-| `POSTGRES_USER` | no | `forge` | DB user |
-| `POSTGRES_DB` | no | `forge` | DB name |
-| `FORGE_SECRET_KEY` | yes | — | Django `SECRET_KEY` (50+ chars) |
-| `FORGE_BROADCAST_WEBSOCKET_SECRET` | yes | — | WS broadcast secret |
-| `FORGE_ADMIN_USER` | no | `admin` | Bootstrap admin username |
-| `FORGE_ADMIN_PASSWORD` | yes | — | Bootstrap admin password |
-| `FORGE_ADMIN_EMAIL` | no | `admin@example.com` | Bootstrap admin email |
-| `FORGE_CSRF_TRUSTED_ORIGINS` | yes | — | Comma-separated `https://...` origins |
-| `FORGE_ALLOWED_HOSTS` | no | `*` | Django ALLOWED_HOSTS |
-| `FORGE_NODE_NAME` | no | `forge-node` | This node's name in mesh |
-| `FORGE_NODE_TYPE` | no | `hybrid` | `control` / `execution` / `hybrid` |
-| `FORGE_BACKEND_IMAGE` | no | `ghcr.io/forgeplatform/forge-backend` | Backend image |
-| `FORGE_FRONTEND_IMAGE` | no | `ghcr.io/forgeplatform/forge-frontend` | Frontend image |
-| `FORGE_TAG` | no | `latest` | Image tag (use a real version, not `latest`) |
-| `BACKUP_RETENTION_DAYS` | no | `7` | Days of backups to keep |
+| Variable                           | Required | Default                                | Description                                  |
+| ---------------------------------- | -------- | -------------------------------------- | -------------------------------------------- |
+| `POSTGRES_PASSWORD`                | yes      | —                                      | DB password                                  |
+| `POSTGRES_USER`                    | no       | `forge`                                | DB user                                      |
+| `POSTGRES_DB`                      | no       | `forge`                                | DB name                                      |
+| `FORGE_SECRET_KEY`                 | yes      | —                                      | Django `SECRET_KEY` (50+ chars)              |
+| `FORGE_BROADCAST_WEBSOCKET_SECRET` | yes      | —                                      | WS broadcast secret                          |
+| `FORGE_ADMIN_USER`                 | no       | `admin`                                | Bootstrap admin username                     |
+| `FORGE_ADMIN_PASSWORD`             | yes      | —                                      | Bootstrap admin password                     |
+| `FORGE_ADMIN_EMAIL`                | no       | `admin@example.com`                    | Bootstrap admin email                        |
+| `FORGE_CSRF_TRUSTED_ORIGINS`       | yes      | —                                      | Comma-separated `https://...` origins        |
+| `FORGE_ALLOWED_HOSTS`              | no       | `*`                                    | Django ALLOWED_HOSTS                         |
+| `FORGE_NODE_NAME`                  | no       | `forge-node`                           | This node's name in mesh                     |
+| `FORGE_NODE_TYPE`                  | no       | `hybrid`                               | `control` / `execution` / `hybrid`           |
+| `FORGE_BACKEND_IMAGE`              | no       | `ghcr.io/forgeplatform/forge-backend`  | Backend image                                |
+| `FORGE_FRONTEND_IMAGE`             | no       | `ghcr.io/forgeplatform/forge-frontend` | Frontend image                               |
+| `FORGE_TAG`                        | no       | `latest`                               | Image tag (use a real version, not `latest`) |
+| `BACKUP_RETENTION_DAYS`            | no       | `7`                                    | Days of backups to keep                      |
 
 ---
 
@@ -832,4 +921,4 @@ Symptom: browser shows nginx 502 Bad Gateway.
 
 ---
 
-*End of administrator handbook.*
+_End of administrator handbook._

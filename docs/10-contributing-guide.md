@@ -64,14 +64,14 @@ type(scope): short description
 
 ### Types
 
-| Type | When | Example |
-|------|------|---------|
-| `feat` | New feature | `feat(api): add /policies/ endpoint` |
-| `fix` | Bug fix | `fix(tasks): prevent job stuck in pending` |
+| Type       | When               | Example                                     |
+| ---------- | ------------------ | ------------------------------------------- |
+| `feat`     | New feature        | `feat(api): add /policies/ endpoint`        |
+| `fix`      | Bug fix            | `fix(tasks): prevent job stuck in pending`  |
 | `refactor` | Code restructuring | `refactor(serializers): split into modules` |
-| `docs` | Documentation | `docs(wiki): add task engine documentation` |
-| `test` | Tests | `test(api): add inventory CRUD tests` |
-| `chore` | Maintenance | `chore(deps): update Django to 4.2.18` |
+| `docs`     | Documentation      | `docs(wiki): add task engine documentation` |
+| `test`     | Tests              | `test(api): add inventory CRUD tests`       |
+| `chore`    | Maintenance        | `chore(deps): update Django to 4.2.18`      |
 
 ### Scopes
 
@@ -134,6 +134,7 @@ cd forge/ui_next && npx tsc --noEmit
 ### Review Checklist
 
 **For the author:**
+
 - [ ] Reviewed my own diff before requesting review
 - [ ] No debug code, console.log, or print statements
 - [ ] No hardcoded secrets or URLs
@@ -141,6 +142,7 @@ cd forge/ui_next && npx tsc --noEmit
 - [ ] New code has tests
 
 **For the reviewer:**
+
 - [ ] Code does what the PR description says
 - [ ] Security: no SQL injection, XSS, credential exposure
 - [ ] Edge cases are handled (empty lists, null, concurrent access)

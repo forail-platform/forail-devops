@@ -17,6 +17,7 @@ populate dropdown options from inventory, host facts, or external APIs.
 This is the single most upvoted feature request in the AWX community.
 
 **Solution:**
+
 - Add a `dynamic_choices` field to survey question spec
 - Support three sources: Jinja2 template (from inventory/facts), API endpoint
   (external URL returning JSON array), and database query (hosts, groups, projects)
@@ -37,10 +38,11 @@ way to react to real-time events (monitoring alerts, Git pushes, cloud events).
 AAP 2.5+ has this as an exclusive feature.
 
 **Solution:**
+
 - Add an event router service that accepts inbound webhooks and evaluates
   them against user-defined rules (YAML rulebooks)
 - Rule format: `source` (webhook path/filter) + `condition` (Jinja2 expression)
-  + `action` (launch job template, workflow, or notification)
+  - `action` (launch job template, workflow, or notification)
 - Integrate with common sources: GitHub/GitLab webhooks, Alertmanager,
   PagerDuty, Datadog, CloudWatch, generic HTTP POST
 - Store rules as a new model (`EventRule`) with RBAC
@@ -58,6 +60,7 @@ There is no way to detect configuration drift or prove compliance.
 Ascender's "Ledger" product fills this gap commercially.
 
 **Solution:**
+
 - Capture host facts (`ansible_facts`) after each playbook run and store
   as snapshots in a `HostFactSnapshot` model
 - Compare snapshots between runs to detect drift (new packages, changed
@@ -78,6 +81,7 @@ from failed jobs are often cryptic. New users struggle with RBAC, credentials,
 and inventory setup.
 
 **Solution:** (detailed in `docs/chat_plan.md`)
+
 - Ollama LLM (mistral:7b or llama3.1:8b) running as a Docker service
 - ChromaDB vector store with indexed Forge/Ansible documentation
 - Django API endpoint `/api/v2/assistant/` with SSE streaming
@@ -96,6 +100,7 @@ and inventory setup.
 auditing. No way to generate audit reports or track credential access.
 
 **Solution:**
+
 - Extend activity stream with: source IP, user agent, session ID
 - Add credential access logging (who used which credential, when, on which host)
 - Immutable audit log table (append-only, no updates or deletes)
@@ -119,6 +124,7 @@ AWX without training. They need a simplified interface to run pre-approved
 automation without understanding templates, inventories, or credentials.
 
 **Delivered:**
+
 - `ServiceCatalogItem` model wraps an existing JobTemplate or
   WorkflowJobTemplate with portal metadata (icon, category, tags,
   `requires_approval`, `approver_team`).
@@ -151,6 +157,7 @@ must have approval", "credentials must rotate every 90 days", or "only
 signed playbooks can run on production inventories".
 
 **Delivered:**
+
 - `Policy` model storing Rego modules + metadata; pushed to a
   `forge-opa` sidecar (OPA 0.69.0) on save via post_save signal.
 - `PolicyDecision` audit row per evaluation hit; full launch context
@@ -189,6 +196,7 @@ and passwordless login. WebAuthn/passkeys are now the standard for
 phishing-resistant authentication.
 
 **Delivered:**
+
 - OIDC client wired through the existing
   `social_core.backends.open_id_connect.OpenIdConnectAuth` (no new
   dependency — already vendored). Configuration via Settings → Generic
@@ -196,11 +204,11 @@ phishing-resistant authentication.
   team map. JIT user provisioning + org/team mapping reuses
   `forge.sso.social_pipeline`.
 - WebAuthn / FIDO2 via `py_webauthn==2.5.2`:
-  * `WebAuthnCredential` model + 5-minute challenge stores.
-  * REST API at `/api/v2/webauthn/credentials/`,
+  - `WebAuthnCredential` model + 5-minute challenge stores.
+  - REST API at `/api/v2/webauthn/credentials/`,
     `register/{begin,complete}/`, `authenticate/{begin,complete}/`.
-  * Replay protection via monotonic sign-count guard.
-  * Origin / RP-ID derived from request — same image works on any host.
+  - Replay protection via monotonic sign-count guard.
+  - Origin / RP-ID derived from request — same image works on any host.
 - Org-level MFA enforcement: `Organization.webauthn_required`
   (`none`/`admins`/`all`) + `WebAuthnMfaEnforcementMiddleware` that
   flips `session.mfa_pending` when policy applies.
@@ -222,6 +230,7 @@ Users cannot prompt for different variables at individual job template nodes
 within a workflow.
 
 **Solution:**
+
 - Add `survey_spec` to `WorkflowJobTemplateNode` model
 - At launch time, merge workflow-level and node-level survey prompts
 - Frontend: multi-step launch dialog showing prompts grouped by node
@@ -239,6 +248,7 @@ trends, or efficiency. Managers cannot answer "how much time did automation
 save this month?"
 
 **Solution:**
+
 - New analytics models tracking: job duration trends, success/failure rates
   over time, most-used templates, busiest hosts, automation coverage
 - Time savings calculator: estimated manual time vs automated time
@@ -279,6 +289,7 @@ provisioning every customer's org/admin/team, manually enforcing "fair use"
 manually skinning the UI per customer.
 
 **Delivered (v1 — soft multi-tenancy, no new compose service):**
+
 - `Organization` extended with 11 additive fields: `is_tenant_root`,
   `tenant_max_concurrent_jobs`, `tenant_max_daily_launches`,
   `tenant_max_hosts`, `tenant_max_storage_mb`, `tenant_isolation_strict`,
@@ -337,6 +348,7 @@ manually skinning the UI per customer.
 - See `forge-backend/docs/22-multi-tenancy.md` for the full architecture.
 
 **Deferred to v2:**
+
 - Postgres row-level security policies (real DB-level isolation).
 - Strict-mode enforcement (cross-tenant reads blocked, not just audited).
 - Per-tenant API rate limiting at the middleware layer (token bucket).
@@ -353,6 +365,7 @@ manually skinning the UI per customer.
 ### 3.3 Kubernetes Operator --- COMPLETED (v2026.05.0)
 
 **Delivered:**
+
 - 9 CRDs spanning the full Forge resource model: `Inventory`,
   `Credential`, `JobTemplate`, `Schedule`, `Project`, `Organization`,
   `Team`, `Workflow`, `ForgeInstance` (in `forge-operator/api/v1alpha1/`).
@@ -387,6 +400,7 @@ with unquoted user input, pulling an unpinned role, or importing a
 Python package with a known CVE.
 
 **Delivered:**
+
 - `Scanner` model — one row per configured tool (ansible-lint, checkov,
   pip-audit) with severity threshold + enforcement + `applies_to`.
 - `ScanResult` audit row per scanner execution (status ok / warn /
@@ -399,7 +413,7 @@ Python package with a known CVE.
   ScanResult + ScanFinding persistence, aggregate `ScanRunResult`.
 - Tool adapters in `forge/main/scanning/tools/` — one module per CLI
   (`ansible-lint -f json --strict`, `checkov -o json`, `pip-audit
-  --format json`) with severity normalization to info/low/medium/
+--format json`) with severity normalization to info/low/medium/
   high/critical.
 - Pure helpers: `severity_at_or_above`, `effective_enforcement`,
   `aggregate_status`, `fail_mode_decision` — unit-tested standalone.
@@ -428,6 +442,7 @@ Python package with a known CVE.
   architecture.
 
 **Deferred to v2:**
+
 - Collection / role provenance verification (sigstore / checksums) —
   needs a separate signing infrastructure conversation.
 - Live CVE feed for non-Python EE packages (system OS packages).
@@ -441,6 +456,7 @@ Python package with a known CVE.
 ### 3.5 Mobile Application
 
 Detailed plan in `docs/mobile_plan.md`:
+
 - Deployment approval with biometric verification
 - Real-time server monitoring (containers, CPU, RAM, disk)
 - Live log streaming
@@ -464,24 +480,24 @@ Detailed plan in `docs/mobile_plan.md`:
 
 ## Priority Matrix
 
-| # | Feature | Impact | Effort | Priority |
-|---|---------|--------|--------|----------|
-| 1.1 | Dynamic Surveys | High | 2-3w | **DONE** |
-| 1.2 | Event-Driven Automation | High | 4-6w | **DONE** |
-| 1.3 | Drift Detection | High | 3-4w | **DONE** |
-| 1.4 | AI Assistant (Ollama) | High | 4w | **DONE** |
-| 1.5 | Audit Trail | Medium | 2-3w | **DONE** |
-| 2.1 | Self-Service Portal | High | 3-4w | **DONE** |
-| 2.2 | Policy-as-Code (OPA) | Medium | 4-5w | **DONE** |
-| 2.3 | OIDC + WebAuthn | Medium | 3-4w | **DONE** |
-| 2.4 | Workflow Node Surveys | Medium | 2-3w | **DONE** |
-| 2.5 | Analytics Dashboard | Medium | 3w | **DONE** |
-| 3.1 | Plugin Architecture | High | 8-12w | P2 |
-| 3.2 | Multi-Tenancy | High | 6-8w | **DONE** |
-| 3.3 | Kubernetes Operator | Medium | 5d (spent) | **DONE** (v2026.05.0) |
-| 3.4 | IaC Scanning | Medium | 3-4w | **DONE** |
-| 3.5 | Mobile App | Medium | 7w | P2 |
-| 3.6 | Observability (OTel) | Medium | 3-4w | **DONE** |
+| #   | Feature                 | Impact | Effort     | Priority              |
+| --- | ----------------------- | ------ | ---------- | --------------------- |
+| 1.1 | Dynamic Surveys         | High   | 2-3w       | **DONE**              |
+| 1.2 | Event-Driven Automation | High   | 4-6w       | **DONE**              |
+| 1.3 | Drift Detection         | High   | 3-4w       | **DONE**              |
+| 1.4 | AI Assistant (Ollama)   | High   | 4w         | **DONE**              |
+| 1.5 | Audit Trail             | Medium | 2-3w       | **DONE**              |
+| 2.1 | Self-Service Portal     | High   | 3-4w       | **DONE**              |
+| 2.2 | Policy-as-Code (OPA)    | Medium | 4-5w       | **DONE**              |
+| 2.3 | OIDC + WebAuthn         | Medium | 3-4w       | **DONE**              |
+| 2.4 | Workflow Node Surveys   | Medium | 2-3w       | **DONE**              |
+| 2.5 | Analytics Dashboard     | Medium | 3w         | **DONE**              |
+| 3.1 | Plugin Architecture     | High   | 8-12w      | P2                    |
+| 3.2 | Multi-Tenancy           | High   | 6-8w       | **DONE**              |
+| 3.3 | Kubernetes Operator     | Medium | 5d (spent) | **DONE** (v2026.05.0) |
+| 3.4 | IaC Scanning            | Medium | 3-4w       | **DONE**              |
+| 3.5 | Mobile App              | Medium | 7w         | P2                    |
+| 3.6 | Observability (OTel)    | Medium | 3-4w       | **DONE**              |
 
 ---
 
@@ -501,21 +517,21 @@ Detailed plan in `docs/mobile_plan.md`:
 
 ## Competitive Landscape
 
-| Feature | Forge | AWX | AAP 2.5+ | Ascender | Semaphore |
-|---------|-------|-----|----------|----------|-----------|
-| Docker Compose deploy | Yes | No | No | Yes | Yes |
-| Dynamic surveys | Yes | No | No | No | No |
-| Event-driven (EDA) | Yes | No | Yes | No | No |
-| Drift detection | Yes | No | No | Yes | No |
-| AI assistant | Yes | No | Yes | No | No |
-| Self-service portal | **Yes** | No | Yes | No | No |
-| Policy-as-Code | **Yes** | No | Planned | No | No |
-| OIDC native | **Yes** | Partial | Yes | Partial | No |
-| WebAuthn/passkeys | **Yes** | No | No | No | No |
-| Modern UI (React 18) | Yes | Legacy | Yes | Legacy | Yes |
-| Multi-tenancy | **Yes** | No | Yes | No | No |
-| K8s operator | **Yes** (9 CRDs, multi-cluster) | Yes | Yes | Yes | No |
-| Open source | Yes | Yes | No | Partial | Yes |
+| Feature               | Forge                           | AWX     | AAP 2.5+ | Ascender | Semaphore |
+| --------------------- | ------------------------------- | ------- | -------- | -------- | --------- |
+| Docker Compose deploy | Yes                             | No      | No       | Yes      | Yes       |
+| Dynamic surveys       | Yes                             | No      | No       | No       | No        |
+| Event-driven (EDA)    | Yes                             | No      | Yes      | No       | No        |
+| Drift detection       | Yes                             | No      | No       | Yes      | No        |
+| AI assistant          | Yes                             | No      | Yes      | No       | No        |
+| Self-service portal   | **Yes**                         | No      | Yes      | No       | No        |
+| Policy-as-Code        | **Yes**                         | No      | Planned  | No       | No        |
+| OIDC native           | **Yes**                         | Partial | Yes      | Partial  | No        |
+| WebAuthn/passkeys     | **Yes**                         | No      | No       | No       | No        |
+| Modern UI (React 18)  | Yes                             | Legacy  | Yes      | Legacy   | Yes       |
+| Multi-tenancy         | **Yes**                         | No      | Yes      | No       | No        |
+| K8s operator          | **Yes** (9 CRDs, multi-cluster) | Yes     | Yes      | Yes      | No        |
+| Open source           | Yes                             | Yes     | No       | Partial  | Yes       |
 
 ---
 

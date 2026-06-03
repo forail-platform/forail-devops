@@ -3,12 +3,20 @@
 These manifests are **stubs** that accompany Tier 3.6 (Observability /
 OpenTelemetry) and prepare the ground for Tier 3.3 (Kubernetes Operator).
 
-> **WARNING — NOT YET TESTED**
+> **VALIDATED on a live cluster (2026-06-03).**
 >
-> These YAML files have **not** been validated against a live cluster.
-> No k8s test environment has been provisioned yet. See
-> `docs/future_development_plan.md` → *Infrastructure & Test
-> Environments* for the open TODO to stand one up.
+> Applied and verified on the `forge-dev-cluster` k3s test environment
+> (k3s v1.30.4, 3 control-plane + 4 workers). Both manifests apply
+> cleanly into namespace `forge-system`; the OpenTelemetry Collector
+> (`otel/opentelemetry-collector-contrib` 0.153.0) rolls out `1/1`,
+> logs _"Everything is ready. Begin running and processing data."_,
+> and serves OTLP gRPC `:4317` + HTTP `:4318` (ClusterIP endpoints
+> resolve). The Grafana dashboard ConfigMap carries the
+> `grafana_dashboard: "1"` label required by the sidecar.
+>
+> Still untested: end-to-end trace flow into Grafana (requires a
+> Grafana + Prometheus stack with the dashboard sidecar enabled — not
+> part of these stubs).
 
 ## Contents
 
@@ -49,5 +57,7 @@ Point the Forge backend at the Collector by setting
 
 ## Status
 
-Pending validation on a real cluster. Tracked under *Infrastructure &
-Test Environments* in `docs/future_development_plan.md`.
+Core manifests validated on k3s v1.30.4 (see the note at the top).
+The remaining open item is the full Grafana/Prometheus observability
+stack and the end-to-end trace pipeline, tracked under _Infrastructure
+& Test Environments_ in `docs/future_development_plan.md`.

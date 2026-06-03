@@ -15,6 +15,7 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 ## Highlights
 
 ### Modern Stack
+
 - **Python 3.12** (from 3.11)
 - **Node.js 20** (from 18)
 - **Django 4.2.17** with 40+ upgraded packages
@@ -22,6 +23,7 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 - **Channels 4 / Daphne 4 / Cython 3** migration completed
 
 ### New Forge UI
+
 - Complete rewrite in React 18 with TypeScript
 - Vite build system (replaces CRA/react-scripts)
 - Tailwind CSS for styling (replaces PatternFly 4 + Styled Components)
@@ -36,6 +38,7 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 - Legacy UI preserved at `/ui_legacy/`
 
 ### Production Docker Compose
+
 - 6-service deployment: PostgreSQL 15, Redis 7, init, web, task, Nginx
 - TLS termination via Nginx reverse proxy
 - Automated backup/restore scripts
@@ -43,10 +46,12 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 - Environment-based configuration (`.env.example` template)
 
 ### Dual Docker Images
+
 - **CentOS Stream 9** — 882MB (`forge:2026.03.0-centos`)
 - **Ubuntu 24.04** — 932MB (`forge:2026.03.0-ubuntu`)
 
 ### CI/CD Pipelines
+
 - **GitLab CI** (`.gitlab-ci.yml`) — 5 stages: lint, test, build, security, release
 - **Jenkins** (`Jenkinsfile`) — equivalent pipeline with parallel stages
 - Version derived from git tag (`v2026.03.0` → `2026.03.0`)
@@ -57,15 +62,15 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 
 ## Quality Metrics
 
-| Category | Result |
-|----------|--------|
-| Python unit tests | 1237 passed, 0 failed |
-| Frontend unit tests | 42 passed, 0 failed |
-| Functional API tests | 989 passed, 0 failed, 1 skipped |
-| Python lint (flake8) | 0 errors |
-| Frontend lint (tsc) | 0 errors |
+| Category                | Result                            |
+| ----------------------- | --------------------------------- |
+| Python unit tests       | 1237 passed, 0 failed             |
+| Frontend unit tests     | 42 passed, 0 failed               |
+| Functional API tests    | 989 passed, 0 failed, 1 skipped   |
+| Python lint (flake8)    | 0 errors                          |
+| Frontend lint (tsc)     | 0 errors                          |
 | Python CVEs (pip-audit) | 15 remaining (0 critical runtime) |
-| Container CVEs (Trivy) | 0 CRITICAL |
+| Container CVEs (Trivy)  | 0 CRITICAL                        |
 
 ---
 
@@ -82,21 +87,21 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 
 ## Dependency Changes (Major)
 
-| Package | Before | After |
-|---------|--------|-------|
-| Django | 4.2.10 | 4.2.17 |
-| channels | 3.0.5 | 4.1.0 |
-| daphne | 3.0.2 | 4.1.2 |
-| cryptography | 41.0.7 | 42.0.8 |
-| Cython | 0.29.37 | 3.0.11 |
-| grpcio | 1.62.2 | 1.67.1 |
-| twisted | 24.3.0 | 24.7.0 |
-| boto3 | 1.34.42 | 1.35.36 |
-| redis | 5.0.1 | 5.2.1 |
-| aiohttp | 3.9.3 | 3.10.10 |
-| psutil | 5.9.8 | 6.1.0 |
-| pip (build) | 21.2.4 | 24.0 |
-| setuptools (build) | 69.0.2 | 70.0.0 |
+| Package            | Before  | After   |
+| ------------------ | ------- | ------- |
+| Django             | 4.2.10  | 4.2.17  |
+| channels           | 3.0.5   | 4.1.0   |
+| daphne             | 3.0.2   | 4.1.2   |
+| cryptography       | 41.0.7  | 42.0.8  |
+| Cython             | 0.29.37 | 3.0.11  |
+| grpcio             | 1.62.2  | 1.67.1  |
+| twisted            | 24.3.0  | 24.7.0  |
+| boto3              | 1.34.42 | 1.35.36 |
+| redis              | 5.0.1   | 5.2.1   |
+| aiohttp            | 3.9.3   | 3.10.10 |
+| psutil             | 5.9.8   | 6.1.0   |
+| pip (build)        | 21.2.4  | 24.0    |
+| setuptools (build) | 69.0.2  | 70.0.0  |
 
 ---
 

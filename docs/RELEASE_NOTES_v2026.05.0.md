@@ -19,14 +19,14 @@ single PVC.
 
 ## Component Versions
 
-| Component | Version | Notes |
-|-----------|---------|-------|
-| forge-backend | 2026.05.0 | Migration `0208` fix for `DriftAlertRule` audit fields |
-| forge-frontend | 0.1.0 | No changes this cycle (UI from v2026.04.0 still current) |
-| forge-assistant | 2026.05.0 | All-in-one image (Ollama + ChromaDB embedded), `gemma3:1b` default |
-| forge-operator | **1.0.0** | 5 new CRDs, multi-cluster, OLM bundle |
-| forge-helm | **1.0.0** | `appVersion: 2026.05.0` |
-| forge-dev-cluster | — | 3m+4w k3s 1.30 (was 2m+2w kubeadm) |
+| Component         | Version   | Notes                                                              |
+| ----------------- | --------- | ------------------------------------------------------------------ |
+| forge-backend     | 2026.05.0 | Migration `0208` fix for `DriftAlertRule` audit fields             |
+| forge-frontend    | 0.1.0     | No changes this cycle (UI from v2026.04.0 still current)           |
+| forge-assistant   | 2026.05.0 | All-in-one image (Ollama + ChromaDB embedded), `gemma3:1b` default |
+| forge-operator    | **1.0.0** | 5 new CRDs, multi-cluster, OLM bundle                              |
+| forge-helm        | **1.0.0** | `appVersion: 2026.05.0`                                            |
+| forge-dev-cluster | —         | 3m+4w k3s 1.30 (was 2m+2w kubeadm)                                 |
 
 ---
 
@@ -74,17 +74,17 @@ target URL or secret reference changes.
 
 **Resource model summary:**
 
-| CRD | Scope | Reconciles to |
-|-----|-------|---------------|
-| Inventory | Namespaced | `/api/v2/inventories/` |
-| Credential | Namespaced | `/api/v2/credentials/` |
-| JobTemplate | Namespaced | `/api/v2/job_templates/` |
-| Schedule | Namespaced | `/api/v2/schedules/` |
-| **Project** | Namespaced | `/api/v2/projects/` |
-| **Organization** | Cluster | `/api/v2/organizations/` |
-| **Team** | Namespaced | `/api/v2/teams/` + user membership |
-| **Workflow** | Namespaced | `/api/v2/workflow_job_templates/` + DAG nodes |
-| **ForgeInstance** | Namespaced | (control-plane only; no upstream call) |
+| CRD               | Scope      | Reconciles to                                 |
+| ----------------- | ---------- | --------------------------------------------- |
+| Inventory         | Namespaced | `/api/v2/inventories/`                        |
+| Credential        | Namespaced | `/api/v2/credentials/`                        |
+| JobTemplate       | Namespaced | `/api/v2/job_templates/`                      |
+| Schedule          | Namespaced | `/api/v2/schedules/`                          |
+| **Project**       | Namespaced | `/api/v2/projects/`                           |
+| **Organization**  | Cluster    | `/api/v2/organizations/`                      |
+| **Team**          | Namespaced | `/api/v2/teams/` + user membership            |
+| **Workflow**      | Namespaced | `/api/v2/workflow_job_templates/` + DAG nodes |
+| **ForgeInstance** | Namespaced | (control-plane only; no upstream call)        |
 
 ### Forge Assistant — All-in-One Image
 
@@ -121,7 +121,7 @@ download).
 - `appVersion: 2026.05.0` tracks the backend release that ships the
   `0208_driftalertrule_audit_fields` migration fix.
 - 5 new operator CRDs added under `helm/crds/` so `helm install
-  forge-operator` provisions the complete schema.
+forge-operator` provisions the complete schema.
 
 ### Dev-Cluster — 3-Master / 4-Worker HA k3s
 
@@ -269,9 +269,9 @@ New / updated documentation:
 
 ## Quality Metrics
 
-| Metric | Value |
-|--------|-------|
-| Operator e2e (live 3m+4w k3s) | 9/9 CRDs reconcile cleanly |
-| Backend regression (`test_drift_audit_fields_schema`) | passing |
-| Helm chart (`helm lint` + `helm template`, both default and `assistant.enabled=true`) | passing |
-| Operator OLM bundle (`operator-sdk bundle validate`) | passing (4 warnings, see Known Issues) |
+| Metric                                                                                | Value                                  |
+| ------------------------------------------------------------------------------------- | -------------------------------------- |
+| Operator e2e (live 3m+4w k3s)                                                         | 9/9 CRDs reconcile cleanly             |
+| Backend regression (`test_drift_audit_fields_schema`)                                 | passing                                |
+| Helm chart (`helm lint` + `helm template`, both default and `assistant.enabled=true`) | passing                                |
+| Operator OLM bundle (`operator-sdk bundle validate`)                                  | passing (4 warnings, see Known Issues) |

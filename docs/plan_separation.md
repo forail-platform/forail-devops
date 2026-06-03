@@ -23,18 +23,20 @@ forge-platform/
 
 **Repo:** `forge-platform/forge-backend`
 
-### What goes in:
-| Source (current monorepo) | Destination in new repo |
-|---|---|
-| `forge/` (Python package) | `forge/` |
-| `forge/main/`, `forge/api/`, `forge/conf/`, `forge/sso/` | Same |
-| `forge/settings/` | `forge/settings/` |
-| `manage.py` | `manage.py` |
-| `requirements/` | `requirements/` |
-| `tools/` (management scripts) | `tools/` |
-| `setup.cfg`, `setup.py`, `pyproject.toml` | Root |
+### What goes in
 
-### Documentation included with backend:
+| Source (current monorepo)                                | Destination in new repo |
+| -------------------------------------------------------- | ----------------------- |
+| `forge/` (Python package)                                | `forge/`                |
+| `forge/main/`, `forge/api/`, `forge/conf/`, `forge/sso/` | Same                    |
+| `forge/settings/`                                        | `forge/settings/`       |
+| `manage.py`                                              | `manage.py`             |
+| `requirements/`                                          | `requirements/`         |
+| `tools/` (management scripts)                            | `tools/`                |
+| `setup.cfg`, `setup.py`, `pyproject.toml`                | Root                    |
+
+### Documentation included with backend
+
 - `docs/wiki/02-backend-django.md`
 - `docs/wiki/04-task-engine.md`
 - `docs/wiki/05-authentication-rbac.md`
@@ -43,18 +45,20 @@ forge-platform/
 - `docs/wiki/11-api-reference.md`
 - `docs/wiki/12-configuration-reference.md`
 
-### CI/CD for backend repo:
+### CI/CD for backend repo
+
 ```yaml
 # .gitlab-ci.yml
 stages:
-  - lint        # flake8
-  - test        # pytest (unit + functional)
-  - build       # Docker image (forge-backend:tag)
-  - security    # pip-audit, trivy
-  - publish     # Push image to registry
+  - lint # flake8
+  - test # pytest (unit + functional)
+  - build # Docker image (forge-backend:tag)
+  - security # pip-audit, trivy
+  - publish # Push image to registry
 ```
 
-### Artifact:
+### Artifact
+
 - Docker image: `ghcr.io/forgeplatform/forge-backend:<version>`
 - API documentation (auto-generated)
 
@@ -64,38 +68,43 @@ stages:
 
 **Repo:** `forge-platform/forge-frontend`
 
-### What goes in:
-| Source (current monorepo) | Destination in new repo |
-|---|---|
-| `src/` (React application) | `src/` |
-| `public/` | `public/` |
-| `index.html` | `index.html` |
-| `package.json`, `package-lock.json` | Root |
-| `vite.config.ts` | Root |
-| `tailwind.config.ts` | Root |
-| `tsconfig.json`, `tsconfig.*.json` | Root |
-| `postcss.config.js` | Root |
-| `.eslintrc.*` | Root |
+### What goes in
 
-### Documentation included with frontend:
+| Source (current monorepo)           | Destination in new repo |
+| ----------------------------------- | ----------------------- |
+| `src/` (React application)          | `src/`                  |
+| `public/`                           | `public/`               |
+| `index.html`                        | `index.html`            |
+| `package.json`, `package-lock.json` | Root                    |
+| `vite.config.ts`                    | Root                    |
+| `tailwind.config.ts`                | Root                    |
+| `tsconfig.json`, `tsconfig.*.json`  | Root                    |
+| `postcss.config.js`                 | Root                    |
+| `.eslintrc.*`                       | Root                    |
+
+### Documentation included with frontend
+
 - `docs/wiki/03-frontend-react.md`
 - `docs/wiki/09-testing-guide.md` (Frontend section)
 
-### CI/CD for frontend repo:
+### CI/CD for frontend repo
+
 ```yaml
 # .gitlab-ci.yml
 stages:
-  - lint        # tsc --noEmit, eslint
-  - test        # vitest
-  - build       # vite build → static bundle
-  - publish     # Upload artifact or Docker image with nginx
+  - lint # tsc --noEmit, eslint
+  - test # vitest
+  - build # vite build → static bundle
+  - publish # Upload artifact or Docker image with nginx
 ```
 
-### Artifact:
+### Artifact
+
 - Build folder (`dist/`) — static files
 - Optional Docker image: `ghcr.io/forgeplatform/forge-frontend:<version>` (nginx + static files)
 
-### Configuration:
+### Configuration
+
 - API URL is configured via environment variable (`VITE_API_URL`)
 - Frontend builds independently from the backend
 - Proxy configuration in `vite.config.ts` for development
@@ -106,17 +115,19 @@ stages:
 
 **Repo:** `forge-platform/forge-devops`
 
-### What goes in:
-| Source (current monorepo) | Destination in new repo |
-|---|---|
-| `Dockerfile`, `Dockerfile.*` | `docker/` |
-| `docker-compose.yml` | Root |
-| `nginx/` configuration | `nginx/` |
-| `Vagrantfile` | `vagrant/` |
-| Deployment scripts | `scripts/` |
-| SSL/TLS configuration | `ssl/` |
+### What goes in
 
-### Documentation included with devops:
+| Source (current monorepo)    | Destination in new repo |
+| ---------------------------- | ----------------------- |
+| `Dockerfile`, `Dockerfile.*` | `docker/`               |
+| `docker-compose.yml`         | Root                    |
+| `nginx/` configuration       | `nginx/`                |
+| `Vagrantfile`                | `vagrant/`              |
+| Deployment scripts           | `scripts/`              |
+| SSL/TLS configuration        | `ssl/`                  |
+
+### Documentation included with devops
+
 - `docs/wiki/01-architecture-overview.md`
 - `docs/wiki/07-docker-deployment.md`
 - `docs/wiki/08-ci-cd-pipeline.md`
@@ -126,7 +137,8 @@ stages:
 - `docs/RELEASE_NOTES_*.md`
 - `docs/future_development_plan.md`
 
-### Structure:
+### Structure
+
 ```
 forge-devops/
 ├── docker/
@@ -153,7 +165,8 @@ forge-devops/
 └── README.md
 ```
 
-### Docker Compose (production):
+### Docker Compose (production)
+
 ```yaml
 services:
   postgres:
@@ -165,12 +178,13 @@ services:
   forge-frontend:
     image: ghcr.io/forgeplatform/forge-frontend:${VERSION}
   forge-task:
-    image: ghcr.io/forgeplatform/forge-backend:${VERSION}   # same image, different entrypoint
+    image: ghcr.io/forgeplatform/forge-backend:${VERSION} # same image, different entrypoint
   nginx:
     # reverse proxy → frontend + backend API
 ```
 
-### CI/CD orchestration:
+### CI/CD orchestration
+
 ```
 The forge-devops repo is the "glue" that:
 1. Pulls backend and frontend image versions
@@ -186,7 +200,8 @@ The forge-devops repo is the "glue" that:
 
 **Repo:** `forge-platform/forge-assistant`
 
-### Planned structure:
+### Planned structure
+
 ```
 forge-assistant/
 ├── app/
@@ -205,7 +220,8 @@ forge-assistant/
     └── chat_plan.md
 ```
 
-### Integration:
+### Integration
+
 - Exposes an API consumed by the frontend (`/api/v2/assistant/`)
 - SSE streaming for real-time responses
 - ChromaDB for vector search over documentation
@@ -217,7 +233,8 @@ forge-assistant/
 
 **Repo:** `forge-platform/forge-mobile`
 
-### Planned structure:
+### Planned structure
+
 ```
 forge-mobile/
 ├── android/
@@ -239,12 +256,14 @@ forge-mobile/
 
 ## How repositories connect (CI/CD integration)
 
-### Versioning:
+### Versioning
+
 - All repos use **CalVer**: `YYYY.MM.PATCH` (e.g., `2026.03.1`)
 - Git tags trigger the release pipeline
 - `forge-devops` references versions from other repos
 
-### Release flow:
+### Release flow
+
 ```
 1. Developer pushes code to forge-backend or forge-frontend
 2. That repo's CI:
@@ -258,7 +277,8 @@ forge-mobile/
    - docker compose up -d
 ```
 
-### Connection diagram:
+### Connection diagram
+
 ```
 ┌──────────────┐     ┌───────────────┐     ┌──────────────┐
 │ forge-backend│     │ forge-frontend│     │forge-assistant│
@@ -288,27 +308,30 @@ forge-mobile/
 
 ## Execution Order
 
-| Step | Action | Priority |
-|------|--------|----------|
-| 1 | Create `forge-frontend` repo, extract React code | High |
-| 2 | Create `forge-backend` repo, extract Django code | High |
-| 3 | Create `forge-devops` repo, define Docker Compose | High |
-| 4 | Set up CI/CD for each repo | High |
-| 5 | Test end-to-end with separate images | High |
-| 6 | Create `forge-assistant` repo | Medium |
-| 7 | Create `forge-mobile` repo | Low |
+| Step | Action                                            | Priority |
+| ---- | ------------------------------------------------- | -------- |
+| 1    | Create `forge-frontend` repo, extract React code  | High     |
+| 2    | Create `forge-backend` repo, extract Django code  | High     |
+| 3    | Create `forge-devops` repo, define Docker Compose | High     |
+| 4    | Set up CI/CD for each repo                        | High     |
+| 5    | Test end-to-end with separate images              | High     |
+| 6    | Create `forge-assistant` repo                     | Medium   |
+| 7    | Create `forge-mobile` repo                        | Low      |
 
 ### Steps 1-3: Separation (estimate: 1-2 weeks)
+
 - Use `git filter-branch` or `git subtree split` to preserve history
 - Update all references and paths
 - Verify that each repo independently passes CI
 
 ### Steps 4-5: CI/CD integration (estimate: 1 week)
+
 - GitLab CI for each repo
 - Harbor registry publish for each repo
 - `forge-devops` orchestration
 
 ### Steps 6-7: Future components
+
 - Per `chat_plan.md` and `mobile_plan.md` timelines
 
 ---

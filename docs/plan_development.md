@@ -13,13 +13,13 @@
 
 ### Known Issues with AWX 24.6.1
 
-| Problem | Description |
-|---------|-------------|
-| OpenSSL pin | Dockerfile pins `openssl-3.0.7` which no longer exists in CentOS Stream 9 repositories |
-| Django conflict | `django-ansible-base` requires Django >=4.2.16, but AWX pins 4.2.10 |
-| Python 3.12.8+ crash | `argparse._parse_known_args()` got a new `intermixed` parameter, breaks AWX CLI |
-| Missing VERSION file | Build from source fails without a `VERSION` file in the root |
-| Node.js 18 | Entering maintenance LTS, needs migration to Node.js 20+ |
+| Problem              | Description                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------- |
+| OpenSSL pin          | Dockerfile pins `openssl-3.0.7` which no longer exists in CentOS Stream 9 repositories |
+| Django conflict      | `django-ansible-base` requires Django >=4.2.16, but AWX pins 4.2.10                    |
+| Python 3.12.8+ crash | `argparse._parse_known_args()` got a new `intermixed` parameter, breaks AWX CLI        |
+| Missing VERSION file | Build from source fails without a `VERSION` file in the root                           |
+| Node.js 18           | Entering maintenance LTS, needs migration to Node.js 20+                               |
 
 ---
 
@@ -57,6 +57,7 @@ Document all errors that appear during the 24.6.1 build as these are the first b
 ### 0.3 CI/CD Pipeline
 
 Set up the GitHub Actions pipeline with:
+
 - Build matrix: Python 3.11 / 3.12 / 3.13
 - OS matrix: CentOS Stream 9 / Ubuntu 24.04
 - Automatic unit tests on every push
@@ -138,6 +139,7 @@ Create an alternative Dockerfile for Ubuntu 24.04:
 **File:** `tools/ansible/roles/dockerfile/templates/Dockerfile.ubuntu.j2`
 
 Key differences compared to CentOS:
+
 - `apt` instead of `dnf`
 - Different package names (e.g., `libpq-dev` instead of `postgresql-devel`)
 - Python 3.12 comes from the system (no need for `dnf module`)
@@ -186,26 +188,28 @@ Goal: Update all dependencies to the latest compatible versions.
 
 **Do NOT update everything at once.** Work in groups with testing after each group:
 
-| Priority | Group | Packages |
-|----------|-------|----------|
-| 1 | Core Framework | Django 4.2.16 → 5.2.x, DRF, Channels, Daphne |
-| 2 | Database and Cache | psycopg, redis, hiredis |
-| 3 | Cryptography | cryptography, pyopenssl, pyjwt, pynacl |
-| 4 | Async/Network | aiohttp, twisted, autobahn |
-| 5 | Cloud Providers | boto3, azure-*, kubernetes, openshift |
-| 6 | Observability | opentelemetry-*, prometheus-client |
-| 7 | Other | all remaining ~130 packages |
+| Priority | Group              | Packages                                     |
+| -------- | ------------------ | -------------------------------------------- |
+| 1        | Core Framework     | Django 4.2.16 → 5.2.x, DRF, Channels, Daphne |
+| 2        | Database and Cache | psycopg, redis, hiredis                      |
+| 3        | Cryptography       | cryptography, pyopenssl, pyjwt, pynacl       |
+| 4        | Async/Network      | aiohttp, twisted, autobahn                   |
+| 5        | Cloud Providers    | boto3, azure-\*, kubernetes, openshift       |
+| 6        | Observability      | opentelemetry-\*, prometheus-client          |
+| 7        | Other              | all remaining ~130 packages                  |
 
 ### 3.2 Django Upgrade Path
 
 This is the most critical change. I suggest a two-step approach:
 
 **Step A:** Django 4.2.10 → 4.2.16 (minor bump, minimal risk)
+
 - Fixes the dependency conflict with `django-ansible-base`
 - Does not introduce breaking changes (LTS version)
 - Test: `make test_unit && make test_coverage`
 
 **Step B:** Django 4.2.16 → 5.2.x (major bump, higher risk)
+
 - Needed only if Python 3.13 support is desired
 - Breaking changes in Django 5.x:
   - `DEFAULT_AUTO_FIELD` must be explicitly set
@@ -227,6 +231,7 @@ This is the most critical change. I suggest a two-step approach:
 ```
 
 Run UI build and verify:
+
 ```bash
 make clean/ui ui
 ```
@@ -362,15 +367,15 @@ echo "Backup saved to: $BACKUP_DIR"
 
 ### 5.1 Test Matrix
 
-| Test Type | Tool | What is Tested |
-|-----------|------|----------------|
-| Unit | pytest | API, models, serializers, utility functions |
-| Integration | pytest + Docker | Full stack with real database and Redis |
-| UI | Cypress/Playwright | Frontend workflows |
-| API | pytest + requests | REST API endpoints |
-| Performance | locust/k6 | Concurrent users, job throughput |
-| Security | pip-audit, Trivy | CVE scanning of dependencies and images |
-| Compatibility | tox | Python 3.11, 3.12, 3.13 |
+| Test Type     | Tool               | What is Tested                              |
+| ------------- | ------------------ | ------------------------------------------- |
+| Unit          | pytest             | API, models, serializers, utility functions |
+| Integration   | pytest + Docker    | Full stack with real database and Redis     |
+| UI            | Cypress/Playwright | Frontend workflows                          |
+| API           | pytest + requests  | REST API endpoints                          |
+| Performance   | locust/k6          | Concurrent users, job throughput            |
+| Security      | pip-audit, Trivy   | CVE scanning of dependencies and images     |
+| Compatibility | tox                | Python 3.11, 3.12, 3.13                     |
 
 ### 5.2 Minimum Acceptance Criteria
 
@@ -391,14 +396,14 @@ Before each release, the following MUST work:
 
 Establish a performance baseline on standard hardware (4 CPU, 8GB RAM):
 
-| Metric | Target |
-|--------|--------|
-| Startup time | < 60 seconds |
-| Login response | < 500ms |
-| API listing (100 items) | < 1s |
-| Job launch latency | < 5s |
-| Concurrent users | >= 20 |
-| Concurrent jobs | >= 10 |
+| Metric                  | Target       |
+| ----------------------- | ------------ |
+| Startup time            | < 60 seconds |
+| Login response          | < 500ms      |
+| API listing (100 items) | < 1s         |
+| Job launch latency      | < 5s         |
+| Concurrent users        | >= 20        |
+| Concurrent jobs         | >= 10        |
 
 ---
 
@@ -483,14 +488,14 @@ git push origin fix/openssl-pinning
 
 ### 8.1 Server Requirements
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| CPU | 4 cores | 8 cores |
-| RAM | 8 GB | 16 GB |
-| Disk | 40 GB SSD | 100 GB SSD |
-| OS | Ubuntu 22.04+ / Rocky 9+ | Ubuntu 24.04 LTS |
-| Docker | 24.0+ | 27.0+ |
-| Docker Compose | v2.20+ | v2.30+ |
+| Component      | Minimum                  | Recommended      |
+| -------------- | ------------------------ | ---------------- |
+| CPU            | 4 cores                  | 8 cores          |
+| RAM            | 8 GB                     | 16 GB            |
+| Disk           | 40 GB SSD                | 100 GB SSD       |
+| OS             | Ubuntu 22.04+ / Rocky 9+ | Ubuntu 24.04 LTS |
+| Docker         | 24.0+                    | 27.0+            |
+| Docker Compose | v2.20+                   | v2.30+           |
 
 ### 8.2 Server Deploy Script
 
@@ -551,15 +556,15 @@ AWX already has built-in OpenTelemetry and Prometheus support - it just needs sc
 
 Before starting with our own fork, it is worth considering **Ascender**:
 
-| Aspect | Our Fork | Ascender |
-|--------|----------|----------|
-| Version | Based on 24.6.1 | 25.3.3 (Feb 2026) |
-| Maintenance | By ourselves | CIQ team (Rocky Linux) |
-| Base Image | CentOS/Ubuntu | Rocky Linux 9 |
-| Deploy | Docker + K8s | K8s (multiple distros) + Single VM |
-| Support | Community | Commercial option |
-| Upstream sync | Manual | Regular |
-| Risk | High (self-maintained) | Low (professional team) |
+| Aspect        | Our Fork               | Ascender                           |
+| ------------- | ---------------------- | ---------------------------------- |
+| Version       | Based on 24.6.1        | 25.3.3 (Feb 2026)                  |
+| Maintenance   | By ourselves           | CIQ team (Rocky Linux)             |
+| Base Image    | CentOS/Ubuntu          | Rocky Linux 9                      |
+| Deploy        | Docker + K8s           | K8s (multiple distros) + Single VM |
+| Support       | Community              | Commercial option                  |
+| Upstream sync | Manual                 | Regular                            |
+| Risk          | High (self-maintained) | Low (professional team)            |
 
 **Recommendation:** If the goal is just to run AWX on a new server, Ascender is a more pragmatic choice. If the goal is learning and full control, a custom fork makes sense.
 

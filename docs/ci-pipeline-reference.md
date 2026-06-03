@@ -49,19 +49,19 @@ push / MR                    git tag v*
 
 ### Lint (required — blocks merge if fails)
 
-| Job | Image | What it checks | Command |
-|-----|-------|----------------|---------|
-| `lint:python` | `python:3.12-slim` | PEP8, undefined names, unused imports | `flake8 forge/ --count --statistics` |
-| `lint:frontend` | `node:20-slim` | TypeScript type errors | `npx tsc --noEmit` |
+| Job             | Image              | What it checks                        | Command                              |
+| --------------- | ------------------ | ------------------------------------- | ------------------------------------ |
+| `lint:python`   | `python:3.12-slim` | PEP8, undefined names, unused imports | `flake8 forge/ --count --statistics` |
+| `lint:frontend` | `node:20-slim`     | TypeScript type errors                | `npx tsc --noEmit`                   |
 
 **Triggers:** Every push, every MR, every tag.
 
 ### Test (required — blocks merge if fails)
 
-| Job | Image | Services | What it checks | Command |
-|-----|-------|----------|----------------|---------|
-| `test:python-unit` | `python:3.12-slim` | PostgreSQL 15, Redis 7 | 1083 unit tests | `pytest forge/main/tests/unit/ -x -q` |
-| `test:frontend-unit` | `node:20-slim` | — | Vitest test suite | `npx vitest run` |
+| Job                  | Image              | Services               | What it checks    | Command                               |
+| -------------------- | ------------------ | ---------------------- | ----------------- | ------------------------------------- |
+| `test:python-unit`   | `python:3.12-slim` | PostgreSQL 15, Redis 7 | 1083 unit tests   | `pytest forge/main/tests/unit/ -x -q` |
+| `test:frontend-unit` | `node:20-slim`     | —                      | Vitest test suite | `npx vitest run`                      |
 
 **Triggers:** Every push, every MR, every tag.
 
@@ -70,33 +70,34 @@ stops on the first failure for faster feedback.
 
 ### Build (only default branch + tags)
 
-| Job | Base image | Output |
-|-----|-----------|--------|
+| Job            | Base image      | Output                                                 |
+| -------------- | --------------- | ------------------------------------------------------ |
 | `build:centos` | CentOS Stream 9 | `${IMAGE}:${VERSION}-centos`, `${IMAGE}:centos-latest` |
-| `build:ubuntu` | Ubuntu 24.04 | `${IMAGE}:${VERSION}-ubuntu`, `${IMAGE}:ubuntu-latest` |
+| `build:ubuntu` | Ubuntu 24.04    | `${IMAGE}:${VERSION}-ubuntu`, `${IMAGE}:ubuntu-latest` |
 
 **Does not run on feature branches** — only when merged to default branch or tagged.
 
 Both images are multi-stage builds:
+
 1. Node.js stage: builds React frontend (`npm run build`)
 2. Python stage: installs dependencies, builds sdist package
 3. Runtime stage: minimal image with only runtime dependencies
 
 ### Security (informational — does NOT block merge)
 
-| Job | Tool | What it scans |
-|-----|------|---------------|
+| Job                  | Tool      | What it scans                     |
+| -------------------- | --------- | --------------------------------- |
 | `security:pip-audit` | pip-audit | Known CVEs in Python dependencies |
-| `security:trivy` | Trivy | Known CVEs in Docker image layers |
+| `security:trivy`     | Trivy     | Known CVEs in Docker image layers |
 
 Both have `allow_failure: true` — they report vulnerabilities but don't block the pipeline.
 
 ### Release (only on git tags `v*`)
 
-| Job | Destination | Trigger |
-|-----|-------------|---------|
-| `release:gitlab-registry` | GitLab Container Registry | Automatic on tag |
-| `release:harbor` | Harbor (`ghcr.io`) | **Manual** (click to deploy) |
+| Job                       | Destination               | Trigger                      |
+| ------------------------- | ------------------------- | ---------------------------- |
+| `release:gitlab-registry` | GitLab Container Registry | Automatic on tag             |
+| `release:harbor`          | Harbor (`ghcr.io`)        | **Manual** (click to deploy) |
 
 The CentOS image is tagged as the primary (`:latest`, `:${VERSION}`).
 Ubuntu is available as `:${VERSION}-ubuntu`.
@@ -125,6 +126,7 @@ workflow:
 ```
 
 **What this means:**
+
 - Push changes to `forge/`, `requirements/`, `tools/`, etc. → pipeline runs, must pass
 - Push changes to only `docs/`, `*.md`, `*.png` → pipeline does NOT run
 - Push a tag `v2026.03.0` → full pipeline including release stage
@@ -136,20 +138,20 @@ workflow:
 
 ### Required for build stage
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `CI_REGISTRY` | GitLab (automatic) | GitLab container registry URL |
-| `CI_REGISTRY_USER` | GitLab (automatic) | Registry username |
-| `CI_REGISTRY_PASSWORD` | GitLab (automatic) | Registry password |
-| `CI_REGISTRY_IMAGE` | GitLab (automatic) | Full image path |
+| Variable               | Source             | Description                   |
+| ---------------------- | ------------------ | ----------------------------- |
+| `CI_REGISTRY`          | GitLab (automatic) | GitLab container registry URL |
+| `CI_REGISTRY_USER`     | GitLab (automatic) | Registry username             |
+| `CI_REGISTRY_PASSWORD` | GitLab (automatic) | Registry password             |
+| `CI_REGISTRY_IMAGE`    | GitLab (automatic) | Full image path               |
 
 ### Required for Harbor release
 
-| Variable | Set manually | Description |
-|----------|-------------|-------------|
-| `HARBOR_USER` | Yes | Harbor registry username |
-| `HARBOR_TOKEN` | Yes (masked) | Harbor registry access token |
-| `HARBOR_REGISTRY` | Yes | Registry URL (`ghcr.io`) |
+| Variable          | Set manually | Description                  |
+| ----------------- | ------------ | ---------------------------- |
+| `HARBOR_USER`     | Yes          | Harbor registry username     |
+| `HARBOR_TOKEN`    | Yes (masked) | Harbor registry access token |
+| `HARBOR_REGISTRY` | Yes          | Registry URL (`ghcr.io`)     |
 
 ---
 
@@ -161,6 +163,7 @@ no tag              →  VERSION=abc1234      (dev build, commit SHA)
 ```
 
 The version is used for:
+
 - Docker image tags
 - `SETUPTOOLS_SCM_PRETEND_VERSION` build arg (Python package version)
 - Release notes
@@ -169,11 +172,11 @@ The version is used for:
 
 ## Caching
 
-| Cache | Key | What it caches |
-|-------|-----|---------------|
-| pip | `pip-${CI_COMMIT_REF_SLUG}` | Python packages (`.cache/pip`) |
-| npm | `npm-${CI_COMMIT_REF_SLUG}` | Node modules (`forge/ui_next/node_modules`) |
-| trivy | `trivy` | Vulnerability database (`.trivycache/`) |
+| Cache | Key                         | What it caches                              |
+| ----- | --------------------------- | ------------------------------------------- |
+| pip   | `pip-${CI_COMMIT_REF_SLUG}` | Python packages (`.cache/pip`)              |
+| npm   | `npm-${CI_COMMIT_REF_SLUG}` | Node modules (`forge/ui_next/node_modules`) |
+| trivy | `trivy`                     | Vulnerability database (`.trivycache/`)     |
 
 Caches are per-branch. The lint stage uses `pull-push` (reads and writes),
 test stage uses `pull` (reads only) for npm to avoid cache conflicts.

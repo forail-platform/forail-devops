@@ -14,11 +14,11 @@ Modernization for running on newer systems (Ubuntu 24.04+, Python 3.12+).
 
 Forge Platform is split into three independent repositories:
 
-| Repository | Description | Registry |
-|------------|-------------|----------|
-| `forge-backend` | Django REST API, task engine, receptor | `ghcr.io/forgeplatform/forge-backend` |
-| `forge-frontend` | React UI (Vite + TypeScript) | `ghcr.io/forgeplatform/forge-frontend` |
-| `forge-deploy` | Docker Compose, nginx, settings, scripts | — |
+| Repository       | Description                              | Registry                               |
+| ---------------- | ---------------------------------------- | -------------------------------------- |
+| `forge-backend`  | Django REST API, task engine, receptor   | `ghcr.io/forgeplatform/forge-backend`  |
+| `forge-frontend` | React UI (Vite + TypeScript)             | `ghcr.io/forgeplatform/forge-frontend` |
+| `forge-deploy`   | Docker Compose, nginx, settings, scripts | —                                      |
 
 ### Service Architecture
 
@@ -77,6 +77,7 @@ The monolithic AWX codebase was separated into three independent repos:
 ### Production Deployment (VERIFIED 2026-03-17)
 
 Full production stack deployed and verified in Vagrant VM (Ubuntu 24.04):
+
 - **6 services**: postgres, redis, forge-init, forge-web, forge-task, forge-frontend, nginx
 - **HTTPS**: self-signed SSL with nginx TLS termination (port 443)
 - **HTTP→HTTPS redirect**: automatic
@@ -122,22 +123,22 @@ management command. `awx-manage` still works via symlink for backward compatibil
 
 ## Phase Overview
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 1 | Build Stabilization | **COMPLETED** |
-| 2 | Rebranding (Forge) | **COMPLETED** |
-| 3 | Dependency Modernization | **COMPLETED** |
-| 4 | Backend Refactoring | **COMPLETED** |
-| 5 | Frontend Refactoring | **COMPLETED** |
-| 6 | Dockerfile Modernization | **COMPLETED** |
-| 7 | Docker Compose Production | **COMPLETED** |
-| 8 | Testing and QA | **COMPLETED** |
-| 9 | Release | **COMPLETED** |
-| L1 | User-Facing Rebranding | **COMPLETED** |
-| L2 | Full Package Rename (awx→forge) | **COMPLETED** |
-| 10 | Repository Separation | **COMPLETED** |
-| 11 | AWX→Forge File Rename | **COMPLETED** |
-| 12 | Centralized CI/CD Pipeline | **COMPLETED** |
+| Phase | Description                     | Status        |
+| ----- | ------------------------------- | ------------- |
+| 1     | Build Stabilization             | **COMPLETED** |
+| 2     | Rebranding (Forge)              | **COMPLETED** |
+| 3     | Dependency Modernization        | **COMPLETED** |
+| 4     | Backend Refactoring             | **COMPLETED** |
+| 5     | Frontend Refactoring            | **COMPLETED** |
+| 6     | Dockerfile Modernization        | **COMPLETED** |
+| 7     | Docker Compose Production       | **COMPLETED** |
+| 8     | Testing and QA                  | **COMPLETED** |
+| 9     | Release                         | **COMPLETED** |
+| L1    | User-Facing Rebranding          | **COMPLETED** |
+| L2    | Full Package Rename (awx→forge) | **COMPLETED** |
+| 10    | Repository Separation           | **COMPLETED** |
+| 11    | AWX→Forge File Rename           | **COMPLETED** |
+| 12    | Centralized CI/CD Pipeline      | **COMPLETED** |
 
 ### CI/CD Pipeline (GitHub Actions)
 
@@ -232,11 +233,11 @@ docker push ghcr.io/forgeplatform/forge-frontend:latest
 
 Each repo includes a Vagrantfile with Ubuntu 24.04 and Docker/Compose pre-installed:
 
-| Repo | VM IP | RAM | Ports |
-|------|-------|-----|-------|
-| forge-backend | 192.168.56.20 | 8GB | 8043, 8013, 8080, 5433 |
-| forge-frontend | 192.168.56.21 | 4GB | 3000, 4173 |
-| forge-deploy | 192.168.56.22 | 8GB | 80→8080, 443→8443, 8013 |
+| Repo           | VM IP         | RAM | Ports                   |
+| -------------- | ------------- | --- | ----------------------- |
+| forge-backend  | 192.168.56.20 | 8GB | 8043, 8013, 8080, 5433  |
+| forge-frontend | 192.168.56.21 | 4GB | 3000, 4173              |
+| forge-deploy   | 192.168.56.22 | 8GB | 80→8080, 443→8443, 8013 |
 
 ---
 
@@ -295,4 +296,4 @@ Types: `refactor`, `fix`, `feat`, `docs`, `test`, `chore`
 ## License
 
 Forge is licensed under Apache License 2.0.
-Based on the AWX project (https://github.com/ansible/awx).
+Based on the AWX project (<https://github.com/ansible/awx>).

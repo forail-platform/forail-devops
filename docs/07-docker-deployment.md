@@ -8,15 +8,15 @@ How to build, configure, and deploy Forge Platform to production.
 
 Forge Platform uses a separated architecture with independent Docker images:
 
-| Service | Image | Purpose |
-|---------|-------|---------|
-| forge-web | `ghcr.io/forgeplatform/forge-backend` | Django API (uwsgi + daphne + nginx-internal) |
-| forge-task | `ghcr.io/forgeplatform/forge-backend` | Task execution (dispatcher, callback, receptor) |
-| forge-init | `ghcr.io/forgeplatform/forge-backend` | One-shot: migrations, admin user, provisioning |
-| forge-frontend | `ghcr.io/forgeplatform/forge-frontend` | React SPA served by nginx |
-| postgres | `postgres:15-alpine` | Database |
-| redis | `redis:7-alpine` | Cache and message broker |
-| nginx | `nginx:1.27-alpine` | TLS termination, routing |
+| Service        | Image                                  | Purpose                                         |
+| -------------- | -------------------------------------- | ----------------------------------------------- |
+| forge-web      | `ghcr.io/forgeplatform/forge-backend`  | Django API (uwsgi + daphne + nginx-internal)    |
+| forge-task     | `ghcr.io/forgeplatform/forge-backend`  | Task execution (dispatcher, callback, receptor) |
+| forge-init     | `ghcr.io/forgeplatform/forge-backend`  | One-shot: migrations, admin user, provisioning  |
+| forge-frontend | `ghcr.io/forgeplatform/forge-frontend` | React SPA served by nginx                       |
+| postgres       | `postgres:15-alpine`                   | Database                                        |
+| redis          | `redis:7-alpine`                       | Cache and message broker                        |
+| nginx          | `nginx:1.27-alpine`                    | TLS termination, routing                        |
 
 ### Startup Order
 
@@ -29,13 +29,13 @@ Each service waits for the previous one to be healthy before starting.
 
 ### Request Routing (External Nginx)
 
-| Path | Destination | Description |
-|------|-------------|-------------|
-| `/api/*` | forge-web:8013 | REST API |
-| `/sso/*` | forge-web:8013 | SSO/SAML/LDAP |
-| `/api/login/` | forge-web:8013 | Login (rate-limited) |
-| `/(api/)?websocket/` | forge-web:8013 | WebSocket (upgrade) |
-| `/*` (everything else) | forge-frontend:80 | React SPA |
+| Path                   | Destination       | Description          |
+| ---------------------- | ----------------- | -------------------- |
+| `/api/*`               | forge-web:8013    | REST API             |
+| `/sso/*`               | forge-web:8013    | SSO/SAML/LDAP        |
+| `/api/login/`          | forge-web:8013    | Login (rate-limited) |
+| `/(api/)?websocket/`   | forge-web:8013    | WebSocket (upgrade)  |
+| `/*` (everything else) | forge-frontend:80 | React SPA            |
 
 ---
 
@@ -50,6 +50,7 @@ docker push ghcr.io/forgeplatform/forge-backend:latest
 ```
 
 The Dockerfile is a multi-stage build:
+
 1. **builder** (Ubuntu 24.04): installs Python deps, builds sdist, runs collectstatic
 2. **runtime** (Ubuntu 24.04): minimal image with runtime deps, receptor, supervisor
 
@@ -62,6 +63,7 @@ docker push ghcr.io/forgeplatform/forge-frontend:latest
 ```
 
 The Dockerfile is a multi-stage build:
+
 1. **builder** (Node 20 Alpine): `npm ci && npm run build`
 2. **runtime** (nginx 1.27 Alpine): serves built assets with SPA fallback
 
@@ -125,28 +127,28 @@ docker compose up -d
 
 ### Required
 
-| Variable | Description | Generate with... |
-|----------|-------------|-----------------|
-| `POSTGRES_PASSWORD` | DB password | `openssl rand -hex 16` |
-| `FORGE_SECRET_KEY` | Django crypto key | `openssl rand -hex 32` |
-| `FORGE_BROADCAST_WEBSOCKET_SECRET` | WS auth secret | `openssl rand -hex 32` |
-| `FORGE_ADMIN_PASSWORD` | Admin password | Strong password |
-| `FORGE_CSRF_TRUSTED_ORIGINS` | CSRF origins | `https://forge.example.com` |
+| Variable                           | Description       | Generate with...            |
+| ---------------------------------- | ----------------- | --------------------------- |
+| `POSTGRES_PASSWORD`                | DB password       | `openssl rand -hex 16`      |
+| `FORGE_SECRET_KEY`                 | Django crypto key | `openssl rand -hex 32`      |
+| `FORGE_BROADCAST_WEBSOCKET_SECRET` | WS auth secret    | `openssl rand -hex 32`      |
+| `FORGE_ADMIN_PASSWORD`             | Admin password    | Strong password             |
+| `FORGE_CSRF_TRUSTED_ORIGINS`       | CSRF origins      | `https://forge.example.com` |
 
 ### Optional
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `FORGE_ALLOWED_HOSTS` | `*` | Allowed HTTP hosts |
-| `FORGE_ADMIN_USER` | `admin` | Admin username |
-| `FORGE_ADMIN_EMAIL` | `admin@example.com` | Admin email |
-| `FORGE_NODE_NAME` | `forge-node` | Instance hostname |
-| `FORGE_NODE_TYPE` | `hybrid` | `hybrid`, `control`, or `execution` |
-| `FORGE_BACKEND_IMAGE` | `ghcr.io/forgeplatform/forge-backend` | Backend Docker image |
-| `FORGE_FRONTEND_IMAGE` | `ghcr.io/forgeplatform/forge-frontend` | Frontend Docker image |
-| `FORGE_TAG` | `latest` | Image tag |
-| `NGINX_HTTP_PORT` | `80` | External HTTP port |
-| `NGINX_HTTPS_PORT` | `443` | External HTTPS port |
+| Variable               | Default                                | Description                         |
+| ---------------------- | -------------------------------------- | ----------------------------------- |
+| `FORGE_ALLOWED_HOSTS`  | `*`                                    | Allowed HTTP hosts                  |
+| `FORGE_ADMIN_USER`     | `admin`                                | Admin username                      |
+| `FORGE_ADMIN_EMAIL`    | `admin@example.com`                    | Admin email                         |
+| `FORGE_NODE_NAME`      | `forge-node`                           | Instance hostname                   |
+| `FORGE_NODE_TYPE`      | `hybrid`                               | `hybrid`, `control`, or `execution` |
+| `FORGE_BACKEND_IMAGE`  | `ghcr.io/forgeplatform/forge-backend`  | Backend Docker image                |
+| `FORGE_FRONTEND_IMAGE` | `ghcr.io/forgeplatform/forge-frontend` | Frontend Docker image               |
+| `FORGE_TAG`            | `latest`                               | Image tag                           |
+| `NGINX_HTTP_PORT`      | `80`                                   | External HTTP port                  |
+| `NGINX_HTTPS_PORT`     | `443`                                  | External HTTPS port                 |
 
 ### Watch out
 
@@ -168,6 +170,7 @@ cp /etc/letsencrypt/live/forge.example.com/{fullchain,privkey}.pem nginx/ssl/
 ```
 
 Auto-renewal (crontab):
+
 ```bash
 0 0 1 * * certbot renew && cp /etc/letsencrypt/live/forge.example.com/*.pem /path/to/nginx/ssl/ && docker compose restart nginx
 ```
@@ -310,8 +313,8 @@ docker compose exec forge-web forge-manage register_queue --queuename=default --
 
 ### Recommended Hardware
 
-| Size | CPU | RAM | Disk |
-|------|-----|-----|------|
-| Small (≤100 hosts) | 4 | 8GB | 50GB SSD |
-| Medium (≤1000 hosts) | 8 | 16GB | 100GB SSD |
-| Large (≤10000 hosts) | 16 | 32GB | 200GB SSD |
+| Size                 | CPU | RAM  | Disk      |
+| -------------------- | --- | ---- | --------- |
+| Small (≤100 hosts)   | 4   | 8GB  | 50GB SSD  |
+| Medium (≤1000 hosts) | 8   | 16GB | 100GB SSD |
+| Large (≤10000 hosts) | 16  | 32GB | 200GB SSD |

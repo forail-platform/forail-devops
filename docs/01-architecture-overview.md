@@ -70,15 +70,16 @@
 
 Handles all HTTP and WebSocket traffic. Runs three processes via `supervisord`:
 
-| Process | Port | Purpose |
-|---------|------|---------|
-| Nginx (internal) | 8013 | Routes requests, serves static files |
-| uWSGI | 8050 | Django app — API, pages, authentication |
-| Daphne | 8051 | WebSocket connections for real-time updates |
+| Process          | Port | Purpose                                     |
+| ---------------- | ---- | ------------------------------------------- |
+| Nginx (internal) | 8013 | Routes requests, serves static files        |
+| uWSGI            | 8050 | Django app — API, pages, authentication     |
+| Daphne           | 8051 | WebSocket connections for real-time updates |
 
 **Watch out:** Internal Nginx is inside the container and handles routing. External Nginx
 is a separate container that terminates TLS. Don't confuse them — configuration lives in
 two different files:
+
 - External: `tools/docker-compose-prod/nginx/nginx.conf`
 - Internal: `tools/docker-compose-prod/settings/nginx-internal.conf`
 
@@ -86,12 +87,12 @@ two different files:
 
 Handles background job execution. Runs four processes:
 
-| Process | Purpose |
-|---------|---------|
-| **Dispatcher** | Picks tasks from Redis, manages capacity, starts jobs |
+| Process               | Purpose                                                |
+| --------------------- | ------------------------------------------------------ |
+| **Dispatcher**        | Picks tasks from Redis, manages capacity, starts jobs  |
 | **Callback Receiver** | Receives events from Ansible Runner, saves to database |
-| **WSRelay** | Broadcasts job events to WebSocket clients |
-| **Receptor** | Mesh networking for remote job execution |
+| **WSRelay**           | Broadcasts job events to WebSocket clients             |
+| **Receptor**          | Mesh networking for remote job execution               |
 
 **Watch out:** If any of these 4 processes goes down, jobs won't work correctly.
 Check with `supervisorctl status` inside the container.
@@ -105,6 +106,7 @@ which is critical for performance since a single job can have tens of thousands 
 ### Redis
 
 Used for two purposes:
+
 - **DB 0:** Celery message broker + Django Channels (WebSocket)
 - **DB 1:** Cache (API response caching, rate limiting)
 
@@ -119,7 +121,7 @@ remote execution nodes over TCP port 2222.
 
 ---
 
-## Request Flow — What happens when...
+## Request Flow — What happens when
 
 ### ...a user launches a job template
 
@@ -157,16 +159,16 @@ remote execution nodes over TCP port 2222.
 
 ## Port Reference
 
-| Port | Service | Description |
-|------|---------|-------------|
-| 443 | Nginx (external) | HTTPS entry point for users |
-| 80 | Nginx (external) | HTTP → redirect to HTTPS |
+| Port | Service          | Description                              |
+| ---- | ---------------- | ---------------------------------------- |
+| 443  | Nginx (external) | HTTPS entry point for users              |
+| 80   | Nginx (external) | HTTP → redirect to HTTPS                 |
 | 8013 | Nginx (internal) | Internal routing (within Docker network) |
-| 8050 | uWSGI | Django sync application |
-| 8051 | Daphne | Django async (WebSocket) |
-| 5432 | PostgreSQL | Database |
-| 6379 | Redis | Broker + cache |
-| 2222 | Receptor | Mesh networking |
+| 8050 | uWSGI            | Django sync application                  |
+| 8051 | Daphne           | Django async (WebSocket)                 |
+| 5432 | PostgreSQL       | Database                                 |
+| 6379 | Redis            | Broker + cache                           |
+| 2222 | Receptor         | Mesh networking                          |
 
 **Watch out:** Ports 8050 and 8051 are not externally accessible — only internal Nginx
 on 8013 communicates with them. Do not expose 8050/8051 outside the Docker network.

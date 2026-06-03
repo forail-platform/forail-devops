@@ -7,6 +7,7 @@ A step-by-step guide for everyday use of the Forge Platform UI. Each section fol
 ## Table of Contents
 
 ### Views
+
 - [Dashboard](#dashboard)
 - [Jobs](#jobs)
 - [Schedules](#schedules)
@@ -15,21 +16,25 @@ A step-by-step guide for everyday use of the Forge Platform UI. Each section fol
 - [Analytics](#analytics)
 
 ### Automation
+
 - [Event Rules](#event-rules)
 - [Event Logs](#event-logs)
 - [Outbound Webhooks](#outbound-webhooks)
 
 ### Self-Service
+
 - [Service Portal](#service-portal)
 - [My Requests](#my-requests)
 - [Approvals](#approvals)
 - [Catalog Admin](#catalog-admin)
 
 ### Tenancy
+
 - [Tenants](#tenants)
 - [Quota Events](#quota-events)
 
 ### Compliance
+
 - [Drift Detections](#drift-detections)
 - [Drift Alerts](#drift-alerts)
 - [Alert Rules](#alert-rules)
@@ -41,6 +46,7 @@ A step-by-step guide for everyday use of the Forge Platform UI. Each section fol
 - [Observability](#observability)
 
 ### Resources
+
 - [Templates](#templates)
 - [Inventories](#inventories)
 - [Hosts](#hosts)
@@ -48,11 +54,13 @@ A step-by-step guide for everyday use of the Forge Platform UI. Each section fol
 - [Credentials](#credentials)
 
 ### Access
+
 - [Organizations](#organizations)
 - [Users](#users)
 - [Teams](#teams)
 
 ### Admin
+
 - [Instances](#instances)
 - [Instance Groups](#instance-groups)
 - [Execution Environments](#execution-environments)
@@ -79,13 +87,13 @@ The Dashboard is the landing page after login. It shows the overall health of th
 
 1. Log in to Forge.
 2. You will land on the Dashboard automatically. If not, click **Dashboard** in the left sidebar.
-3. Read the four top tiles: *Total Hosts*, *Total Jobs*, *Active Schedules*, *Recent Failures*.
+3. Read the four top tiles: _Total Hosts_, _Total Jobs_, _Active Schedules_, _Recent Failures_.
 4. Use the time-range selector (top-right) to switch between **Last 24h**, **Last 7d**, **Last 30d**.
 5. Click any tile to drill into the matching list view.
 
 **Example**
 
-> Open Dashboard → set range to **Last 7d** → click the *Recent Failures* tile to see all failed jobs of the past week.
+> Open Dashboard → set range to **Last 7d** → click the _Recent Failures_ tile to see all failed jobs of the past week.
 
 ---
 
@@ -156,19 +164,19 @@ Schedules trigger Job Templates automatically on a cron-like cadence.
    - **Job Template** — what to run
    - **Start Date / Time**
    - **Frequency** — None / Minute / Hour / Day / Week / Month
-   - **Repeat Frequency** — every *N* of the chosen unit
+   - **Repeat Frequency** — every _N_ of the chosen unit
 3. Click **Save**.
 4. Toggle the **Enabled** switch to activate.
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Name | `nightly-db-backup` |
+| Field        | Value               |
+| ------------ | ------------------- |
+| Name         | `nightly-db-backup` |
 | Job Template | `Backup PostgreSQL` |
-| Start Date | `2026-04-12 02:00` |
-| Frequency | Day |
-| Repeat | every `1` day |
+| Start Date   | `2026-04-12 02:00`  |
+| Frequency    | Day                 |
+| Repeat       | every `1` day       |
 
 ---
 
@@ -190,7 +198,7 @@ A chronological feed of platform actions: who did what and when.
 
 **Example**
 
-> Filter: User = `alice`, Date Range = *Today* → see every change Alice made today.
+> Filter: User = `alice`, Date Range = _Today_ → see every change Alice made today.
 
 ---
 
@@ -212,7 +220,7 @@ Tamper-evident security log used for compliance reporting (SOC 2, ISO 27001).
 
 **Example**
 
-> Filter: Event Type = `credential_access`, Date Range = *Last 30d* → export CSV → attach to audit ticket.
+> Filter: Event Type = `credential_access`, Date Range = _Last 30d_ → export CSV → attach to audit ticket.
 
 ---
 
@@ -235,7 +243,7 @@ Visual KPIs across the whole platform: job throughput, MTTR, top failing templat
 
 **Example**
 
-> Open *Top Failures* → identify the template with most failures → click it → land on its Jobs list filtered to failed runs.
+> Open _Top Failures_ → identify the template with most failures → click it → land on its Jobs list filtered to failed runs.
 
 ---
 
@@ -375,18 +383,18 @@ End-user catalog: lets non-admins request pre-approved automations without touch
 
 1. Click **Service Portal**.
 2. Browse the catalog tiles or use the search bar.
-3. Click a tile (e.g., *New Dev VM*).
+3. Click a tile (e.g., _New Dev VM_).
 4. Fill in the request form.
 5. Click **Submit**.
 
 **Example form**
 
-| Field | Value |
-|---|---|
-| VM name | `dev-alice-01` |
-| OS | Ubuntu 24.04 |
-| Size | small (2 vCPU / 4 GB) |
-| Owner email | `alice@example.com` |
+| Field       | Value                 |
+| ----------- | --------------------- |
+| VM name     | `dev-alice-01`        |
+| OS          | Ubuntu 24.04          |
+| Size        | small (2 vCPU / 4 GB) |
+| Owner email | `alice@example.com`   |
 
 ---
 
@@ -408,7 +416,7 @@ Tracks the status of requests you submitted from the Service Portal.
 
 **Example**
 
-> Submit a *New Dev VM* request → open **My Requests** → wait for `approved` → wait for `completed` → copy the VM IP from output.
+> Submit a _New Dev VM_ request → open **My Requests** → wait for `approved` → wait for `completed` → copy the VM IP from output.
 
 ---
 
@@ -471,12 +479,12 @@ Where admins create and manage Service Portal entries.
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Title | New Dev VM |
-| Category | Compute |
-| Template | `Provision VM` |
-| Approval required | No |
+| Field             | Value          |
+| ----------------- | -------------- |
+| Title             | New Dev VM     |
+| Category          | Compute        |
+| Template          | `Provision VM` |
+| Approval required | No             |
 
 ---
 
@@ -568,7 +576,7 @@ Compares the current state of a host against a known-good fact baseline.
 2. Pick:
    - **Inventory**
    - **Baseline snapshot**
-   - **Hosts** (or *All*)
+   - **Hosts** (or _All_)
 3. Click **Run**.
 4. Open the result row when finished.
 
@@ -663,11 +671,11 @@ A point-in-time capture of host facts. Used as drift baselines.
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Inventory | `prod-web` |
-| Hosts | All |
-| Label | `baseline-2026-04-01` |
+| Field     | Value                 |
+| --------- | --------------------- |
+| Inventory | `prod-web`            |
+| Hosts     | All                   |
+| Label     | `baseline-2026-04-01` |
 
 ---
 
@@ -769,11 +777,11 @@ Configured IaC / image / dependency scanners (Trivy, Checkov, …).
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Type | Trivy |
-| Target | Project: `infra-terraform` |
-| Schedule | `0 3 * * *` |
+| Field    | Value                      |
+| -------- | -------------------------- |
+| Type     | Trivy                      |
+| Target   | Project: `infra-terraform` |
+| Schedule | `0 3 * * *`                |
 
 ---
 
@@ -913,12 +921,12 @@ Logical group of hosts. May be static, sourced from a file, or synced from a clo
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Name | `prod-web` |
-| Organization | Platform |
-| Hosts | `web01`, `web02`, `web03` |
-| Group | `webservers` (contains all three) |
+| Field        | Value                             |
+| ------------ | --------------------------------- |
+| Name         | `prod-web`                        |
+| Organization | Platform                          |
+| Hosts        | `web01`, `web02`, `web03`         |
+| Group        | `webservers` (contains all three) |
 
 ---
 
@@ -991,13 +999,13 @@ A Project is a Git checkout containing playbooks, roles, and collections.
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Name | webapp-iac |
-| SCM Type | git |
-| URL | `git@github.com:acme/webapp-iac.git` |
-| Branch | main |
-| Credential | `github-deploy-key` |
+| Field      | Value                                |
+| ---------- | ------------------------------------ |
+| Name       | webapp-iac                           |
+| SCM Type   | git                                  |
+| URL        | `git@github.com:acme/webapp-iac.git` |
+| Branch     | main                                 |
+| Credential | `github-deploy-key`                  |
 
 ---
 
@@ -1032,13 +1040,13 @@ Encrypted secret store: SSH keys, passwords, cloud tokens, vault keys.
 
 **Example — SSH key for production**
 
-| Field | Value |
-|---|---|
-| Name | `ssh-prod` |
-| Type | Machine |
-| Username | `deploy` |
-| SSH Private Key | *(paste key)* |
-| Privilege Escalation | sudo |
+| Field                | Value         |
+| -------------------- | ------------- |
+| Name                 | `ssh-prod`    |
+| Type                 | Machine       |
+| Username             | `deploy`      |
+| SSH Private Key      | _(paste key)_ |
+| Privilege Escalation | sudo          |
 
 ---
 
@@ -1110,12 +1118,12 @@ Local and SSO-mapped users.
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Username | `alice` |
-| Email | `alice@example.com` |
-| User Type | Normal |
-| Role | `Project Admin` on `webapp-iac` |
+| Field     | Value                           |
+| --------- | ------------------------------- |
+| Username  | `alice`                         |
+| Email     | `alice@example.com`             |
+| User Type | Normal                          |
+| Role      | `Project Admin` on `webapp-iac` |
 
 ---
 
@@ -1198,11 +1206,11 @@ Logical pools of instances. Templates can be pinned to a group (e.g., `gpu-pool`
 
 **Example**
 
-| Field | Value |
-|---|---|
-| Name | `eu-west-pool` |
-| Policy instances minimum | 2 |
-| Members | `worker-eu-01`, `worker-eu-02` |
+| Field                    | Value                          |
+| ------------------------ | ------------------------------ |
+| Name                     | `eu-west-pool`                 |
+| Policy instances minimum | 2                              |
+| Members                  | `worker-eu-01`, `worker-eu-02` |
 
 ---
 
@@ -1268,11 +1276,11 @@ Channels Forge can send messages to (email, Slack, PagerDuty, MS Teams, webhooks
 
 **Example — Slack**
 
-| Field | Value |
-|---|---|
-| Name | `slack-secops` |
-| Type | Slack |
-| Token | `xoxb-…` |
+| Field   | Value            |
+| ------- | ---------------- |
+| Name    | `slack-secops`   |
+| Type    | Slack            |
+| Token   | `xoxb-…`         |
 | Channel | `#secops-alerts` |
 
 ---
@@ -1327,7 +1335,7 @@ Global platform configuration: auth, system, jobs, UI, logging, license.
 
 ### A) Provision a new dev VM (self-service path)
 
-1. [Catalog Admin](#catalog-admin) — admin publishes the *New Dev VM* item.
+1. [Catalog Admin](#catalog-admin) — admin publishes the _New Dev VM_ item.
 2. End user opens [Service Portal](#service-portal) → submits the form.
 3. Item appears in [Approvals](#approvals) → approver approves.
 4. Forge launches the [Templates](#templates) job behind the item.
@@ -1351,4 +1359,4 @@ Global platform configuration: auth, system, jobs, UI, logging, license.
 
 ---
 
-*End of handbook.*
+_End of handbook._

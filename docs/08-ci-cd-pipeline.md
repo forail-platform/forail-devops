@@ -18,25 +18,25 @@ Each repo's workflow file: **`.github/workflows/ci.yml`**
 
 ## Pipeline Stages
 
-| Stage | What it does | Fails if... |
-|-------|-------------|-------------|
-| Checkout | `actions/checkout@v4` clones the repo on the runner | Repo unreachable |
-| Lint (Python) | `ruff check` in backend / assistant | Lint errors |
-| Lint (Frontend) | `tsc --noEmit` + ESLint | TypeScript type errors |
-| Test (Python) | `pytest` against `tests_standalone/` (no DB needed for fast path) | Any test fails |
-| Test (Frontend) | `vitest run` | Any test fails |
-| Build | `docker build` to produce the release image | Build error |
-| Security (pip-audit) | CVE scan on Python dependencies | Critical CVE |
-| Security (Trivy) | Container image scan | CRITICAL CVE |
-| Release | `docker push` to `ghcr.io/forgeplatform/*` | Only on `main` branch or tag push |
+| Stage                | What it does                                                      | Fails if...                       |
+| -------------------- | ----------------------------------------------------------------- | --------------------------------- |
+| Checkout             | `actions/checkout@v4` clones the repo on the runner               | Repo unreachable                  |
+| Lint (Python)        | `ruff check` in backend / assistant                               | Lint errors                       |
+| Lint (Frontend)      | `tsc --noEmit` + ESLint                                           | TypeScript type errors            |
+| Test (Python)        | `pytest` against `tests_standalone/` (no DB needed for fast path) | Any test fails                    |
+| Test (Frontend)      | `vitest run`                                                      | Any test fails                    |
+| Build                | `docker build` to produce the release image                       | Build error                       |
+| Security (pip-audit) | CVE scan on Python dependencies                                   | Critical CVE                      |
+| Security (Trivy)     | Container image scan                                              | CRITICAL CVE                      |
+| Release              | `docker push` to `ghcr.io/forgeplatform/*`                        | Only on `main` branch or tag push |
 
 ### Stage Conditions
 
-| Stage | When it runs |
-|-------|-------------|
-| Checkout, Lint, Test | Every push / PR |
-| Build, Security | `main` branch builds and tag builds |
-| Release | `main` branch builds and tag builds (push to `ghcr.io`) |
+| Stage                | When it runs                                            |
+| -------------------- | ------------------------------------------------------- |
+| Checkout, Lint, Test | Every push / PR                                         |
+| Build, Security      | `main` branch builds and tag builds                     |
+| Release              | `main` branch builds and tag builds (push to `ghcr.io`) |
 
 ---
 
@@ -44,8 +44,8 @@ Each repo's workflow file: **`.github/workflows/ci.yml`**
 
 For the release stage, each repo needs the following secret:
 
-| Secret | Description |
-|--------|-------------|
+| Secret         | Description                                                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `GITHUB_TOKEN` | Provided automatically by GitHub Actions. Used with the built-in `permissions: packages: write` to push to `ghcr.io/forgeplatform/*` |
 
 No third-party credentials are required — everything runs in the GitHub-hosted runner with built-in tokens.
@@ -54,14 +54,14 @@ No third-party credentials are required — everything runs in the GitHub-hosted
 
 ## Docker Images
 
-| Image | Source | Description |
-|-------|--------|-------------|
-| `ghcr.io/forgeplatform/forge-backend:latest` | `forge-backend/Dockerfile` | Django API + task engine |
-| `ghcr.io/forgeplatform/forge-backend:<version>` | Same | Version-tagged (CalVer) |
-| `ghcr.io/forgeplatform/forge-frontend:latest` | `forge-frontend/Dockerfile` | React SPA + nginx |
-| `ghcr.io/forgeplatform/forge-frontend:<version>` | Same | Version-tagged |
-| `ghcr.io/forgeplatform/forge-assistant:latest` | `forge-assistant/Dockerfile` | FastAPI + Ollama + ChromaDB (preview) |
-| `ghcr.io/forgeplatform/forge-operator:<version>` | `forge-operator/Dockerfile` | Kubernetes operator |
+| Image                                            | Source                       | Description                           |
+| ------------------------------------------------ | ---------------------------- | ------------------------------------- |
+| `ghcr.io/forgeplatform/forge-backend:latest`     | `forge-backend/Dockerfile`   | Django API + task engine              |
+| `ghcr.io/forgeplatform/forge-backend:<version>`  | Same                         | Version-tagged (CalVer)               |
+| `ghcr.io/forgeplatform/forge-frontend:latest`    | `forge-frontend/Dockerfile`  | React SPA + nginx                     |
+| `ghcr.io/forgeplatform/forge-frontend:<version>` | Same                         | Version-tagged                        |
+| `ghcr.io/forgeplatform/forge-assistant:latest`   | `forge-assistant/Dockerfile` | FastAPI + Ollama + ChromaDB (preview) |
+| `ghcr.io/forgeplatform/forge-operator:<version>` | `forge-operator/Dockerfile`  | Kubernetes operator                   |
 
 All images are **public** — no pull secret required for `docker pull` or `helm install`.
 

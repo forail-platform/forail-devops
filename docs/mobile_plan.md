@@ -19,13 +19,13 @@ Plan for an Android application that serves as a 2FA/biometric gateway for deplo
 
 ### Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **Deployment Approval** | Push notification → biometrics → approve/reject |
-| **Server Monitor** | Real-time container status, CPU/RAM, health checks |
-| **Log Viewer** | Live log streaming with filtering |
-| **Alerts** | Notifications for service outages, high CPU, failed deploys |
-| **Audit Trail** | Who approved what, when, from which device |
+| Feature                 | Description                                                 |
+| ----------------------- | ----------------------------------------------------------- |
+| **Deployment Approval** | Push notification → biometrics → approve/reject             |
+| **Server Monitor**      | Real-time container status, CPU/RAM, health checks          |
+| **Log Viewer**          | Live log streaming with filtering                           |
+| **Alerts**              | Notifications for service outages, high CPU, failed deploys |
+| **Audit Trail**         | Who approved what, when, from which device                  |
 
 ---
 
@@ -65,15 +65,15 @@ forge-mobile/
 
 ### Tech Stack
 
-| Component | Technology | Reason |
-|-----------|------------|--------|
-| **Backend** | Go 1.22+ | Fast, small binary, excellent for WebSocket/concurrency |
-| **Database** | SQLite (dev) / PostgreSQL (prod) | Approval log, device registry, audit trail |
-| **Push** | Firebase Cloud Messaging (FCM) | Free, reliable, Android native |
-| **Real-time** | WebSocket | Log and status streaming |
-| **Android** | Kotlin + Jetpack Compose | Modern Android UI, native biometrics |
-| **Auth** | JWT + Biometrics + TOTP | Multi-layered security model |
-| **CI/CD Hook** | GitHub Actions / Generic Webhook | Triggers approval flow |
+| Component      | Technology                       | Reason                                                  |
+| -------------- | -------------------------------- | ------------------------------------------------------- |
+| **Backend**    | Go 1.22+                         | Fast, small binary, excellent for WebSocket/concurrency |
+| **Database**   | SQLite (dev) / PostgreSQL (prod) | Approval log, device registry, audit trail              |
+| **Push**       | Firebase Cloud Messaging (FCM)   | Free, reliable, Android native                          |
+| **Real-time**  | WebSocket                        | Log and status streaming                                |
+| **Android**    | Kotlin + Jetpack Compose         | Modern Android UI, native biometrics                    |
+| **Auth**       | JWT + Biometrics + TOTP          | Multi-layered security model                            |
+| **CI/CD Hook** | GitHub Actions / Generic Webhook | Triggers approval flow                                  |
 
 ---
 
@@ -429,7 +429,7 @@ name: Deploy to Production
 
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 
 jobs:
   deploy:
@@ -622,26 +622,26 @@ Layer 5: Audit log for every operation
 
 ### 5.2 Key Security Measures
 
-| Measure | Implementation |
-|---------|----------------|
-| Token storage | Android EncryptedSharedPreferences (AES-256) |
-| Biometric binding | Android Keystore hardware-backed keys |
-| API rate limiting | 10 req/sec per device, 3 failed auth → 15min lockout |
-| Approval expiry | Max 5 min TTL, cannot be extended |
-| Device revocation | Admin can deactivate a device instantly |
-| Audit trail | All actions logged with IP, device, timestamp |
-| FCM security | Data-only messages (do not display content without the app) |
-| Certificate pinning | OkHttp CertificatePinner for backend communication |
+| Measure             | Implementation                                              |
+| ------------------- | ----------------------------------------------------------- |
+| Token storage       | Android EncryptedSharedPreferences (AES-256)                |
+| Biometric binding   | Android Keystore hardware-backed keys                       |
+| API rate limiting   | 10 req/sec per device, 3 failed auth → 15min lockout        |
+| Approval expiry     | Max 5 min TTL, cannot be extended                           |
+| Device revocation   | Admin can deactivate a device instantly                     |
+| Audit trail         | All actions logged with IP, device, timestamp               |
+| FCM security        | Data-only messages (do not display content without the app) |
+| Certificate pinning | OkHttp CertificatePinner for backend communication          |
 
 ### 5.3 Threat Model
 
-| Threat | Mitigation |
-|--------|------------|
-| Stolen phone | Biometrics required, token in encrypted storage |
-| MITM attack | TLS + certificate pinning |
-| Replay attack | JWT with short TTL, approval nonce |
-| Brute force | Rate limiting + account lockout |
-| Insider threat | Audit trail, device binding, biometric proof |
+| Threat         | Mitigation                                      |
+| -------------- | ----------------------------------------------- |
+| Stolen phone   | Biometrics required, token in encrypted storage |
+| MITM attack    | TLS + certificate pinning                       |
+| Replay attack  | JWT with short TTL, approval nonce              |
+| Brute force    | Rate limiting + account lockout                 |
+| Insider threat | Audit trail, device binding, biometric proof    |
 
 ---
 
@@ -782,13 +782,13 @@ class ChatViewModel(private val api: ForgeApi) : ViewModel() {
 
 ### 6.4 Mobile-Specific Features
 
-| Feature | Description |
-|---------|-------------|
-| **Voice Input** | Android Speech-to-Text — ask by voice |
-| **Quick Actions** | Bot suggests actions with buttons (Restart, View Logs) |
-| **Offline FAQ** | Cached most common answers, works without internet |
-| **Push + Chat** | From push notification (failed job) → directly into chat for help |
-| **Contextual** | Knows which screen the user came from (Server, Job, Log) |
+| Feature           | Description                                                       |
+| ----------------- | ----------------------------------------------------------------- |
+| **Voice Input**   | Android Speech-to-Text — ask by voice                             |
+| **Quick Actions** | Bot suggests actions with buttons (Restart, View Logs)            |
+| **Offline FAQ**   | Cached most common answers, works without internet                |
+| **Push + Chat**   | From push notification (failed job) → directly into chat for help |
+| **Contextual**    | Knows which screen the user came from (Server, Job, Log)          |
 
 ### 6.5 Voice Input Flow
 

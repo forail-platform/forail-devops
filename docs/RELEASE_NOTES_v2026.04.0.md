@@ -55,35 +55,35 @@ database queries, external API calls, and Jinja2 templates.
 
 ## New API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v2/event_rules/` | GET, POST | List/create event rules |
-| `/api/v2/event_rules/{id}/` | GET, PATCH, DELETE | Event rule CRUD |
-| `/api/v2/event_rules/{id}/webhook_key/` | GET, POST | Get/rotate webhook key |
-| `/api/v2/event_rules/{id}/event_logs/` | GET | Logs for this rule |
-| `/api/v2/event_rules/{id}/test/` | POST | Dry-run condition test |
-| `/api/v2/event_rules/{id}/enable/` | POST | Enable rule |
-| `/api/v2/event_rules/{id}/disable/` | POST | Disable rule |
-| `/api/v2/event_logs/` | GET | List all event logs |
-| `/api/v2/event_logs/{id}/` | GET | Event log detail |
-| `/api/v2/outbound_webhooks/` | GET, POST | List/create outbound webhooks |
-| `/api/v2/outbound_webhooks/{id}/` | GET, PATCH, DELETE | Outbound webhook CRUD |
-| `/api/v2/outbound_webhooks/{id}/test/` | POST | Send test payload |
-| `/api/v2/eda_webhooks/{path}/` | POST | Public webhook receiver (no auth) |
-| `/api/v2/audit_events/` | GET | List audit events |
-| `/api/v2/audit_events/?format=csv` | GET | Export as CSV |
-| `/api/v2/audit_events/?format=siem` | GET | Export for SIEM |
+| Endpoint                                | Method             | Description                       |
+| --------------------------------------- | ------------------ | --------------------------------- |
+| `/api/v2/event_rules/`                  | GET, POST          | List/create event rules           |
+| `/api/v2/event_rules/{id}/`             | GET, PATCH, DELETE | Event rule CRUD                   |
+| `/api/v2/event_rules/{id}/webhook_key/` | GET, POST          | Get/rotate webhook key            |
+| `/api/v2/event_rules/{id}/event_logs/`  | GET                | Logs for this rule                |
+| `/api/v2/event_rules/{id}/test/`        | POST               | Dry-run condition test            |
+| `/api/v2/event_rules/{id}/enable/`      | POST               | Enable rule                       |
+| `/api/v2/event_rules/{id}/disable/`     | POST               | Disable rule                      |
+| `/api/v2/event_logs/`                   | GET                | List all event logs               |
+| `/api/v2/event_logs/{id}/`              | GET                | Event log detail                  |
+| `/api/v2/outbound_webhooks/`            | GET, POST          | List/create outbound webhooks     |
+| `/api/v2/outbound_webhooks/{id}/`       | GET, PATCH, DELETE | Outbound webhook CRUD             |
+| `/api/v2/outbound_webhooks/{id}/test/`  | POST               | Send test payload                 |
+| `/api/v2/eda_webhooks/{path}/`          | POST               | Public webhook receiver (no auth) |
+| `/api/v2/audit_events/`                 | GET                | List audit events                 |
+| `/api/v2/audit_events/?format=csv`      | GET                | Export as CSV                     |
+| `/api/v2/audit_events/?format=siem`     | GET                | Export for SIEM                   |
 
 ---
 
 ## New Database Tables
 
-| Table | Description |
-|-------|-------------|
-| `main_eventrule` | Webhook rules with conditions and actions |
-| `main_eventlog` | Incoming webhook events and evaluation results |
-| `main_outboundwebhook` | Outbound webhook configurations |
-| `main_auditevent` | Immutable security audit log |
+| Table                  | Description                                    |
+| ---------------------- | ---------------------------------------------- |
+| `main_eventrule`       | Webhook rules with conditions and actions      |
+| `main_eventlog`        | Incoming webhook events and evaluation results |
+| `main_outboundwebhook` | Outbound webhook configurations                |
+| `main_auditevent`      | Immutable security audit log                   |
 
 ---
 
@@ -99,22 +99,24 @@ database queries, external API calls, and Jinja2 templates.
 
 ## Quality Metrics
 
-| Metric | Value |
-|--------|-------|
+| Metric                         | Value     |
+| ------------------------------ | --------- |
 | Backend tests (standalone EDA) | 38 passed |
-| Frontend tests (vitest) | 58 passed |
-| TypeScript compilation | 0 errors |
+| Frontend tests (vitest)        | 58 passed |
+| TypeScript compilation         | 0 errors  |
 
 ---
 
 ## Documentation
 
 New documentation files:
+
 - `docs/13-dynamic-surveys.md` — Dynamic survey system
 - `docs/14-audit-trail.md` — Audit trail and compliance logging
 - `docs/15-event-driven-automation.md` — EDA architecture, API, security, quick start
 
 Updated documentation:
+
 - `01-architecture-overview.md` — Added EDA webhook flow
 - `02-backend-django.md` — Added EDA models reference
 - `03-frontend-react.md` — Added EDA routes
@@ -157,27 +159,27 @@ Updated documentation:
 
 ### Quality Metrics
 
-| Metric | Value |
-|--------|-------|
-| Backend standalone tests | 404 passed |
-| Frontend tests (vitest) | 212 passed |
+| Metric                   | Value                      |
+| ------------------------ | -------------------------- |
+| Backend standalone tests | 404 passed                 |
+| Frontend tests (vitest)  | 212 passed                 |
 | Assistant knowledge base | 14 docs, 92 chunks indexed |
-| TypeScript compilation | 0 errors |
+| TypeScript compilation   | 0 errors                   |
 
 ---
 
 ## Competitive Landscape Update
 
-| Feature | Forge | AWX | AAP 2.5+ | Ascender | Semaphore |
-|---------|-------|-----|----------|----------|-----------|
-| Dynamic surveys | **Yes** | No | No | No | No |
-| Event-driven (EDA) | **Yes** | No | Yes | No | No |
-| AI assistant (RAG) | **Yes** | No | Yes | No | No |
-| Audit trail (immutable) | **Yes** | No | Partial | No | No |
-| IaC scanning | **Yes** | No | No | No | No |
-| Policy-as-Code (OPA) | **Yes** | No | No | No | No |
-| Drift detection | **Yes** | No | No | No | No |
-| Self-service portal | **Yes** | No | Partial | No | No |
-| Multi-tenancy (RLS) | **Yes** | No | Partial | No | No |
-| WebAuthn/Passkey MFA | **Yes** | No | No | No | No |
-| Smart recommendations | **Yes** | No | No | No | No |
+| Feature                 | Forge   | AWX | AAP 2.5+ | Ascender | Semaphore |
+| ----------------------- | ------- | --- | -------- | -------- | --------- |
+| Dynamic surveys         | **Yes** | No  | No       | No       | No        |
+| Event-driven (EDA)      | **Yes** | No  | Yes      | No       | No        |
+| AI assistant (RAG)      | **Yes** | No  | Yes      | No       | No        |
+| Audit trail (immutable) | **Yes** | No  | Partial  | No       | No        |
+| IaC scanning            | **Yes** | No  | No       | No       | No        |
+| Policy-as-Code (OPA)    | **Yes** | No  | No       | No       | No        |
+| Drift detection         | **Yes** | No  | No       | No       | No        |
+| Self-service portal     | **Yes** | No  | Partial  | No       | No        |
+| Multi-tenancy (RLS)     | **Yes** | No  | Partial  | No       | No        |
+| WebAuthn/Passkey MFA    | **Yes** | No  | No       | No       | No        |
+| Smart recommendations   | **Yes** | No  | No       | No       | No        |

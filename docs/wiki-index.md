@@ -14,6 +14,7 @@ inventories, credentials, and scheduled automation at scale.
 
 | # | Document | Description |
 |---|----------|-------------|
+| 00 | [Platform Architecture](00-platform-architecture.md) | Cross-repo map, GitOps control-plane flow (Frontend → API → Operator → K8s), and the CalVer/SemVer versioning policy |
 | 01 | [Architecture Overview](01-architecture-overview.md) | System components, data flow, how things connect |
 | 02 | [Backend (Django)](02-backend-django.md) | Module responsibilities, what lives where, gotchas |
 | 03 | [Frontend (React)](03-frontend-react.md) | Project structure, development workflow, patterns |

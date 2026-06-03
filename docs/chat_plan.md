@@ -49,14 +49,14 @@ Plan for an integrated AI assistant within the Forge platform that uses a local 
 
 ## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **Contextual help** | Knows which page you're on, gives relevant tips |
+| Feature                  | Description                                          |
+| ------------------------ | ---------------------------------------------------- |
+| **Contextual help**      | Knows which page you're on, gives relevant tips      |
 | **Documentation search** | Searches AWX/Forge docs, API reference, Ansible docs |
-| **Error explanation** | Explains errors from job output or API responses |
-| **Playbook assistance** | Suggests Ansible modules, fixes YAML syntax |
-| **Admin guide** | RBAC, credential setup, inventory management |
-| **Streaming responses** | Token-by-token response display (SSE) |
+| **Error explanation**    | Explains errors from job output or API responses     |
+| **Playbook assistance**  | Suggests Ansible modules, fixes YAML syntax          |
+| **Admin guide**          | RBAC, credential setup, inventory management         |
+| **Streaming responses**  | Token-by-token response display (SSE)                |
 
 ---
 
@@ -64,14 +64,14 @@ Plan for an integrated AI assistant within the Forge platform that uses a local 
 
 ### Tech Stack
 
-| Component | Technology | Reason |
-|-----------|------------|--------|
-| **LLM** | Ollama (llama3.1:8b or mistral:7b) | Local, free, data privacy |
-| **Vector DB** | ChromaDB | Lightweight, Python native, no external service |
-| **Embeddings** | `nomic-embed-text` (Ollama) | Local embedding model, fast |
-| **Backend** | Django endpoint (existing Forge API) | No new service, same auth |
-| **Frontend** | React chat component | Integrated into existing UI |
-| **Streaming** | Server-Sent Events (SSE) | Simpler than WebSocket for unidirectional stream |
+| Component      | Technology                           | Reason                                           |
+| -------------- | ------------------------------------ | ------------------------------------------------ |
+| **LLM**        | Ollama (llama3.1:8b or mistral:7b)   | Local, free, data privacy                        |
+| **Vector DB**  | ChromaDB                             | Lightweight, Python native, no external service  |
+| **Embeddings** | `nomic-embed-text` (Ollama)          | Local embedding model, fast                      |
+| **Backend**    | Django endpoint (existing Forge API) | No new service, same auth                        |
+| **Frontend**   | React chat component                 | Integrated into existing UI                      |
+| **Streaming**  | Server-Sent Events (SSE)             | Simpler than WebSocket for unidirectional stream |
 
 ### Why Ollama + RAG?
 
@@ -121,13 +121,13 @@ volumes:
 
 ### 1.2 Model Selection
 
-| Model | RAM | Speed | Quality | Recommendation |
-|-------|-----|-------|---------|----------------|
-| `tinyllama:1.1b` | 2 GB | Fastest | Basic | CPU-only, small server |
-| `phi3:mini` | 4 GB | Fast | Good | CPU with 8GB+ RAM |
-| `mistral:7b` | 6 GB | Medium | Excellent | GPU with 8GB+ VRAM |
-| `llama3.1:8b` | 8 GB | Medium | Best | GPU with 10GB+ VRAM |
-| `codellama:7b` | 6 GB | Medium | Code-focused | For Ansible/YAML assistance |
+| Model            | RAM  | Speed   | Quality      | Recommendation              |
+| ---------------- | ---- | ------- | ------------ | --------------------------- |
+| `tinyllama:1.1b` | 2 GB | Fastest | Basic        | CPU-only, small server      |
+| `phi3:mini`      | 4 GB | Fast    | Good         | CPU with 8GB+ RAM           |
+| `mistral:7b`     | 6 GB | Medium  | Excellent    | GPU with 8GB+ VRAM          |
+| `llama3.1:8b`    | 8 GB | Medium  | Best         | GPU with 10GB+ VRAM         |
+| `codellama:7b`   | 6 GB | Medium  | Code-focused | For Ansible/YAML assistance |
 
 Recommendation: **mistral:7b** for a balance of speed and quality. Fallback to **phi3:mini** for CPU-only.
 
@@ -387,57 +387,57 @@ awx/ui_next/src/
 ```typescript
 // useAssistant.ts
 export function useAssistant() {
-  const [messages, setMessages] = useState<ChatMsg[]>([])
-  const [isStreaming, setIsStreaming] = useState(false)
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   async function sendMessage(text: string, pageContext?: string) {
     // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: text }])
-    setIsStreaming(true)
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    setIsStreaming(true);
 
     // Open SSE stream
-    const response = await fetch('/api/v2/assistant/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, context: { page: pageContext } })
-    })
+    const response = await fetch("/api/v2/assistant/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, context: { page: pageContext } }),
+    });
 
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder()
-    let botMessage = ''
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let botMessage = "";
 
     // Add empty bot message
-    setMessages(prev => [...prev, { role: 'assistant', content: '' }])
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
     while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
+      const { done, value } = await reader.read();
+      if (done) break;
 
-      const chunk = decoder.decode(value)
+      const chunk = decoder.decode(value);
       // Parse SSE data lines
-      for (const line of chunk.split('\n')) {
-        if (line.startsWith('data: ')) {
-          const data = JSON.parse(line.slice(6))
+      for (const line of chunk.split("\n")) {
+        if (line.startsWith("data: ")) {
+          const data = JSON.parse(line.slice(6));
           if (data.token) {
-            botMessage += data.token
+            botMessage += data.token;
             // Update last message
-            setMessages(prev => {
-              const updated = [...prev]
+            setMessages((prev) => {
+              const updated = [...prev];
               updated[updated.length - 1] = {
-                role: 'assistant',
-                content: botMessage
-              }
-              return updated
-            })
+                role: "assistant",
+                content: botMessage,
+              };
+              return updated;
+            });
           }
         }
       }
     }
 
-    setIsStreaming(false)
+    setIsStreaming(false);
   }
 
-  return { messages, sendMessage, isStreaming }
+  return { messages, sendMessage, isStreaming };
 }
 ```
 
@@ -471,6 +471,7 @@ awx-manage query_docs "how to create inventory"
 ### 4.3 Suggested Documents to Write
 
 Priority 1 (most common questions):
+
 - How to create a Job Template
 - How to create an Inventory (manually, from a source)
 - How to use Credentials
@@ -479,6 +480,7 @@ Priority 1 (most common questions):
 - What is an Execution Environment
 
 Priority 2:
+
 - Workflow visual editor
 - Notification templates
 - Smart inventories
@@ -537,12 +539,14 @@ Bot: Use the `ansible.builtin.copy` module:
 ## Hardware Requirements
 
 ### Minimum (CPU-only, phi3:mini)
+
 - CPU: 4 core
 - RAM: 8 GB (4 for the model + 4 for everything else)
 - Disk: 5 GB for the model + 2 GB for ChromaDB
 - Response time: 10-20 seconds
 
 ### Recommended (GPU, mistral:7b)
+
 - CPU: 4+ core
 - RAM: 16 GB
 - GPU: NVIDIA with 8+ GB VRAM (RTX 3060+, T4, A10)
@@ -550,6 +554,7 @@ Bot: Use the `ansible.builtin.copy` module:
 - Response time: 2-5 seconds
 
 ### Production (GPU, llama3.1:8b)
+
 - CPU: 8+ core
 - RAM: 32 GB
 - GPU: NVIDIA with 12+ GB VRAM (RTX 4070+, A100)
@@ -598,6 +603,7 @@ Minimum viable product:
 5. **10-15 documents** indexed (API ref + user guide basics)
 
 Post-MVP:
+
 - Chat history (save conversations)
 - Contextual hints per page
 - Error analysis from job output
