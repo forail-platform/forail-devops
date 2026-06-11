@@ -1,4 +1,4 @@
-# Forge - Detailed Development Plan (HISTORICAL — COMPLETED)
+# Forail - Detailed Development Plan (HISTORICAL — COMPLETED)
 
 > **Status: COMPLETED.** This detailed plan was fully executed as of v2026.04.0. This document is retained for historical reference. For the current state, see [Release Notes v2026.04.0](RELEASE_NOTES_v2026.04.0.md).
 
@@ -44,7 +44,7 @@
 
 ### 1.1 Current Build Verification
 
-**Goal:** Confirm that Forge can be built and launched with applied fixes.
+**Goal:** Confirm that Forail can be built and launched with applied fixes.
 
 **Steps:**
 
@@ -133,8 +133,8 @@ make docker-compose-runtest
 
 | File        | Change                                                |
 | ----------- | ----------------------------------------------------- |
-| `setup.cfg` | `name = awx` → `name = forge`, author → Forge Project |
-| `NOTICE`    | Already contains "Forge" (previously)                 |
+| `setup.cfg` | `name = awx` → `name = forail`, author → Forail Project |
+| `NOTICE`    | Already contains "Forail" (previously)                 |
 
 ### 2.2 UI Branding - COMPLETED
 
@@ -142,9 +142,9 @@ make docker-compose-runtest
 
 | File                                              | Change                                                          |
 | ------------------------------------------------- | --------------------------------------------------------------- |
-| `awx/ui/public/static/media/default.strings.json` | `BRAND_NAME: "Ansible AWX"` → `"Forge"`                         |
-| `awx/ui/public/index.html`                        | meta description → "Forge - Infrastructure Automation Platform" |
-| `awx/ui/src/components/About/About.js`            | Copyright → "Forge Project"                                     |
+| `awx/ui/public/static/media/default.strings.json` | `BRAND_NAME: "Ansible AWX"` → `"Forail"`                         |
+| `awx/ui/public/index.html`                        | meta description → "Forail - Infrastructure Automation Platform" |
+| `awx/ui/src/components/About/About.js`            | Copyright → "Forail Project"                                     |
 | `awx/ui/src/screens/Login/`                       | Login page branding                                             |
 | `awx/ui/src/components/About/`                    | About modal content                                             |
 
@@ -152,8 +152,8 @@ make docker-compose-runtest
 
 ### 2.3 Phase 2 Result
 
-- [x] UI displays "Forge" instead of "AWX" (2026-02-06)
-- [x] Login page has Forge branding (2026-02-06)
+- [x] UI displays "Forail" instead of "AWX" (2026-02-06)
+- [x] Login page has Forail branding (2026-02-06)
 - [x] About modal displays correct information (2026-02-06)
 
 **Note:** Python package name remains `awx` as changing it would require refactoring all imports.
@@ -678,12 +678,12 @@ awx/main/dispatch/
 
 ---
 
-## PHASE 5: Forge UI — Custom Frontend from Scratch (Week 12-24)
+## PHASE 5: Forail UI — Custom Frontend from Scratch (Week 12-24)
 
 **Decision:** Instead of incremental upgrade (Option A) or ansible-ui integration (Option B), **Option C: completely new custom frontend** was chosen. Reasons:
 
 - Old UI (`awx/ui/`) is React 17, PatternFly 4, CRA — too old for upgrade
-- ansible-ui (Option B) was tried but looks the same as AWX — no unique Forge identity
+- ansible-ui (Option B) was tried but looks the same as AWX — no unique Forail identity
 - Custom frontend gives full control over design and tech stack
 
 **Tech Stack:**
@@ -881,9 +881,9 @@ Services:
 
 1. **postgres** - PostgreSQL 15/16
 2. **redis** - Redis 7
-3. **forge-web** - Web server (nginx + uwsgi + daphne)
-4. **forge-task** - Task dispatcher
-5. **forge-receptor** - Receptor mesh
+3. **forail-web** - Web server (nginx + uwsgi + daphne)
+4. **forail-task** - Task dispatcher
+5. **forail-receptor** - Receptor mesh
 6. **nginx** - Reverse proxy with TLS
 
 ### 7.2 Environment Configuration
@@ -892,17 +892,17 @@ Services:
 
 ```env
 # Database
-POSTGRES_USER=forge
+POSTGRES_USER=forail
 POSTGRES_PASSWORD=changeme
-POSTGRES_DB=forge
+POSTGRES_DB=forail
 
-# Forge
-FORGE_ADMIN_USER=admin
-FORGE_ADMIN_PASSWORD=changeme
-FORGE_SECRET_KEY=generate-random-key-here
+# Forail
+FORAIL_ADMIN_USER=admin
+FORAIL_ADMIN_PASSWORD=changeme
+FORAIL_SECRET_KEY=generate-random-key-here
 
 # TLS
-FORGE_HOSTNAME=forge.example.com
+FORAIL_HOSTNAME=forail.example.com
 ```
 
 ### 7.3 Backup/Restore
@@ -926,7 +926,7 @@ healthcheck:
 
 ### 7.5 Phase 7 Result
 
-- [x] `docker compose up -d` starts Forge in production mode
+- [x] `docker compose up -d` starts Forail in production mode
 - [x] TLS works with self-signed or Let's Encrypt certificate
 - [x] Backup/restore scripts work
 - [x] Health checks work
@@ -945,9 +945,9 @@ healthcheck:
 | Lint (Python)        | `make api-lint`                        | ~~0 errors~~ **DONE** (flake8, 0 errors)                    |
 | Lint (Frontend)      | `npm run lint`                         | ~~0 errors~~ **DONE** (tsc --noEmit, 0 errors)              |
 | Security (Python)    | `pip-audit`                            | ~~0 critical CVE~~ **DONE** (71→15 CVE, 0 critical runtime) |
-| Security (Container) | `trivy image forge:latest`             | ~~0 critical~~ **DONE** (0 CRITICAL)                        |
-| Build (CentOS)       | `make Dockerfile.dev && docker build`  | ~~Success~~ **DONE** (forge:centos-dev, 882MB)              |
-| Build (Ubuntu)       | `Dockerfile.ubuntu.j2 && docker build` | ~~Success~~ **DONE** (forge:ubuntu-dev, 932MB)              |
+| Security (Container) | `trivy image forail:latest`             | ~~0 critical~~ **DONE** (0 CRITICAL)                        |
+| Build (CentOS)       | `make Dockerfile.dev && docker build`  | ~~Success~~ **DONE** (forail:centos-dev, 882MB)              |
+| Build (Ubuntu)       | `Dockerfile.ubuntu.j2 && docker build` | ~~Success~~ **DONE** (forail:ubuntu-dev, 932MB)              |
 
 ### 8.2 Performance Testing
 
@@ -970,8 +970,8 @@ Establish baseline on 4 CPU / 8GB RAM:
 - [x] Lint (Frontend) — tsc --noEmit, 0 errors
 - [x] Security (Python) — pip-audit, 71→15 CVE (0 critical runtime, 19 packages updated)
 - [x] Security (Container) — trivy, 0 critical (0 CRITICAL, 28 HIGH OS-level)
-- [x] Build (CentOS) — docker build Success (forge:centos-dev, 882MB)
-- [x] Build (Ubuntu) — docker build Success (forge:ubuntu-dev, 932MB, 4 fixes)
+- [x] Build (CentOS) — docker build Success (forail:centos-dev, 882MB)
+- [x] Build (Ubuntu) — docker build Success (forail:ubuntu-dev, 932MB, 4 fixes)
 - [ ] Performance targets achieved (optional, for Phase 9)
 
 ---
@@ -998,8 +998,8 @@ First release: `2026.XX.0`
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  --tag registry.example.com/forge:2026.XX.0 \
-  --tag registry.example.com/forge:latest \
+  --tag registry.example.com/forail:2026.XX.0 \
+  --tag registry.example.com/forail:latest \
   --push .
 ```
 
@@ -1009,7 +1009,7 @@ docker buildx build \
 
 ```
 Week  1-2:   Phase 1  - Build stabilization
-Week  2-3:   Phase 2  - Rebranding (Forge)
+Week  2-3:   Phase 2  - Rebranding (Forail)
 Week  3-6:   Phase 3  - Dependency modernization (8 groups)
 Week  6-12:  Phase 4  - Backend refactoring (11 sub-tasks)
 Week 12-18:  Phase 5  - Frontend refactoring (8 sub-tasks)

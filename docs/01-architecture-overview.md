@@ -2,7 +2,7 @@
 
 ## System Diagram
 
-![Forge Architecture](img/architecture.png)
+![Forail Architecture](img/architecture.png)
 
 <details>
 <summary>Text version (for terminals)</summary>
@@ -66,7 +66,7 @@
 
 ## Component Roles
 
-### Web Container (`forge-web`)
+### Web Container (`forail-web`)
 
 Handles all HTTP and WebSocket traffic. Runs three processes via `supervisord`:
 
@@ -83,7 +83,7 @@ two different files:
 - External: `tools/docker-compose-prod/nginx/nginx.conf`
 - Internal: `tools/docker-compose-prod/settings/nginx-internal.conf`
 
-### Task Container (`forge-task`)
+### Task Container (`forail-task`)
 
 Handles background job execution. Runs four processes:
 
@@ -178,7 +178,7 @@ on 8013 communicates with them. Do not expose 8050/8051 outside the Docker netwo
 ## Directory Structure — Where things live
 
 ```
-forge/                          # Python backend
+forail/                          # Python backend
 ├── api/                        # REST API (views, serializers, urls)
 ├── main/                       # Core (models, tasks, signals, migrations, commands)
 ├── conf/                       # Database-backed settings

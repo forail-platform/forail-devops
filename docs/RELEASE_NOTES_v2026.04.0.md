@@ -1,14 +1,14 @@
-# Forge 2026.04.0 — Release Notes
+# Forail 2026.04.0 — Release Notes
 
 **Release date:** 2026-04-03
-**Based on:** Forge 2026.03.0 + new features
+**Based on:** Forail 2026.03.0 + new features
 **License:** Apache License 2.0
 
 ---
 
 ## Overview
 
-Forge 2026.04.0 delivers the remaining Tier 1 features from the post-release roadmap:
+Forail 2026.04.0 delivers the remaining Tier 1 features from the post-release roadmap:
 Event-Driven Automation (EDA), AI Assistant, Dynamic Surveys, and Improved Audit Trail.
 
 ---
@@ -34,7 +34,7 @@ automated job launches, workflow executions, or notification dispatches.
 
 Optional microservice providing context-aware chat assistance using local LLMs.
 
-- **forge-assistant** repository: FastAPI + Ollama + ChromaDB
+- **forail-assistant** repository: FastAPI + Ollama + ChromaDB
 - **SSE streaming** for real-time token delivery
 - **Frontend chat panel** with floating button, markdown rendering, context awareness
 - **Privacy-first:** All processing on-premises, no cloud API calls
@@ -144,7 +144,7 @@ Updated documentation:
 - **Missing migrations** — Added `0204_audit_event` migration for AuditEvent model and ActivityStream audit fields (actor_ip, actor_user_agent, actor_session_id)
 - **Migration chain** — Reordered migrations so audit_event (0204) precedes RLS policies (0206) which references the table
 - **Assistant docker-compose** — Fixed healthchecks for Ollama and ChromaDB containers (curl not available in images)
-- **Assistant registry path** — Fixed image path from `forgeplatform` to `forge-platform`
+- **Assistant registry path** — Fixed image path from `forail-platform` to `forail-platform`
 
 ### Testing
 
@@ -155,7 +155,7 @@ Updated documentation:
 
 ### Refactoring
 
-- **forge-assistant** — Extracted shared ChromaDB client and embedding functions into `app/db.py`, eliminating 32 lines of duplicated code between `rag.py` and `indexer.py`
+- **forail-assistant** — Extracted shared ChromaDB client and embedding functions into `app/db.py`, eliminating 32 lines of duplicated code between `rag.py` and `indexer.py`
 
 ### Quality Metrics
 
@@ -170,7 +170,7 @@ Updated documentation:
 
 ## Competitive Landscape Update
 
-| Feature                 | Forge   | AWX | AAP 2.5+ | Ascender | Semaphore |
+| Feature                 | Forail   | AWX | AAP 2.5+ | Ascender | Semaphore |
 | ----------------------- | ------- | --- | -------- | -------- | --------- |
 | Dynamic surveys         | **Yes** | No  | No       | No       | No        |
 | Event-driven (EDA)      | **Yes** | No  | Yes      | No       | No        |

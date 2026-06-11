@@ -31,9 +31,9 @@ const page = await ctx.newPage()
 
 // Login
 await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
-await page.evaluate(() => localStorage.setItem('forge_password_changed_1', 'true'))
+await page.evaluate(() => localStorage.setItem('forail_password_changed_1', 'true'))
 await page.locator('input').first().fill('admin')
-await page.locator('input[type="password"]').first().fill('ForgeAdmin2026!')
+await page.locator('input[type="password"]').first().fill('ForailAdmin2026!')
 await Promise.all([
   page.waitForResponse((r) => r.url().includes('/api/login/') && r.request().method() === 'POST'),
   page.click('button:has-text("Sign in")'),

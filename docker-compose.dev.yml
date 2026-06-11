@@ -1,8 +1,8 @@
 services:
-  forge-web:
+  forail-web:
     ports:
       - "8013:8013"
       - "8043:8043"
     environment:
-      FORGE_CSRF_TRUSTED_ORIGINS: "https://localhost,https://192.168.56.20,http://localhost:5173,http://192.168.56.20:5173"
-      FORGE_COOKIE_SECURE: "false"
+      FORAIL_CSRF_TRUSTED_ORIGINS: "https://localhost,https://192.168.56.20,http://localhost:5173,http://192.168.56.20:5173"
+      FORAIL_COOKIE_SECURE: "false"

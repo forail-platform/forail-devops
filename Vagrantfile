@@ -3,17 +3,17 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-24.04"
-  config.vm.hostname = "forge-deploy"
+  config.vm.hostname = "forail-deploy"
 
   # Production deployment ports
   config.vm.network "forwarded_port", guest: 80,   host: 8080   # HTTP
   config.vm.network "forwarded_port", guest: 443,  host: 8443   # HTTPS
-  config.vm.network "forwarded_port", guest: 8013, host: 8013   # Forge web internal
+  config.vm.network "forwarded_port", guest: 8013, host: 8013   # Forail web internal
 
   config.vm.network "private_network", ip: "192.168.56.22"
 
   config.vm.provider "virtualbox" do |vb|
-    vb.name = "forge-deploy"
+    vb.name = "forail-deploy"
     vb.memory = "8192"
     vb.cpus = 4
   end
@@ -23,14 +23,14 @@ Vagrant.configure("2") do |config|
     lv.cpus = 4
   end
 
-  config.vm.synced_folder ".", "/forge-deploy", type: "rsync",
+  config.vm.synced_folder ".", "/forail-deploy", type: "rsync",
     rsync__exclude: [".git/", "*.pyc", "__pycache__/"]
 
   config.vm.provision "shell", inline: <<-SHELL
     set -euo pipefail
 
     echo "============================================"
-    echo " Forge Deploy - Ubuntu 24.04"
+    echo " Forail Deploy - Ubuntu 24.04"
     echo " Provisioning..."
     echo "============================================"
 
@@ -62,61 +62,61 @@ Vagrant.configure("2") do |config|
 
     # --- SSL self-signed certs for testing ---
     echo "[3/3] Generating self-signed SSL certificates..."
-    mkdir -p /forge-deploy/nginx/ssl
-    if [ ! -f /forge-deploy/nginx/ssl/fullchain.pem ]; then
+    mkdir -p /forail-deploy/nginx/ssl
+    if [ ! -f /forail-deploy/nginx/ssl/fullchain.pem ]; then
         openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-            -keyout /forge-deploy/nginx/ssl/privkey.pem \
-            -out /forge-deploy/nginx/ssl/fullchain.pem \
-            -subj "/C=RS/ST=Belgrade/L=Belgrade/O=Forge Platform/CN=forge.local"
+            -keyout /forail-deploy/nginx/ssl/privkey.pem \
+            -out /forail-deploy/nginx/ssl/fullchain.pem \
+            -subj "/C=RS/ST=Belgrade/L=Belgrade/O=Forail Platform/CN=forail.local"
     fi
 
     # --- .env file ---
-    if [ ! -f /forge-deploy/.env ]; then
+    if [ ! -f /forail-deploy/.env ]; then
         SECRET_KEY=$(openssl rand -hex 32)
         WS_SECRET=$(openssl rand -hex 32)
         DB_PASS=$(openssl rand -hex 16)
         ADMIN_PASS=$(openssl rand -base64 12)
 
-        cat > /forge-deploy/.env << ENVFILE
-POSTGRES_USER=forge
+        cat > /forail-deploy/.env << ENVFILE
+POSTGRES_USER=forail
 POSTGRES_PASSWORD=${DB_PASS}
-POSTGRES_DB=forge
-FORGE_SECRET_KEY=${SECRET_KEY}
-FORGE_BROADCAST_WEBSOCKET_SECRET=${WS_SECRET}
-FORGE_ADMIN_USER=admin
-FORGE_ADMIN_PASSWORD=${ADMIN_PASS}
-FORGE_ADMIN_EMAIL=admin@forge.local
-FORGE_ALLOWED_HOSTS=*
-FORGE_CSRF_TRUSTED_ORIGINS=https://192.168.56.22,https://localhost:8443,https://forge.local
-FORGE_NODE_NAME=forge-node
-FORGE_NODE_TYPE=hybrid
-FORGE_IMAGE=ghcr.io/forgeplatform/forge-backend
-FORGE_TAG=latest
+POSTGRES_DB=forail
+FORAIL_SECRET_KEY=${SECRET_KEY}
+FORAIL_BROADCAST_WEBSOCKET_SECRET=${WS_SECRET}
+FORAIL_ADMIN_USER=admin
+FORAIL_ADMIN_PASSWORD=${ADMIN_PASS}
+FORAIL_ADMIN_EMAIL=admin@forail.local
+FORAIL_ALLOWED_HOSTS=*
+FORAIL_CSRF_TRUSTED_ORIGINS=https://192.168.56.22,https://localhost:8443,https://forail.local
+FORAIL_NODE_NAME=forail-node
+FORAIL_NODE_TYPE=hybrid
+FORAIL_IMAGE=ghcr.io/forail-platform/forail-backend
+FORAIL_TAG=latest
 ENVFILE
         echo "Generated .env with random secrets."
         echo "Admin password: ${ADMIN_PASS}"
     fi
 
     # --- Workspace setup ---
-    ln -sf /forge-deploy /home/vagrant/forge-deploy
+    ln -sf /forail-deploy /home/vagrant/forail-deploy
 
     cat >> /home/vagrant/.bashrc << 'BASHRC'
 
-# Forge Deploy Environment
-export FORGE_DEPLOY=/forge-deploy
-alias forge-up='cd /forge-deploy && docker compose up -d'
-alias forge-down='cd /forge-deploy && docker compose down'
-alias forge-logs='cd /forge-deploy && docker compose logs -f'
-alias forge-ps='cd /forge-deploy && docker compose ps'
-alias forge-restart='cd /forge-deploy && docker compose restart'
-alias forge-pull='cd /forge-deploy && docker compose pull'
+# Forail Deploy Environment
+export FORAIL_DEPLOY=/forail-deploy
+alias forail-up='cd /forail-deploy && docker compose up -d'
+alias forail-down='cd /forail-deploy && docker compose down'
+alias forail-logs='cd /forail-deploy && docker compose logs -f'
+alias forail-ps='cd /forail-deploy && docker compose ps'
+alias forail-restart='cd /forail-deploy && docker compose restart'
+alias forail-pull='cd /forail-deploy && docker compose pull'
 BASHRC
 
     chown -R vagrant:vagrant /home/vagrant
 
     echo ""
     echo "============================================"
-    echo " Forge Deploy - Ready"
+    echo " Forail Deploy - Ready"
     echo "============================================"
     echo ""
     echo " Versions:"
@@ -125,15 +125,15 @@ BASHRC
     echo "   Docker Compose: $(docker compose version 2>&1)"
     echo ""
     echo " Quick start (vagrant ssh):"
-    echo "   cd /forge-deploy"
+    echo "   cd /forail-deploy"
     echo "   docker compose up -d"
     echo ""
     echo " Or use aliases:"
-    echo "   forge-up      - Start all services"
-    echo "   forge-down    - Stop all services"
-    echo "   forge-logs    - Follow logs"
-    echo "   forge-ps      - Show service status"
-    echo "   forge-pull    - Pull latest images"
+    echo "   forail-up      - Start all services"
+    echo "   forail-down    - Stop all services"
+    echo "   forail-logs    - Follow logs"
+    echo "   forail-ps      - Show service status"
+    echo "   forail-pull    - Pull latest images"
     echo ""
     echo " Access:"
     echo "   HTTPS: https://192.168.56.22 (or https://localhost:8443)"

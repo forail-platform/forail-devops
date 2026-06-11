@@ -36,8 +36,8 @@ git checkout -b feature/my-feature
 
 # 2. Make changes, test, commit
 vagrant rsync
-vagrant ssh -c "cd /awx_devel && forge-test"
-git add forge/main/models/my_model.py
+vagrant ssh -c "cd /awx_devel && forail-test"
+git add forail/main/models/my_model.py
 git commit -m "feat(models): add Policy model for governance"
 
 # 3. Push and create PR
@@ -108,8 +108,8 @@ type(scope): short description
 ### Linting (run before every commit)
 
 ```bash
-flake8 forge/ --count --statistics
-cd forge/ui_next && npx tsc --noEmit
+flake8 forail/ --count --statistics
+cd forail/ui_next && npx tsc --noEmit
 ```
 
 ---
@@ -155,12 +155,12 @@ cd forge/ui_next && npx tsc --noEmit
 
 ### Add a new API endpoint
 
-1. Model in `forge/main/models/` → register in `__init__.py`
-2. Migration: `forge-manage makemigrations main`
-3. Serializer in `forge/api/serializers/`
-4. View in `forge/api/views/`
-5. URL module in `forge/api/urls/` → register in `urls.py`
-6. Access class in `forge/main/access.py`
+1. Model in `forail/main/models/` → register in `__init__.py`
+2. Migration: `forail-manage makemigrations main`
+3. Serializer in `forail/api/serializers/`
+4. View in `forail/api/views/`
+5. URL module in `forail/api/urls/` → register in `urls.py`
+6. Access class in `forail/main/access.py`
 7. Tests
 
 ### Add a new frontend page
@@ -174,6 +174,6 @@ cd forge/ui_next && npx tsc --noEmit
 
 ### Add a management command
 
-1. File in `forge/main/management/commands/`
+1. File in `forail/main/management/commands/`
 2. Implement `Command` class with `handle()` method
-3. Test: `forge-manage my_command --help`
+3. Test: `forail-manage my_command --help`

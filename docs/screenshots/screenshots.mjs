@@ -1,11 +1,11 @@
-// Annotated screenshot generator for the Forge Platform user handbook.
+// Annotated screenshot generator for the Forail Platform user handbook.
 //
 // This is a documentation tool only. It is intentionally separate from the
 // frontend application — it does not ship with the product, it is not part
-// of the build, and it has no runtime dependency on forge-frontend code.
-// All it needs is a running Forge stack reachable at FORGE_URL.
+// of the build, and it has no runtime dependency on forail-frontend code.
+// All it needs is a running Forail stack reachable at FORAIL_URL.
 //
-// Run from forge-deploy/docs/screenshots/:
+// Run from forail-deploy/docs/screenshots/:
 //   npm install                          # one-time setup
 //   npx playwright install chromium      # one-time setup
 //   npm run screenshots                  # take all screenshots
@@ -26,18 +26,18 @@ import { dirname, resolve } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT_DIR = resolve(__dirname, '../img/handbook')
 
-const BASE = process.env.FORGE_URL || 'https://localhost'
-const USER = process.env.FORGE_USER || 'admin'
-const PASS = process.env.FORGE_PASS || 'ForgeAdmin2026!'
+const BASE = process.env.FORAIL_URL || 'https://localhost'
+const USER = process.env.FORAIL_USER || 'admin'
+const PASS = process.env.FORAIL_PASS || 'ForailAdmin2026!'
 
 const ANNOTATE_CSS = `
-[data-forge-highlight] {
+[data-forail-highlight] {
   outline: 4px solid #ff3b30 !important;
   outline-offset: 3px !important;
   box-shadow: 0 0 0 8px rgba(255, 59, 48, 0.18) !important;
   border-radius: 6px !important;
 }
-.forge-callout-badge {
+.forail-callout-badge {
   position: absolute !important;
   z-index: 999999;
   background: #ff3b30;
@@ -115,7 +115,7 @@ async function annotate(page, items) {
     function placeBadge(target, n) {
       const rect = target.getBoundingClientRect()
       const badge = document.createElement('div')
-      badge.className = 'forge-callout-badge'
+      badge.className = 'forail-callout-badge'
       badge.textContent = String(n)
       // Position absolutely on the document so the badge stays put even
       // when the page is scrolled for full-page screenshots.
@@ -134,7 +134,7 @@ async function annotate(page, items) {
         failures.push({ n: it.n, kind: it.kind, key: it.text || it.namePattern || it.selector })
         continue
       }
-      target.setAttribute('data-forge-highlight', '')
+      target.setAttribute('data-forail-highlight', '')
       placeBadge(target, it.n)
     }
 
@@ -157,7 +157,7 @@ async function annotate(page, items) {
 async function login(page) {
   await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
   await page.evaluate(() => {
-    localStorage.setItem('forge_password_changed_1', 'true')
+    localStorage.setItem('forail_password_changed_1', 'true')
   })
 
   const userInput = page.locator('input').first()

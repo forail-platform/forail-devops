@@ -1,6 +1,6 @@
-# Forge CI/CD Pipeline — Reference Document
+# Forail CI/CD Pipeline — Reference Document
 
-This document describes the intended production CI/CD pipeline for Forge.
+This document describes the intended production CI/CD pipeline for Forail.
 The pipeline enforces code quality gates — code cannot be merged unless
 all required stages pass.
 
@@ -51,7 +51,7 @@ push / MR                    git tag v*
 
 | Job             | Image              | What it checks                        | Command                              |
 | --------------- | ------------------ | ------------------------------------- | ------------------------------------ |
-| `lint:python`   | `python:3.12-slim` | PEP8, undefined names, unused imports | `flake8 forge/ --count --statistics` |
+| `lint:python`   | `python:3.12-slim` | PEP8, undefined names, unused imports | `flake8 forail/ --count --statistics` |
 | `lint:frontend` | `node:20-slim`     | TypeScript type errors                | `npx tsc --noEmit`                   |
 
 **Triggers:** Every push, every MR, every tag.
@@ -60,7 +60,7 @@ push / MR                    git tag v*
 
 | Job                  | Image              | Services               | What it checks    | Command                               |
 | -------------------- | ------------------ | ---------------------- | ----------------- | ------------------------------------- |
-| `test:python-unit`   | `python:3.12-slim` | PostgreSQL 15, Redis 7 | 1083 unit tests   | `pytest forge/main/tests/unit/ -x -q` |
+| `test:python-unit`   | `python:3.12-slim` | PostgreSQL 15, Redis 7 | 1083 unit tests   | `pytest forail/main/tests/unit/ -x -q` |
 | `test:frontend-unit` | `node:20-slim`     | —                      | Vitest test suite | `npx vitest run`                      |
 
 **Triggers:** Every push, every MR, every tag.
@@ -127,7 +127,7 @@ workflow:
 
 **What this means:**
 
-- Push changes to `forge/`, `requirements/`, `tools/`, etc. → pipeline runs, must pass
+- Push changes to `forail/`, `requirements/`, `tools/`, etc. → pipeline runs, must pass
 - Push changes to only `docs/`, `*.md`, `*.png` → pipeline does NOT run
 - Push a tag `v2026.03.0` → full pipeline including release stage
 - Mix of code + docs changes → pipeline runs (code changes take priority)
@@ -175,7 +175,7 @@ The version is used for:
 | Cache | Key                         | What it caches                              |
 | ----- | --------------------------- | ------------------------------------------- |
 | pip   | `pip-${CI_COMMIT_REF_SLUG}` | Python packages (`.cache/pip`)              |
-| npm   | `npm-${CI_COMMIT_REF_SLUG}` | Node modules (`forge/ui_next/node_modules`) |
+| npm   | `npm-${CI_COMMIT_REF_SLUG}` | Node modules (`forail/ui_next/node_modules`) |
 | trivy | `trivy`                     | Vulnerability database (`.trivycache/`)     |
 
 Caches are per-branch. The lint stage uses `pull-push` (reads and writes),
@@ -209,16 +209,16 @@ If you want to verify before pushing:
 
 ```bash
 # Python lint
-flake8 forge/ --count --statistics --max-line-length=160
+flake8 forail/ --count --statistics --max-line-length=160
 
 # TypeScript check
-cd forge/ui_next && npx tsc --noEmit
+cd forail/ui_next && npx tsc --noEmit
 
 # Python tests (inside Vagrant VM)
-python -m pytest forge/main/tests/unit/ -x -q --tb=short
+python -m pytest forail/main/tests/unit/ -x -q --tb=short
 
 # Frontend tests
-cd forge/ui_next && npx vitest run
+cd forail/ui_next && npx vitest run
 ```
 
 If all four pass locally, the pipeline will pass on GitLab.

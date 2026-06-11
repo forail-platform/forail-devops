@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Forge DevOps deployment will be documented
+All notable changes to the Forail DevOps deployment will be documented
 in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -12,10 +12,10 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 
 ### Added
 - `docs/RELEASE_NOTES_v2026.05.0.md` — platform GA release notes
-  covering `forge-operator` v1.0.0 (9 CRDs + multi-cluster + OLM
-  bundle), `forge-backend` 0208 migration fix, `forge-assistant`
-  all-in-one image with `gemma3:1b` default, `forge-helm` chart 1.0.0
-  bump, and the `forge-dev-cluster` 3-master / 4-worker k3s scale-up.
+  covering `forail-operator` v1.0.0 (9 CRDs + multi-cluster + OLM
+  bundle), `forail-backend` 0208 migration fix, `forail-assistant`
+  all-in-one image with `gemma3:1b` default, `forail-helm` chart 1.0.0
+  bump, and the `forail-dev-cluster` 3-master / 4-worker k3s scale-up.
 
 ### Changed
 - `future_development_plan.md`: Tier 3.3 (Kubernetes Operator) and
@@ -27,7 +27,7 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 
 ### Added
 - Docker Compose stack: postgres, redis, OPA, OTel Collector,
-  forge-web, forge-task, forge-frontend, nginx
+  forail-web, forail-task, forail-frontend, nginx
 - Single-VM Vagrantfile for evaluation deployments
 - Backup/restore scripts (`scripts/backup.sh`, `scripts/restore.sh`)
 - Health-check scripts (`healthcheck-web.sh`, `healthcheck-task.sh`)
@@ -38,7 +38,7 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 - Jenkinsfile with standalone, assistant, and integration test stages
 
 ### Changed
-- forge-task now runs `privileged: true` so podman-in-docker works for
+- forail-task now runs `privileged: true` so podman-in-docker works for
   Execution Environments
 - Receptor port surfaced in `.env.example` for inter-node mesh
 

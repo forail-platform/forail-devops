@@ -2,8 +2,8 @@
 compose_name: 'docker-compose.yml'
 awx_image: 'ghcr.io/ansible/awx_devel'
 pg_port: 5432
-pg_username: 'forge'
-pg_database: 'forge'
+pg_username: 'forail'
+pg_database: 'forail'
 pg_tls: false
 control_plane_node_count: 1
 minikube_container_group: false

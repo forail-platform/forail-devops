@@ -5,12 +5,12 @@ set +x
 if [ -f "/awx_devel/manage.py" ]; then
     cd /awx_devel
 else
-    echo "Failed to find forge source tree, map your development tree volume"
+    echo "Failed to find forail source tree, map your development tree volume"
 fi
 
 make awx-link
 
-# Forge bootstrapping
+# Forail bootstrapping
 make version_file
 
 if [[ -n "$RUN_MIGRATIONS" ]]; then
@@ -24,47 +24,47 @@ else
 fi
 
 # Make sure that the UI static file directory exists, Django complains otherwise.
-mkdir -p /awx_devel/forge/ui/build/static
+mkdir -p /awx_devel/forail/ui/build/static
 
 # Make sure that the UI_NEXT static file directory exists, if UI_NEXT is not built yet put a placeholder file in it.
-if [ ! -d "/awx_devel/forge/ui_next/build/forge" ]; then
-    mkdir -p /awx_devel/forge/ui_next/build/forge
-    cp /awx_devel/forge/ui_next/placeholder_index_forge.html /awx_devel/forge/ui_next/build/forge/index_forge.html
+if [ ! -d "/awx_devel/forail/ui_next/build/forail" ]; then
+    mkdir -p /awx_devel/forail/ui_next/build/forail
+    cp /awx_devel/forail/ui_next/placeholder_index_forail.html /awx_devel/forail/ui_next/build/forail/index_forail.html
 fi
 
-if output=$(forge-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
+if output=$(forail-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
     echo $output
 fi
 echo "Admin password: ${DJANGO_SUPERUSER_PASSWORD}"
 
-forge-manage create_preload_data
-forge-manage register_default_execution_environments
+forail-manage create_preload_data
+forail-manage register_default_execution_environments
 
-forge-manage provision_instance --hostname="$(hostname)" --node_type="$MAIN_NODE_TYPE"
-forge-manage add_receptor_address --instance="$(hostname)" --address="$(hostname)" --port=2222 --canonical
+forail-manage provision_instance --hostname="$(hostname)" --node_type="$MAIN_NODE_TYPE"
+forail-manage add_receptor_address --instance="$(hostname)" --address="$(hostname)" --port=2222 --canonical
 
-forge-manage register_queue --queuename=controlplane --instance_percent=100
-forge-manage register_queue --queuename=default --instance_percent=100
+forail-manage register_queue --queuename=controlplane --instance_percent=100
+forail-manage register_queue --queuename=default --instance_percent=100
 
 if [[ -n "$RUN_MIGRATIONS" ]]; then
     for (( i=1; i<$CONTROL_PLANE_NODE_COUNT; i++ )); do
         for (( j=i + 1; j<=$CONTROL_PLANE_NODE_COUNT; j++ )); do
-            forge-manage register_peers "awx-$i" --peers "awx-$j"
+            forail-manage register_peers "awx-$i" --peers "awx-$j"
         done
     done
 
     if [[ $EXECUTION_NODE_COUNT > 0 ]]; then
-        forge-manage provision_instance --hostname="receptor-hop" --node_type="hop"
-        forge-manage add_receptor_address --instance="receptor-hop" --address="receptor-hop" --port=5555 --canonical
-        forge-manage register_peers "receptor-hop" --peers "awx-1"
+        forail-manage provision_instance --hostname="receptor-hop" --node_type="hop"
+        forail-manage add_receptor_address --instance="receptor-hop" --address="receptor-hop" --port=5555 --canonical
+        forail-manage register_peers "receptor-hop" --peers "awx-1"
         for (( e=1; e<=$EXECUTION_NODE_COUNT; e++ )); do
-            forge-manage provision_instance --hostname="receptor-$e" --node_type="execution"
-            forge-manage register_peers "receptor-$e" --peers "receptor-hop"
+            forail-manage provision_instance --hostname="receptor-$e" --node_type="execution"
+            forail-manage register_peers "receptor-$e" --peers "receptor-hop"
         done
     fi
 fi
 
 # Create resource entries when using Minikube
 if [[ -n "$MINIKUBE_CONTAINER_GROUP" ]]; then
-    forge-manage shell < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
+    forail-manage shell < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
 fi

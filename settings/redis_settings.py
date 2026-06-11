@@ -7,7 +7,7 @@ BROKER_URL = f'redis://{_redis_host}:{_redis_port}/0'
 
 CACHES = {
     'default': {
-        'BACKEND': 'forge.main.cache.AWXRedisCache',
+        'BACKEND': 'forail.main.cache.AWXRedisCache',
         'LOCATION': f'redis://{_redis_host}:{_redis_port}/1',
     }
 }

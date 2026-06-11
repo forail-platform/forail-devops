@@ -1,6 +1,6 @@
-# Forge AI Assistant — Ollama RAG Chat
+# Forail AI Assistant — Ollama RAG Chat
 
-Plan for an integrated AI assistant within the Forge platform that uses a local Ollama LLM with RAG (Retrieval Augmented Generation) for fast answers about the platform.
+Plan for an integrated AI assistant within the Forail platform that uses a local Ollama LLM with RAG (Retrieval Augmented Generation) for fast answers about the platform.
 
 ---
 
@@ -8,7 +8,7 @@ Plan for an integrated AI assistant within the Forge platform that uses a local 
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                    Forge Web UI                          │
+│                    Forail Web UI                          │
 │                                                          │
 │  ┌────────────────────────────────┐  ┌────────────────────┐ │
 │  │     Dashboard / Jobs /         │  │   AI Assistant      │ │
@@ -27,7 +27,7 @@ Plan for an integrated AI assistant within the Forge platform that uses a local 
           │                              │
           ▼                              ▼
 ┌──────────────────┐         ┌───────────────────────┐
-│   Forge API      │         │   AI Backend          │
+│   Forail API      │         │   AI Backend          │
 │   (Django)       │         │   (Django endpoint)   │
 │                  │         │                       │
 │  /api/v2/...     │         │  /api/v2/assistant/   │
@@ -52,7 +52,7 @@ Plan for an integrated AI assistant within the Forge platform that uses a local 
 | Feature                  | Description                                          |
 | ------------------------ | ---------------------------------------------------- |
 | **Contextual help**      | Knows which page you're on, gives relevant tips      |
-| **Documentation search** | Searches AWX/Forge docs, API reference, Ansible docs |
+| **Documentation search** | Searches AWX/Forail docs, API reference, Ansible docs |
 | **Error explanation**    | Explains errors from job output or API responses     |
 | **Playbook assistance**  | Suggests Ansible modules, fixes YAML syntax          |
 | **Admin guide**          | RBAC, credential setup, inventory management         |
@@ -69,7 +69,7 @@ Plan for an integrated AI assistant within the Forge platform that uses a local 
 | **LLM**        | Ollama (llama3.1:8b or mistral:7b)   | Local, free, data privacy                        |
 | **Vector DB**  | ChromaDB                             | Lightweight, Python native, no external service  |
 | **Embeddings** | `nomic-embed-text` (Ollama)          | Local embedding model, fast                      |
-| **Backend**    | Django endpoint (existing Forge API) | No new service, same auth                        |
+| **Backend**    | Django endpoint (existing Forail API) | No new service, same auth                        |
 | **Frontend**   | React chat component                 | Integrated into existing UI                      |
 | **Streaming**  | Server-Sent Events (SSE)             | Simpler than WebSocket for unidirectional stream |
 
@@ -148,7 +148,7 @@ Documents to index:
 1. AWX API Reference (/api/v2/ — all endpoints with descriptions)
 2. AWX User Guide (docs/ directory)
 3. Ansible Module Index (most common modules)
-4. Forge-specific documentation
+4. Forail-specific documentation
 5. Common error messages and solutions
 6. RBAC model and permission explanations
 """
@@ -228,10 +228,10 @@ class AssistantView(APIView):
 ```python
 # awx/main/services/assistant.py
 
-class ForgeAssistant:
+class ForailAssistant:
     def __init__(self):
         self.chroma = chromadb.HttpClient(host="chromadb", port=8000)
-        self.collection = self.chroma.get_collection("forge_docs")
+        self.collection = self.chroma.get_collection("forail_docs")
         self.ollama_url = "http://ollama:11434"
 
     def query(self, message: str, context: dict = None):
@@ -247,7 +247,7 @@ class ForgeAssistant:
         # 3. Compose prompt with context
         docs_context = "\n\n".join(results["documents"][0])
 
-        system_prompt = f"""You are Forge Assistant, an AI helper for the Forge
+        system_prompt = f"""You are Forail Assistant, an AI helper for the Forail
 infrastructure automation platform (based on AWX/Ansible Tower).
 
 Answer questions using ONLY the following documentation context.
@@ -328,11 +328,11 @@ class ChatMessage(models.Model):
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Forge Assistant                          ─ × │
+│ Forail Assistant                          ─ × │
 ├──────────────────────────────────────────────┤
 │                                              │
 │  ┌─────────────────────────────────────────┐ │
-│  │ 🤖 Hi! I'm your Forge assistant.       │ │
+│  │ 🤖 Hi! I'm your Forail assistant.       │ │
 │  │    Ask me anything about the platform.  │ │
 │  └─────────────────────────────────────────┘ │
 │                                              │
@@ -565,7 +565,7 @@ Bot: Use the `ansible.builtin.copy` module:
 
 ## Integration with Mobile Application
 
-The chat will also be available in the Forge Mobile app:
+The chat will also be available in the Forail Mobile app:
 
 ```
 Android:
@@ -608,5 +608,5 @@ Post-MVP:
 - Contextual hints per page
 - Error analysis from job output
 - Voice input in the mobile app
-- Fine-tuning the model on Forge-specific data
+- Fine-tuning the model on Forail-specific data
 - Multi-language support

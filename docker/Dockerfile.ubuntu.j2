@@ -5,7 +5,7 @@
 ###
 
 {% if not (build_dev|bool) and not (kube_dev|bool) and not (headless|bool) %}
-# UI builder stage - builds Forge UI frontend
+# UI builder stage - builds Forail UI frontend
 FROM ubuntu:24.04 as ui-builder
 
 USER root
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y nodejs npm && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY . /tmp/src/
-WORKDIR /tmp/src/forge/ui_next
+WORKDIR /tmp/src/forail/ui_next
 RUN npm ci && npm run build
 {% endif %}
 
@@ -100,15 +100,15 @@ WORKDIR /tmp/src/
 
 {% if not headless|bool %}
 # Copy pre-built UI assets from ui-builder stage
-COPY --from=ui-builder /tmp/src/forge/ui_next/build /tmp/src/forge/ui_next/build
+COPY --from=ui-builder /tmp/src/forail/ui_next/build /tmp/src/forail/ui_next/build
 {% endif %}
 
 RUN HEADLESS=yes make sdist && \
-    rm -f dist/forge.tar.gz && \
-    /var/lib/awx/venv/awx/bin/pip install dist/forge-*.tar.gz
+    rm -f dist/forail.tar.gz && \
+    /var/lib/awx/venv/awx/bin/pip install dist/forail-*.tar.gz
 
 {% if not headless|bool %}
-RUN DJANGO_SETTINGS_MODULE=forge.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/forge-manage collectstatic --noinput --clear
+RUN DJANGO_SETTINGS_MODULE=forail.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/forail-manage collectstatic --noinput --clear
 {% endif %}
 
 {% endif %}
@@ -202,14 +202,14 @@ RUN apt-get update && apt-get install -y inotify-tools && \
 # Copy app from builder
 COPY --from=builder /var/lib/awx /var/lib/awx
 
-RUN ln -s /var/lib/awx/venv/awx/bin/forge-manage /usr/bin/forge-manage
+RUN ln -s /var/lib/awx/venv/awx/bin/forail-manage /usr/bin/forail-manage
 
 COPY --from={{ receptor_image }} /usr/bin/receptor /usr/bin/receptor
 
 {%if build_dev|bool %}
 
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \
-        -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=Forge Development/CN=forge.localhost" && \
+        -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=Forail Development/CN=forail.localhost" && \
     openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt && \
     chmod 640 /etc/nginx/nginx.csr /etc/nginx/nginx.key /etc/nginx/nginx.crt
 {% endif %}
@@ -266,9 +266,9 @@ ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
-RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.12/site-packages/forge.egg-link
-RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.12/site-packages/forge.pth
-RUN ln -sf /awx_devel/tools/docker-compose/forge-manage /usr/local/bin/forge-manage
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.12/site-packages/forail.egg-link
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.12/site-packages/forail.pth
+RUN ln -sf /awx_devel/tools/docker-compose/forail-manage /usr/local/bin/forail-manage
 RUN ln -sf /awx_devel/tools/scripts/awx-python /usr/bin/awx-python
 RUN ln -sf /awx_devel/tools/scripts/rsyslog-4xx-recovery /usr/bin/rsyslog-4xx-recovery
 {% endif %}

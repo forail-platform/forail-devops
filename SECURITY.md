@@ -35,11 +35,11 @@ We will credit you in the release notes unless you prefer to remain anonymous.
 
 In scope:
 
-- forge-deploy (this repository) — docker compose stack, install scripts, docs
+- forail-deploy (this repository) — docker compose stack, install scripts, docs
 - Insecure defaults in compose files or scripts
 - Secret handling in `.env.example` and bootstrap flows
 
 Out of scope:
 
-- Issues in upstream component images (please report to forge-backend/forge-frontend etc.)
+- Issues in upstream component images (please report to forail-backend/forail-frontend etc.)
 - Self-inflicted misconfiguration (weak admin passwords, public-facing dev setups)

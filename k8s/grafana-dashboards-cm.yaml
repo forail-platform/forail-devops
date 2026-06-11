@@ -2,14 +2,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: forge-grafana-dashboards
-  namespace: forge-system
+  name: forail-grafana-dashboards
+  namespace: forail-system
   labels:
     grafana_dashboard: "1"
-    app.kubernetes.io/name: forge-grafana-dashboards
-    app.kubernetes.io/part-of: forge-platform
+    app.kubernetes.io/name: forail-grafana-dashboards
+    app.kubernetes.io/part-of: forail-platform
 data:
-  forge-overview.json: |
+  forail-overview.json: |
     {
       "annotations": {
         "list": [
@@ -113,7 +113,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(forge_jobs_launched_total[1m])",
+              "expr": "rate(forail_jobs_launched_total[1m])",
               "legendFormat": "{{template_type}}",
               "refId": "A"
             }
@@ -199,7 +199,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(forge_jobs_blocked_total[1m])",
+              "expr": "rate(forail_jobs_blocked_total[1m])",
               "legendFormat": "{{gate}}",
               "refId": "A"
             }
@@ -285,7 +285,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "histogram_quantile(0.5, rate(forge_job_duration_seconds_bucket[5m]))",
+              "expr": "histogram_quantile(0.5, rate(forail_job_duration_seconds_bucket[5m]))",
               "legendFormat": "p50",
               "refId": "A"
             },
@@ -294,7 +294,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "histogram_quantile(0.95, rate(forge_job_duration_seconds_bucket[5m]))",
+              "expr": "histogram_quantile(0.95, rate(forail_job_duration_seconds_bucket[5m]))",
               "legendFormat": "p95",
               "refId": "B"
             },
@@ -303,7 +303,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "histogram_quantile(0.99, rate(forge_job_duration_seconds_bucket[5m]))",
+              "expr": "histogram_quantile(0.99, rate(forail_job_duration_seconds_bucket[5m]))",
               "legendFormat": "p99",
               "refId": "C"
             }
@@ -371,7 +371,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "forge_active_jobs",
+              "expr": "forail_active_jobs",
               "refId": "A"
             }
           ],
@@ -456,7 +456,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(forge_policy_evaluations_total[1m])",
+              "expr": "rate(forail_policy_evaluations_total[1m])",
               "legendFormat": "{{decision}}",
               "refId": "A"
             }
@@ -542,7 +542,7 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(forge_scan_runs_total[1m])",
+              "expr": "rate(forail_scan_runs_total[1m])",
               "legendFormat": "{{status}}",
               "refId": "A"
             }
@@ -555,7 +555,7 @@ data:
       "schemaVersion": 39,
       "style": "dark",
       "tags": [
-        "forge",
+        "forail",
         "observability"
       ],
       "templating": {
@@ -587,8 +587,8 @@ data:
       },
       "timepicker": {},
       "timezone": "",
-      "title": "Forge Overview",
-      "uid": "forge-overview",
+      "title": "Forail Overview",
+      "uid": "forail-overview",
       "version": 1,
       "weekStart": ""
     }

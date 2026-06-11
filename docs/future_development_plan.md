@@ -1,6 +1,6 @@
-# Forge — Future Development Plan
+# Forail — Future Development Plan
 
-Post-release roadmap for Forge beyond v2026.03.0.
+Post-release roadmap for Forail beyond v2026.03.0.
 Organized by priority tiers with estimated effort and dependencies.
 
 ---
@@ -83,9 +83,9 @@ and inventory setup.
 **Solution:** (detailed in `docs/chat_plan.md`)
 
 - Ollama LLM (mistral:7b or llama3.1:8b) running as a Docker service
-- ChromaDB vector store with indexed Forge/Ansible documentation
+- ChromaDB vector store with indexed Forail/Ansible documentation
 - Django API endpoint `/api/v2/assistant/` with SSE streaming
-- Frontend chat panel integrated into Forge UI
+- Frontend chat panel integrated into Forail UI
 - Context-aware: knows which page the user is on
 - Error analysis: explain failed job output
 
@@ -115,7 +115,7 @@ auditing. No way to generate audit reports or track credential access.
 
 ## Tier 2: Strategic Features (Q3-Q4 2026)
 
-Features that position Forge as a modern platform beyond basic AWX capabilities.
+Features that position Forail as a modern platform beyond basic AWX capabilities.
 
 ### 2.1 Self-Service Portal --- COMPLETED (v2026.04.0)
 
@@ -145,7 +145,7 @@ automation without understanding templates, inventories, or credentials.
   no duplication.
 - Tests: 22 standalone backend lifecycle tests + 10 frontend
   type-shape tests.
-- See `forge-backend/docs/17-self-service-portal.md` for full
+- See `forail-backend/docs/17-self-service-portal.md` for full
   architecture.
 
 ---
@@ -159,7 +159,7 @@ signed playbooks can run on production inventories".
 **Delivered:**
 
 - `Policy` model storing Rego modules + metadata; pushed to a
-  `forge-opa` sidecar (OPA 0.69.0) on save via post_save signal.
+  `forail-opa` sidecar (OPA 0.69.0) on save via post_save signal.
 - `PolicyDecision` audit row per evaluation hit; full launch context
   preserved as JSON.
 - `evaluator.evaluate_launch()` hooked into `JobTemplateLaunch.post`,
@@ -179,12 +179,12 @@ signed playbooks can run on production inventories".
   with Rego editor and dry-run panel, PolicyDecisions audit log with
   expandable context viewer. Compliance sidebar group extended with
   Policies and Policy Decisions entries.
-- `forge-opa` sidecar added to `forge-deploy/docker-compose.yml`
+- `forail-opa` sidecar added to `forail-deploy/docker-compose.yml`
   (image `openpolicyagent/opa:0.69.0-rootless`, healthcheck against
   `/health`).
 - 19 standalone backend tests + 6 frontend type-shape tests, 0 TS
   errors.
-- See `forge-backend/docs/19-policy-as-code.md` for the full
+- See `forail-backend/docs/19-policy-as-code.md` for the full
   architecture.
 
 ---
@@ -202,7 +202,7 @@ phishing-resistant authentication.
   dependency — already vendored). Configuration via Settings → Generic
   OIDC. New settings: button label, scope override, organization map,
   team map. JIT user provisioning + org/team mapping reuses
-  `forge.sso.social_pipeline`.
+  `forail.sso.social_pipeline`.
 - WebAuthn / FIDO2 via `py_webauthn==2.5.2`:
   - `WebAuthnCredential` model + 5-minute challenge stores.
   - REST API at `/api/v2/webauthn/credentials/`,
@@ -219,7 +219,7 @@ phishing-resistant authentication.
   `@simplewebauthn/browser` v13.
 - 16 standalone backend tests (policy resolver, replay guard, TTL,
   base64url helpers) + 5 frontend type-shape tests.
-- See `forge-backend/docs/18-oidc-webauthn.md` for the full architecture.
+- See `forail-backend/docs/18-oidc-webauthn.md` for the full architecture.
 
 ---
 
@@ -255,7 +255,7 @@ save this month?"
 - Dashboard with Recharts visualizations: job trends, host coverage map,
   template usage heatmap, failure analysis
 - Scheduled email reports: weekly/monthly automation summary
-- API: `/api/v2/forge_analytics/` with date range filters
+- API: `/api/v2/forail_analytics/` with date range filters
 
 **Effort:** 3 weeks
 **Dependencies:** None (uses existing job data)
@@ -282,7 +282,7 @@ Long-term features for enterprise scale and ecosystem growth.
 
 ### 3.2 Multi-Tenancy --- COMPLETED (v2026.04.0)
 
-**Problem:** Forge had Organizations and per-org RBAC, but running a single
+**Problem:** Forail had Organizations and per-org RBAC, but running a single
 install for multiple customers required trusting RBAC to be airtight, manually
 provisioning every customer's org/admin/team, manually enforcing "fair use"
 (there were no quotas — one noisy tenant could hog all Celery workers), and
@@ -305,7 +305,7 @@ manually skinning the UI per customer.
   survives org delete.
 - `TenantIsolationEvent` — v1 audit-only row for cross-tenant reads observed
   when `tenant_isolation_strict=True` (blocking deferred to v2).
-- `forge/main/tenancy/` package: pure helpers (`check_quota_value`,
+- `forail/main/tenancy/` package: pure helpers (`check_quota_value`,
   `is_window_expired`, `reset_daily_window`, `format_quota_message`,
   `normalize_branding_host`, `validate_hex_color`), `quota.py` with
   `check_tenant_quota` + `on_job_finished`, `provisioning.py` with atomic
@@ -316,7 +316,7 @@ manually skinning the UI per customer.
 - Launch hook inserted **before** Policy-as-Code and IaC Scanning in
   `JobTemplateLaunch.post`, `WorkflowJobTemplateLaunch.post`, and
   `AdHocCommandList.create`. Blocked launches return HTTP **429** with the
-  quota kind that tripped, inside the `forge.launch` OTel span
+  quota kind that tripped, inside the `forail.launch` OTel span
   (adds `quota_blocked=<kind>` attribute for trace filtering).
 - Job-finished signal decrements `concurrent_jobs_count`; Celery beat
   `recalculate_tenant_usage_all` runs every
@@ -337,15 +337,15 @@ manually skinning the UI per customer.
 - Boot-time branding: `src/branding/applyBranding.ts` called from
   `src/main.tsx` **before** React mounts. Fetches
   `/api/v2/branding/?host=window.location.hostname` with no credentials,
-  sets CSS variables `--forge-primary` / `--forge-secondary` on `:root`,
+  sets CSS variables `--forail-primary` / `--forail-secondary` on `:root`,
   swaps the favicon and document title, caches in localStorage for 5 min.
   Tailwind exposes the CSS vars as `colors.brand.primary`/`secondary`.
-- No new compose service — tenancy piggybacks on the existing `forge-web`
-  and `forge-task` containers and is gated by `TENANCY_ENABLED`.
+- No new compose service — tenancy piggybacks on the existing `forail-web`
+  and `forail-task` containers and is gated by `TENANCY_ENABLED`.
 - Standalone tests in `tests_standalone/test_tenancy.py` cover all pure
   helpers, QuotaResult aggregation, window rollover edge cases, branding
   host normalization, and provisioning payload validation.
-- See `forge-backend/docs/22-multi-tenancy.md` for the full architecture.
+- See `forail-backend/docs/22-multi-tenancy.md` for the full architecture.
 
 **Deferred to v2:**
 
@@ -366,26 +366,26 @@ manually skinning the UI per customer.
 
 **Delivered:**
 
-- 9 CRDs spanning the full Forge resource model: `Inventory`,
+- 9 CRDs spanning the full Forail resource model: `Inventory`,
   `Credential`, `JobTemplate`, `Schedule`, `Project`, `Organization`,
-  `Team`, `Workflow`, `ForgeInstance` (in `forge-operator/api/v1alpha1/`).
+  `Team`, `Workflow`, `ForailInstance` (in `forail-operator/api/v1alpha1/`).
 - Reconciliation controllers for each CRD with finalizer-driven
   cleanup, 60-second drift reconcile, and Secret watch for instant
   Credential rotation.
-- Helm chart (`forge-operator/helm/`) with full RBAC + all 9 CRD
+- Helm chart (`forail-operator/helm/`) with full RBAC + all 9 CRD
   manifests; chart bumped to 1.0.0.
-- OLM bundle: `config/manifests/bases/forge-operator.clusterserviceversion.yaml`
+- OLM bundle: `config/manifests/bases/forail-operator.clusterserviceversion.yaml`
   with `alm-examples` for all 9 CRDs, `spec.icon`, `bundle.Dockerfile`,
   Makefile targets (`bundle`, `bundle-build`, `bundle-validate`,
   `catalog-build`). `operator-sdk bundle validate` clean.
-- **Multi-cluster control plane** via `ForgeInstance` CR +
-  `forgeapi.ClientPool` (per-CR routing to different Forge backends
+- **Multi-cluster control plane** via `ForailInstance` CR +
+  `forailapi.ClientPool` (per-CR routing to different Forail backends
   by name + tokenSecretRef; generation-gated cache invalidation).
 - **Declarative Workflow DAG**: `spec.nodes[]` keyed by `identifier`,
   three edge types (`successNodes`, `failureNodes`, `alwaysNodes`)
   reconciled against `/workflow_job_template_nodes/`.
 - e2e tested live against 3m+4w k3s 1.30 cluster
-  (see `forge-dev-cluster/` for the topology).
+  (see `forail-dev-cluster/` for the topology).
 
 **Effort spent:** 5 days (2026-05-17 → 2026-05-21).
 
@@ -408,10 +408,10 @@ Python package with a known CVE.
   truncated raw output, cached scanner_name so rows survive delete).
 - `ScanFinding` child row per finding at or above threshold
   (rule_id, severity, file_path, line, message).
-- `forge/main/scanning/runner.py` — subprocess runner with per-scanner
+- `forail/main/scanning/runner.py` — subprocess runner with per-scanner
   timeout, project checkout path + playbook resolution, output parsing,
   ScanResult + ScanFinding persistence, aggregate `ScanRunResult`.
-- Tool adapters in `forge/main/scanning/tools/` — one module per CLI
+- Tool adapters in `forail/main/scanning/tools/` — one module per CLI
   (`ansible-lint -f json --strict`, `checkov -o json`, `pip-audit
 --format json`) with severity normalization to info/low/medium/
   high/critical.
@@ -433,12 +433,12 @@ Python package with a known CVE.
   checkboxes; ScanResults audit table with status filter and finding
   drawer. Compliance sidebar group extended with Scanners and Scan
   Results entries.
-- Scanner CLIs bundled into the `forge-backend` image (installed into
+- Scanner CLIs bundled into the `forail-backend` image (installed into
   `/var/lib/awx/venv/awx`), no new compose service — the existing
-  `forge_projects` volume is already mounted on every forge container.
+  `forail_projects` volume is already mounted on every forail container.
 - Standalone backend tests for helpers, adapter parsers, applies_to
   matching, and fail-mode resolver.
-- See `forge-backend/docs/20-iac-scanning.md` for the full
+- See `forail-backend/docs/20-iac-scanning.md` for the full
   architecture.
 
 **Deferred to v2:**
@@ -471,7 +471,7 @@ Detailed plan in `docs/mobile_plan.md`:
 
 - OpenTelemetry export for all automation runs (traces, metrics)
 - Distributed tracing across multi-node receptor mesh
-- Grafana dashboard templates for Forge metrics
+- Grafana dashboard templates for Forail metrics
 - Closed-loop: observability alerts feed into EDA rules
 
 **Effort:** 3-4 weeks
@@ -503,8 +503,8 @@ Detailed plan in `docs/mobile_plan.md`:
 
 ## Infrastructure & Test Environments
 
-- ~~**Provision Kubernetes test instance for Forge Platform**~~ —
-  **DONE** (2026-05-13..16). `forge-dev-cluster` switched from
+- ~~**Provision Kubernetes test instance for Forail Platform**~~ —
+  **DONE** (2026-05-13..16). `forail-dev-cluster` switched from
   2-master + 2-worker kubeadm to **3-master + 4-worker k3s 1.30.4**
   Vagrant cluster (`192.168.56.30-36`, 14 vCPU / 28 GB total) with
   embedded etcd HA, bundled Traefik / local-path / klipper-lb /
@@ -517,7 +517,7 @@ Detailed plan in `docs/mobile_plan.md`:
 
 ## Competitive Landscape
 
-| Feature               | Forge                           | AWX     | AAP 2.5+ | Ascender | Semaphore |
+| Feature               | Forail                           | AWX     | AAP 2.5+ | Ascender | Semaphore |
 | --------------------- | ------------------------------- | ------- | -------- | -------- | --------- |
 | Docker Compose deploy | Yes                             | No      | No       | Yes      | Yes       |
 | Dynamic surveys       | Yes                             | No      | No       | No       | No        |
@@ -571,12 +571,12 @@ i razvijaju platformu.
 1. **Architecture Overview** — dijagram sistema (backend, frontend, task engine,
    Redis, PostgreSQL, Receptor), kako komponente komuniciraju
 2. **Backend (Django)** — objašnjenje svakog modula:
-   - `forge/main/models/` — svaki model, relacije, migracije
-   - `forge/api/views/` — svaki API endpoint, šta radi, koji serializer koristi
-   - `forge/api/serializers/` — logika validacije i transformacije podataka
-   - `forge/main/tasks/` — Celery taskovi, job runner, callback pipeline
-   - `forge/main/signals/` — Django signali i side-effecti
-   - `forge/conf/` — settings, konfiguracija, environment varijable
+   - `forail/main/models/` — svaki model, relacije, migracije
+   - `forail/api/views/` — svaki API endpoint, šta radi, koji serializer koristi
+   - `forail/api/serializers/` — logika validacije i transformacije podataka
+   - `forail/main/tasks/` — Celery taskovi, job runner, callback pipeline
+   - `forail/main/signals/` — Django signali i side-effecti
+   - `forail/conf/` — settings, konfiguracija, environment varijable
 3. **Frontend (React/TypeScript)** — struktura UI koda:
    - Svaka stranica i komponenta
    - Routing, state management, API pozivi
@@ -593,7 +593,7 @@ i razvijaju platformu.
 10. **Contributing Guide** — coding standardi, git workflow, PR proces,
     commit konvencije
 
-**Format:** GitHub Wiki (u okviru `forgeplatform/forge-platform` repozitorijuma)
+**Format:** GitHub Wiki (u okviru `forail-platform/forail-platform` repozitorijuma)
 ili `docs/wiki/` direktorijum u samom projektu.
 
 **Effort:** 3-4 weeks
@@ -603,25 +603,25 @@ ili `docs/wiki/` direktorijum u samom projektu.
 
 ## FreeBSD Support (Host & Jail)
 
-**Problem:** Forge trenutno radi isključivo na Linux-u (Ubuntu 24.04+) i u
+**Problem:** Forail trenutno radi isključivo na Linux-u (Ubuntu 24.04+) i u
 Docker kontejnerima. FreeBSD korisnici, koji često koriste Ansible za
-upravljanje serverima i mrežnom opremom, nemaju mogućnost da pokrenu Forge
+upravljanje serverima i mrežnom opremom, nemaju mogućnost da pokrenu Forail
 nativno na svom sistemu.
 
-**Cilj:** Omogućiti pokretanje Forge platforme direktno na FreeBSD hostu
+**Cilj:** Omogućiti pokretanje Forail platforme direktno na FreeBSD hostu
 i unutar FreeBSD jail-a kao alternativu Docker deployment-u.
 
 **Potrebne izmene:**
 
 1. **Dependency kompatibilnost** — proveriti i prilagoditi sve Python zavisnosti
    za FreeBSD (posebno: psycopg2, uwsgi/gunicorn, receptor, channels/daphne)
-2. **Konfiguracija servisa** — rc.d skripte za pokretanje Forge komponenti
+2. **Konfiguracija servisa** — rc.d skripte za pokretanje Forail komponenti
    (web, task engine, daphne/websocket, beat scheduler)
 3. **PostgreSQL & Redis** — dokumentovati instalaciju iz portova/pkg-a,
-   konfiguracija za Forge
-4. **Jail deployment** — jail konfiguracija sa izolovanim Forge okruženjem,
+   konfiguracija za Forail
+4. **Jail deployment** — jail konfiguracija sa izolovanim Forail okruženjem,
    networking (VNET ili alias IP), storage (ZFS dataset per jail)
-5. **Port/package** — kreirati FreeBSD port (`sysutils/forge-platform`) za
+5. **Port/package** — kreirati FreeBSD port (`sysutils/forail-platform`) za
    jednostavnu instalaciju putem `pkg install`
 6. **Receptor mesh** — proveriti da receptor radi na FreeBSD-u, prilagoditi
    ako koristi Linux-specific sistemske pozive

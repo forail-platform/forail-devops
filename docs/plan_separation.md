@@ -6,30 +6,30 @@
 
 ## Overview
 
-The Forge platform currently resides in a single monorepo. This plan defines the separation into **5 independent repositories** connected through CI/CD pipelines.
+The Forail platform currently resides in a single monorepo. This plan defines the separation into **5 independent repositories** connected through CI/CD pipelines.
 
 ```
-forge-platform/
-├── forge-backend        ← Django API + Task Engine + Celery
-├── forge-frontend       ← React UI (Vite + Tailwind)
-├── forge-devops         ← Docker, Compose, Nginx, CI/CD, infra
-├── forge-assistant      ← Ollama + ChromaDB RAG (future)
-└── forge-mobile         ← Android/iOS app (future)
+forail-platform/
+├── forail-backend        ← Django API + Task Engine + Celery
+├── forail-frontend       ← React UI (Vite + Tailwind)
+├── forail-devops         ← Docker, Compose, Nginx, CI/CD, infra
+├── forail-assistant      ← Ollama + ChromaDB RAG (future)
+└── forail-mobile         ← Android/iOS app (future)
 ```
 
 ---
 
-## Phase 1: forge-backend
+## Phase 1: forail-backend
 
-**Repo:** `forge-platform/forge-backend`
+**Repo:** `forail-platform/forail-backend`
 
 ### What goes in
 
 | Source (current monorepo)                                | Destination in new repo |
 | -------------------------------------------------------- | ----------------------- |
-| `forge/` (Python package)                                | `forge/`                |
-| `forge/main/`, `forge/api/`, `forge/conf/`, `forge/sso/` | Same                    |
-| `forge/settings/`                                        | `forge/settings/`       |
+| `forail/` (Python package)                                | `forail/`                |
+| `forail/main/`, `forail/api/`, `forail/conf/`, `forail/sso/` | Same                    |
+| `forail/settings/`                                        | `forail/settings/`       |
 | `manage.py`                                              | `manage.py`             |
 | `requirements/`                                          | `requirements/`         |
 | `tools/` (management scripts)                            | `tools/`                |
@@ -52,21 +52,21 @@ forge-platform/
 stages:
   - lint # flake8
   - test # pytest (unit + functional)
-  - build # Docker image (forge-backend:tag)
+  - build # Docker image (forail-backend:tag)
   - security # pip-audit, trivy
   - publish # Push image to registry
 ```
 
 ### Artifact
 
-- Docker image: `ghcr.io/forgeplatform/forge-backend:<version>`
+- Docker image: `ghcr.io/forail-platform/forail-backend:<version>`
 - API documentation (auto-generated)
 
 ---
 
-## Phase 2: forge-frontend
+## Phase 2: forail-frontend
 
-**Repo:** `forge-platform/forge-frontend`
+**Repo:** `forail-platform/forail-frontend`
 
 ### What goes in
 
@@ -101,7 +101,7 @@ stages:
 ### Artifact
 
 - Build folder (`dist/`) — static files
-- Optional Docker image: `ghcr.io/forgeplatform/forge-frontend:<version>` (nginx + static files)
+- Optional Docker image: `ghcr.io/forail-platform/forail-frontend:<version>` (nginx + static files)
 
 ### Configuration
 
@@ -111,9 +111,9 @@ stages:
 
 ---
 
-## Phase 3: forge-devops
+## Phase 3: forail-devops
 
-**Repo:** `forge-platform/forge-devops`
+**Repo:** `forail-platform/forail-devops`
 
 ### What goes in
 
@@ -140,7 +140,7 @@ stages:
 ### Structure
 
 ```
-forge-devops/
+forail-devops/
 ├── docker/
 │   ├── Dockerfile.backend      # Multi-stage for backend
 │   ├── Dockerfile.frontend     # Multi-stage for frontend (nginx)
@@ -149,7 +149,7 @@ forge-devops/
 ├── docker-compose.dev.yml      # Development stack
 ├── nginx/
 │   ├── nginx.conf
-│   └── forge.conf
+│   └── forail.conf
 ├── ssl/
 │   └── letsencrypt.sh
 ├── scripts/
@@ -173,12 +173,12 @@ services:
     image: postgres:15
   redis:
     image: redis:7
-  forge-backend:
-    image: ghcr.io/forgeplatform/forge-backend:${VERSION}
-  forge-frontend:
-    image: ghcr.io/forgeplatform/forge-frontend:${VERSION}
-  forge-task:
-    image: ghcr.io/forgeplatform/forge-backend:${VERSION} # same image, different entrypoint
+  forail-backend:
+    image: ghcr.io/forail-platform/forail-backend:${VERSION}
+  forail-frontend:
+    image: ghcr.io/forail-platform/forail-frontend:${VERSION}
+  forail-task:
+    image: ghcr.io/forail-platform/forail-backend:${VERSION} # same image, different entrypoint
   nginx:
     # reverse proxy → frontend + backend API
 ```
@@ -186,7 +186,7 @@ services:
 ### CI/CD orchestration
 
 ```
-The forge-devops repo is the "glue" that:
+The forail-devops repo is the "glue" that:
 1. Pulls backend and frontend image versions
 2. Defines how to deploy to the server
 3. Contains docker-compose for production
@@ -196,14 +196,14 @@ The forge-devops repo is the "glue" that:
 
 ---
 
-## Phase 4: forge-assistant (future)
+## Phase 4: forail-assistant (future)
 
-**Repo:** `forge-platform/forge-assistant`
+**Repo:** `forail-platform/forail-assistant`
 
 ### Planned structure
 
 ```
-forge-assistant/
+forail-assistant/
 ├── app/
 │   ├── main.py              # FastAPI/Django app
 │   ├── ollama_client.py     # Ollama LLM integration
@@ -229,14 +229,14 @@ forge-assistant/
 
 ---
 
-## Phase 5: forge-mobile (future)
+## Phase 5: forail-mobile (future)
 
-**Repo:** `forge-platform/forge-mobile`
+**Repo:** `forail-platform/forail-mobile`
 
 ### Planned structure
 
 ```
-forge-mobile/
+forail-mobile/
 ├── android/
 │   ├── app/src/main/kotlin/   # Kotlin + Jetpack Compose
 │   └── build.gradle.kts
@@ -260,19 +260,19 @@ forge-mobile/
 
 - All repos use **CalVer**: `YYYY.MM.PATCH` (e.g., `2026.03.1`)
 - Git tags trigger the release pipeline
-- `forge-devops` references versions from other repos
+- `forail-devops` references versions from other repos
 
 ### Release flow
 
 ```
-1. Developer pushes code to forge-backend or forge-frontend
+1. Developer pushes code to forail-backend or forail-frontend
 2. That repo's CI:
    - lint → test → build → security → publish Docker image
-3. forge-devops is updated with the new version:
+3. forail-devops is updated with the new version:
    - Manual: update VERSION in .env or docker-compose.yml
    - Automatic: webhook/trigger that updates the version
 4. Deploy to server:
-   - git pull forge-devops
+   - git pull forail-devops
    - docker compose pull
    - docker compose up -d
 ```
@@ -281,19 +281,19 @@ forge-mobile/
 
 ```
 ┌──────────────┐     ┌───────────────┐     ┌──────────────┐
-│ forge-backend│     │ forge-frontend│     │forge-assistant│
+│ forail-backend│     │ forail-frontend│     │forail-assistant│
 │   (Django)   │     │   (React)     │     │  (Ollama)    │
 └──────┬───────┘     └──────┬────────┘     └──────┬───────┘
        │ publish             │ publish              │ publish
        ▼                     ▼                      ▼
 ┌─────────────────────────────────────────────────────────┐
 │              Harbor Registry (ghcr.io)                │
-│  ghcr.io/forgeplatform/forge-backend   ghcr.io/forgeplatform/forge-frontend   forge-platform/... │
+│  ghcr.io/forail-platform/forail-backend   ghcr.io/forail-platform/forail-frontend   forail-platform/... │
 └─────────────────────────┬───────────────────────────────┘
                           │ pull
                           ▼
               ┌───────────────────────┐
-              │     forge-devops      │
+              │     forail-devops      │
               │  docker-compose.yml   │
               │  nginx, ssl, scripts  │
               └───────────┬───────────┘
@@ -310,13 +310,13 @@ forge-mobile/
 
 | Step | Action                                            | Priority |
 | ---- | ------------------------------------------------- | -------- |
-| 1    | Create `forge-frontend` repo, extract React code  | High     |
-| 2    | Create `forge-backend` repo, extract Django code  | High     |
-| 3    | Create `forge-devops` repo, define Docker Compose | High     |
+| 1    | Create `forail-frontend` repo, extract React code  | High     |
+| 2    | Create `forail-backend` repo, extract Django code  | High     |
+| 3    | Create `forail-devops` repo, define Docker Compose | High     |
 | 4    | Set up CI/CD for each repo                        | High     |
 | 5    | Test end-to-end with separate images              | High     |
-| 6    | Create `forge-assistant` repo                     | Medium   |
-| 7    | Create `forge-mobile` repo                        | Low      |
+| 6    | Create `forail-assistant` repo                     | Medium   |
+| 7    | Create `forail-mobile` repo                        | Low      |
 
 ### Steps 1-3: Separation (estimate: 1-2 weeks)
 
@@ -328,7 +328,7 @@ forge-mobile/
 
 - GitLab CI for each repo
 - Harbor registry publish for each repo
-- `forge-devops` orchestration
+- `forail-devops` orchestration
 
 ### Steps 6-7: Future components
 
@@ -340,6 +340,6 @@ forge-mobile/
 
 - **Monorepo remains as archive** — the current `awx` repo is kept in read-only mode as a reference
 - **Documentation is split** — each repo gets its relevant documentation
-- **Shared wiki** — `forge-devops` contains the architectural overview and links to all repositories
+- **Shared wiki** — `forail-devops` contains the architectural overview and links to all repositories
 - **Docker images are the only artifact** — repos do not depend on each other directly, only via Docker images
 - **Environment variables** — all inter-service configuration goes through env variables (12-factor app principle)

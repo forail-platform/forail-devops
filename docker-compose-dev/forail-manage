@@ -1,4 +1,4 @@
-#!/usr/bin/forge-python
+#!/usr/bin/forail-python
 import sys
 from importlib.metadata import distribution
 
@@ -15,5 +15,5 @@ def load_entry_point(dist, group, name):
 
 if __name__ == '__main__':
     sys.exit(
-        load_entry_point('forge', 'console_scripts', 'forge-manage')()
+        load_entry_point('forail', 'console_scripts', 'forail-manage')()
     )

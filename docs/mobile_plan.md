@@ -1,4 +1,4 @@
-# Forge Mobile — Deployment Approval & Server Monitor
+# Forail Mobile — Deployment Approval & Server Monitor
 
 Plan for an Android application that serves as a 2FA/biometric gateway for deployment operations and real-time server monitor.
 
@@ -8,7 +8,7 @@ Plan for an Android application that serves as a 2FA/biometric gateway for deplo
 
 ```
 ┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
-│   PC / CI/CD    │────►│  Forge API   │────►│  Android APK    │
+│   PC / CI/CD    │────►│  Forail API   │────►│  Android APK    │
 │                 │     │  (Backend)   │     │                 │
 │ • git push      │     │              │     │ • Push notif    │
 │ • deploy cmd    │     │ • Auth       │     │ • Fingerprint   │
@@ -34,7 +34,7 @@ Plan for an Android application that serves as a 2FA/biometric gateway for deplo
 ### Components
 
 ```
-forge-mobile/
+forail-mobile/
 ├── backend/                    # Go API service
 │   ├── cmd/server/main.go
 │   ├── internal/
@@ -49,7 +49,7 @@ forge-mobile/
 │
 ├── android/                    # Kotlin Android app
 │   ├── app/src/main/
-│   │   ├── java/.../forge/
+│   │   ├── java/.../forail/
 │   │   │   ├── ui/             # Jetpack Compose screens
 │   │   │   ├── data/           # Repository, API client
 │   │   │   ├── service/        # FCM, WebSocket, Biometric
@@ -58,7 +58,7 @@ forge-mobile/
 │   └── build.gradle.kts
 │
 ├── cli/                        # CLI plugin for deploy approval
-│   └── forge-deploy            # Shell script / Go binary
+│   └── forail-deploy            # Shell script / Go binary
 │
 └── docker-compose.yml          # Backend + Redis for deployment
 ```
@@ -83,7 +83,7 @@ forge-mobile/
 
 ```
 Device registration:
-1. User logs in with Forge credentials (username/password)
+1. User logs in with Forail credentials (username/password)
 2. Backend returns JWT access token + refresh token
 3. Android registers FCM token and device fingerprint
 4. Backend stores device in database (user_id, fcm_token, device_name, public_key)
@@ -125,7 +125,7 @@ GET    /api/v1/audit/                # Audit trail (who, what, when)
 ### 1.3 Database Schema
 
 ```sql
--- Users (synced with Forge/AWX)
+-- Users (synced with Forail/AWX)
 CREATE TABLE users (
     id INTEGER PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
@@ -151,7 +151,7 @@ CREATE TABLE approvals (
     deployment_id TEXT NOT NULL,       -- External ID from CI/CD
     server TEXT NOT NULL,              -- Target server
     action TEXT NOT NULL,              -- "deploy", "rollback", "restart"
-    description TEXT,                  -- "Deploy forge v2.1.3 to production"
+    description TEXT,                  -- "Deploy forail v2.1.3 to production"
     metadata JSONB,                    -- Commit hash, branch, image tag, etc.
     status TEXT DEFAULT 'pending',     -- pending, approved, rejected, expired
     requested_by TEXT,                 -- Who initiated the deploy
@@ -167,7 +167,7 @@ CREATE TABLE approvals (
 -- Servers for monitoring
 CREATE TABLE servers (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,                -- "forge-prod", "forge-staging"
+    name TEXT NOT NULL,                -- "forail-prod", "forail-staging"
     host TEXT NOT NULL,                -- SSH host or Docker API endpoint
     ssh_user TEXT,
     ssh_key_path TEXT,
@@ -195,14 +195,14 @@ CREATE TABLE audit_log (
 {
   "notification": {
     "title": "Deployment Approval Required",
-    "body": "Deploy forge v2.1.3 to production (forge-prod)"
+    "body": "Deploy forail v2.1.3 to production (forail-prod)"
   },
   "data": {
     "type": "deployment_approval",
     "approval_id": "abc-123",
-    "server": "forge-prod",
+    "server": "forail-prod",
     "action": "deploy",
-    "image": "ghcr.io/forgeplatform/forge:2.1.3",
+    "image": "ghcr.io/forail-platform/forail:2.1.3",
     "commit": "a6705d9",
     "branch": "modernization",
     "requested_by": "krle",
@@ -222,8 +222,8 @@ CREATE TABLE audit_log (
 │ LOGIN                               │
 │                                     │
 │  ┌───────────────────────────────┐  │
-│  │ Forge Server URL              │  │
-│  │ https://forge.example.com     │  │
+│  │ Forail Server URL              │  │
+│  │ https://forail.example.com     │  │
 │  └───────────────────────────────┘  │
 │  ┌───────────────────────────────┐  │
 │  │ Username                      │  │
@@ -243,15 +243,15 @@ CREATE TABLE audit_log (
 │ DASHBOARD                      ≡  │
 │                                     │
 │ ┌─ Pending Approvals ────────────┐  │
-│ │ 🔴 Deploy forge v2.1.3        │  │
-│ │    forge-prod • 3m ago         │  │
+│ │ 🔴 Deploy forail v2.1.3        │  │
+│ │    forail-prod • 3m ago         │  │
 │ │    [Approve]  [Reject]         │  │
 │ └────────────────────────────────┘  │
 │                                     │
 │ ┌─ Servers ──────────────────────┐  │
-│ │ 🟢 forge-prod    CPU 23%      │  │
-│ │ 🟢 forge-staging CPU 8%       │  │
-│ │ 🔴 forge-dev     OFFLINE      │  │
+│ │ 🟢 forail-prod    CPU 23%      │  │
+│ │ 🟢 forail-staging CPU 8%       │  │
+│ │ 🔴 forail-dev     OFFLINE      │  │
 │ └────────────────────────────────┘  │
 │                                     │
 │ ┌─ Recent Deployments ───────────┐  │
@@ -268,10 +268,10 @@ CREATE TABLE audit_log (
 ┌─────────────────────────────────────┐
 │ APPROVAL DETAIL                ←   │
 │                                     │
-│ Deploy forge v2.1.3                 │
+│ Deploy forail v2.1.3                 │
 │ ──────────────────────────────────  │
-│ Server:    forge-prod               │
-│ Image:     ghcr.io/forgeplatform/forge:2.1.3 │
+│ Server:    forail-prod               │
+│ Image:     ghcr.io/forail-platform/forail:2.1.3 │
 │ Branch:    modernization            │
 │ Commit:    a6705d9                  │
 │ Requested: krle (3 min ago)         │
@@ -297,12 +297,12 @@ CREATE TABLE audit_log (
 ┌─────────────────────────────────────┐
 │ SERVER DETAIL              ←   🔄  │
 │                                     │
-│ forge-prod                          │
+│ forail-prod                          │
 │ ──────────────────────────────────  │
 │                                     │
 │ ┌─ Containers ───────────────────┐  │
-│ │ 🟢 forge-web   Up 3d  120MB  │  │
-│ │ 🟢 forge-task  Up 3d  340MB  │  │
+│ │ 🟢 forail-web   Up 3d  120MB  │  │
+│ │ 🟢 forail-task  Up 3d  340MB  │  │
 │ │ 🟢 postgres    Up 3d  85MB   │  │
 │ │ 🟢 redis       Up 3d  12MB   │  │
 │ │ 🟢 nginx       Up 3d  8MB    │  │
@@ -324,7 +324,7 @@ CREATE TABLE audit_log (
 ┌─────────────────────────────────────┐
 │ LIVE LOGS                  ← ⏸ 🔍 │
 │                                     │
-│ forge-prod > forge-web                │
+│ forail-prod > forail-web                │
 │ ──────────────────────────────────  │
 │ 16:45:01 GET /api/v2/me/ 200 12ms  │
 │ 16:45:02 GET /api/v2/jobs/ 200 45ms│
@@ -341,7 +341,7 @@ CREATE TABLE audit_log (
 │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  │
 │ Auto-scroll: ON                     │
 │                                     │
-│ Container: [forge-web ▼]  Level: ALL  │
+│ Container: [forail-web ▼]  Level: ALL  │
 │                                     │
 │ ┌────┐ ┌────┐ ┌────┐ ┌────┐       │
 │ │Home│ │Srvr│ │Logs│ │Prof│       │
@@ -438,24 +438,24 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t ghcr.io/forgeplatform/forge:${{ github.ref_name }} .
+        run: docker build -t ghcr.io/forail-platform/forail:${{ github.ref_name }} .
 
       - name: Push image
-        run: docker push ghcr.io/forgeplatform/forge:${{ github.ref_name }}
+        run: docker push ghcr.io/forail-platform/forail:${{ github.ref_name }}
 
       - name: Request deployment approval
         id: approval
         run: |
           RESPONSE=$(curl -s -X POST \
-            ${{ secrets.FORGE_MOBILE_API }}/api/v1/approvals/ \
-            -H "Authorization: Bearer ${{ secrets.FORGE_MOBILE_TOKEN }}" \
+            ${{ secrets.FORAIL_MOBILE_API }}/api/v1/approvals/ \
+            -H "Authorization: Bearer ${{ secrets.FORAIL_MOBILE_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
-              "server": "forge-prod",
+              "server": "forail-prod",
               "action": "deploy",
               "description": "Deploy ${{ github.ref_name }}",
               "metadata": {
-                "image": "ghcr.io/forgeplatform/forge:${{ github.ref_name }}",
+                "image": "ghcr.io/forail-platform/forail:${{ github.ref_name }}",
                 "commit": "${{ github.sha }}",
                 "branch": "${{ github.ref_name }}",
                 "actor": "${{ github.actor }}"
@@ -468,8 +468,8 @@ jobs:
         run: |
           for i in $(seq 1 60); do
             STATUS=$(curl -s \
-              ${{ secrets.FORGE_MOBILE_API }}/api/v1/approvals/${{ steps.approval.outputs.approval_id }} \
-              -H "Authorization: Bearer ${{ secrets.FORGE_MOBILE_TOKEN }}" \
+              ${{ secrets.FORAIL_MOBILE_API }}/api/v1/approvals/${{ steps.approval.outputs.approval_id }} \
+              -H "Authorization: Bearer ${{ secrets.FORAIL_MOBILE_TOKEN }}" \
               | jq -r .status)
             echo "Attempt $i: status=$STATUS"
             if [ "$STATUS" = "approved" ]; then
@@ -490,7 +490,7 @@ jobs:
       - name: Deploy
         if: success()
         run: |
-          ssh deploy@forge-prod "cd /opt/forge && \
+          ssh deploy@forail-prod "cd /opt/forail && \
             docker compose pull && \
             docker compose up -d"
 ```
@@ -499,17 +499,17 @@ jobs:
 
 ```bash
 #!/bin/bash
-# forge-deploy — requests approval before deployment
+# forail-deploy — requests approval before deployment
 
 set -e
 
-SERVER=${1:?Usage: forge-deploy <server> [image_tag]}
+SERVER=${1:?Usage: forail-deploy <server> [image_tag]}
 TAG=${2:-latest}
 
 echo "Requesting approval for deploy $TAG to $SERVER..."
 
-APPROVAL=$(curl -s -X POST "$FORGE_MOBILE_API/api/v1/approvals/" \
-  -H "Authorization: Bearer $FORGE_MOBILE_TOKEN" \
+APPROVAL=$(curl -s -X POST "$FORAIL_MOBILE_API/api/v1/approvals/" \
+  -H "Authorization: Bearer $FORAIL_MOBILE_TOKEN" \
   -H "Content-Type: application/json" \
   -d "{
     \"server\": \"$SERVER\",
@@ -524,8 +524,8 @@ echo "Approval ID: $APPROVAL_ID"
 echo "Waiting for mobile approval (5 min timeout)..."
 
 while true; do
-  STATUS=$(curl -s "$FORGE_MOBILE_API/api/v1/approvals/$APPROVAL_ID" \
-    -H "Authorization: Bearer $FORGE_MOBILE_TOKEN" | jq -r .status)
+  STATUS=$(curl -s "$FORAIL_MOBILE_API/api/v1/approvals/$APPROVAL_ID" \
+    -H "Authorization: Bearer $FORAIL_MOBILE_TOKEN" | jq -r .status)
 
   case "$STATUS" in
     approved) echo "APPROVED. Deploying..."; break ;;
@@ -536,7 +536,7 @@ while true; do
 done
 
 # Start deploy
-ssh "deploy@$SERVER" "cd /opt/forge && docker compose pull && docker compose up -d"
+ssh "deploy@$SERVER" "cd /opt/forail && docker compose pull && docker compose up -d"
 echo "Deploy complete."
 ```
 
@@ -666,7 +666,7 @@ Minimum product that is already useful:
 
 1. **Backend:** Auth + Approval endpoints + FCM push
 2. **Android:** Login + Approval screen + Fingerprint
-3. **CLI:** `forge-deploy` command
+3. **CLI:** `forail-deploy` command
 
 Everything else (monitoring, log viewer, alerts) comes in v2.
 
@@ -676,7 +676,7 @@ Everything else (monitoring, log viewer, alerts) comes in v2.
 
 ### 6.1 Overview
 
-Integrate Forge AI Assistant (Ollama RAG Chat) into the Android application.
+Integrate Forail AI Assistant (Ollama RAG Chat) into the Android application.
 Uses the same backend endpoint `/api/v2/assistant/` as the web UI.
 
 Detailed plan for AI Assistant backend: see `docs/chat_plan.md`
@@ -688,7 +688,7 @@ Detailed plan for AI Assistant backend: see `docs/chat_plan.md`
 │ AI Assistant                   ←   │
 │                                     │
 │  ┌────────────────────────────────┐ │
-│  │ 🤖 Hi! I'm your Forge         │ │
+│  │ 🤖 Hi! I'm your Forail         │ │
 │  │    assistant. Ask me anything. │ │
 │  └────────────────────────────────┘ │
 │                                     │
@@ -748,7 +748,7 @@ fun ChatScreen(viewModel: ChatViewModel = koinViewModel()) {
 
 ```kotlin
 // ChatViewModel.kt — SSE streaming
-class ChatViewModel(private val api: ForgeApi) : ViewModel() {
+class ChatViewModel(private val api: ForailApi) : ViewModel() {
     val messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val isStreaming = MutableStateFlow(false)
 
@@ -812,4 +812,4 @@ class ChatViewModel(private val api: ForgeApi) : ViewModel() {
 - **Grafana dashboards** — embed in app
 - **Webhook integrations** — Slack, Discord, email notifications
 - **Geo-fencing** — allow approval only from specific locations
-- **AI Assistant Fine-tuning** — train the model on Forge-specific data
+- **AI Assistant Fine-tuning** — train the model on Forail-specific data

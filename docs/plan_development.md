@@ -1,4 +1,4 @@
-# Forge - Development Plan (HISTORICAL — COMPLETED)
+# Forail - Development Plan (HISTORICAL — COMPLETED)
 
 > **Status: COMPLETED.** This plan was executed and all phases were delivered as of v2026.04.0. This document is retained for historical reference only. For the current state, see [Release Notes v2026.04.0](RELEASE_NOTES_v2026.04.0.md).
 
@@ -519,10 +519,10 @@ cp .env.example .env
 docker compose up -d
 
 # 5. Initialization
-docker compose exec forge-web awx-manage migrate --noinput
-docker compose exec forge-web awx-manage createsuperuser \
+docker compose exec forail-web awx-manage migrate --noinput
+docker compose exec forail-web awx-manage createsuperuser \
   --username admin --email admin@example.com --noinput
-docker compose exec forge-web awx-manage update_password \
+docker compose exec forail-web awx-manage update_password \
   --username admin --password "$ADMIN_PASSWORD"
 ```
 
@@ -574,7 +574,7 @@ Before starting with our own fork, it is worth considering **Ascender**:
 
 ```
 Week  1-2:   Phase 1 - Build stabilization                ✓ COMPLETED
-Week  2-3:   Phase 2 - Rebranding (Forge)                 ✓ COMPLETED
+Week  2-3:   Phase 2 - Rebranding (Forail)                 ✓ COMPLETED
 Week  3-6:   Phase 3 - Dependency modernization            ✓ COMPLETED
 Week  6-12:  Phase 4 - Backend refactoring                 ✓ COMPLETED
 Week 12-18:  Phase 5 - Frontend refactoring                ✓ COMPLETED

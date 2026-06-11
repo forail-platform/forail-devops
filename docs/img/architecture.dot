@@ -1,4 +1,4 @@
-digraph ForgeArchitecture {
+digraph ForailArchitecture {
     rankdir=TB;
     bgcolor="#1e1e2e";
     fontname="Helvetica Neue,Helvetica,Arial,sans-serif";
@@ -25,10 +25,10 @@ digraph ForgeArchitecture {
         penwidth=2;
         margin=20;
 
-        backend [label="forge-backend\n(Django / Python)",
+        backend [label="forail-backend\n(Django / Python)",
                  fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
                  shape="box", style="filled,rounded"];
-        frontend [label="forge-frontend\n(React / TypeScript)",
+        frontend [label="forail-frontend\n(React / TypeScript)",
                   fillcolor="#1e1e2e", color="#a6e3a1", fontcolor="#a6e3a1",
                   shape="box", style="filled,rounded"];
     }
@@ -40,7 +40,7 @@ digraph ForgeArchitecture {
 
     // ── Deployment ──
     subgraph cluster_deploy {
-        label="  forge-deploy (docker-compose)  ";
+        label="  forail-deploy (docker-compose)  ";
         labeljust="c";
         style="filled,rounded,bold";
         fillcolor="#313244";
@@ -49,16 +49,16 @@ digraph ForgeArchitecture {
         penwidth=2;
         margin=20;
 
-        web [label="forge-web\n(uwsgi + daphne)",
+        web [label="forail-web\n(uwsgi + daphne)",
              fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
              shape="box", style="filled,rounded"];
-        task [label="forge-task\n(dispatcher + receptor)",
+        task [label="forail-task\n(dispatcher + receptor)",
               fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
               shape="box", style="filled,rounded"];
-        fe [label="forge-frontend\n(nginx + React SPA)",
+        fe [label="forail-frontend\n(nginx + React SPA)",
             fillcolor="#1e1e2e", color="#a6e3a1", fontcolor="#a6e3a1",
             shape="box", style="filled,rounded"];
-        init [label="forge-init\n(migrations)",
+        init [label="forail-init\n(migrations)",
               fillcolor="#1e1e2e", color="#89b4fa", fontcolor="#89b4fa",
               shape="box", style="filled,rounded"];
     }
@@ -97,9 +97,9 @@ digraph ForgeArchitecture {
     frontend -> registry [label="  docker push  ", color="#a6e3a1", fontcolor="#a6e3a1"];
 
     // Registry → Deploy
-    registry -> web [label="  forge-platform/forge-backend  ", color="#f9e2af", fontcolor="#f9e2af"];
+    registry -> web [label="  forail-platform/forail-backend  ", color="#f9e2af", fontcolor="#f9e2af"];
     registry -> task [style="invis"];
-    registry -> fe [label="  forge-platform/forge-frontend  ", color="#a6e3a1", fontcolor="#a6e3a1"];
+    registry -> fe [label="  forail-platform/forail-frontend  ", color="#a6e3a1", fontcolor="#a6e3a1"];
     registry -> init [style="invis"];
 
     // Deploy → Infra
@@ -123,7 +123,7 @@ digraph ForgeArchitecture {
 
     // Title
     labelloc="t";
-    label="\n  Forge Platform — Architecture  \n ";
+    label="\n  Forail Platform — Architecture  \n ";
     fontsize=16;
     fontcolor="#cdd6f4";
 }

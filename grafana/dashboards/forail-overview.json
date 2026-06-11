@@ -28,7 +28,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "rate(forge_jobs_launched_total[1m])",
+          "expr": "rate(forail_jobs_launched_total[1m])",
           "legendFormat": "{{template_type}}",
           "refId": "A"
         }
@@ -45,7 +45,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "rate(forge_jobs_blocked_total[1m])",
+          "expr": "rate(forail_jobs_blocked_total[1m])",
           "legendFormat": "{{gate}}",
           "refId": "A"
         }
@@ -60,9 +60,9 @@
       "id": 3,
       "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
       "targets": [
-        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "histogram_quantile(0.5, rate(forge_job_duration_seconds_bucket[5m]))", "legendFormat": "p50", "refId": "A"},
-        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "histogram_quantile(0.95, rate(forge_job_duration_seconds_bucket[5m]))", "legendFormat": "p95", "refId": "B"},
-        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "histogram_quantile(0.99, rate(forge_job_duration_seconds_bucket[5m]))", "legendFormat": "p99", "refId": "C"}
+        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "histogram_quantile(0.5, rate(forail_job_duration_seconds_bucket[5m]))", "legendFormat": "p50", "refId": "A"},
+        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "histogram_quantile(0.95, rate(forail_job_duration_seconds_bucket[5m]))", "legendFormat": "p95", "refId": "B"},
+        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "histogram_quantile(0.99, rate(forail_job_duration_seconds_bucket[5m]))", "legendFormat": "p99", "refId": "C"}
       ],
       "title": "Job duration (p50 / p95 / p99)",
       "type": "timeseries"
@@ -75,7 +75,7 @@
       "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
       "pluginVersion": "10.0.0",
       "targets": [
-        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "forge_active_jobs", "refId": "A"}
+        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "forail_active_jobs", "refId": "A"}
       ],
       "title": "Active jobs",
       "type": "stat"
@@ -87,7 +87,7 @@
       "id": 5,
       "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
       "targets": [
-        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "rate(forge_policy_evaluations_total[1m])", "legendFormat": "{{decision}}", "refId": "A"}
+        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "rate(forail_policy_evaluations_total[1m])", "legendFormat": "{{decision}}", "refId": "A"}
       ],
       "title": "Policy decisions per second",
       "type": "timeseries"
@@ -99,7 +99,7 @@
       "id": 6,
       "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
       "targets": [
-        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "rate(forge_scan_runs_total[1m])", "legendFormat": "{{status}}", "refId": "A"}
+        {"datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "expr": "rate(forail_scan_runs_total[1m])", "legendFormat": "{{status}}", "refId": "A"}
       ],
       "title": "Scan runs per second",
       "type": "timeseries"
@@ -108,7 +108,7 @@
   "refresh": "30s",
   "schemaVersion": 39,
   "style": "dark",
-  "tags": ["forge", "observability"],
+  "tags": ["forail", "observability"],
   "templating": {
     "list": [
       {
@@ -131,8 +131,8 @@
   "time": {"from": "now-6h", "to": "now"},
   "timepicker": {},
   "timezone": "",
-  "title": "Forge Overview",
-  "uid": "forge-overview",
+  "title": "Forail Overview",
+  "uid": "forail-overview",
   "version": 1,
   "weekStart": ""
 }

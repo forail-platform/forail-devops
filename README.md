@@ -1,12 +1,12 @@
-# Forge DevOps
+# Forail DevOps
 
-[![CI](https://github.com/forgeplatform/forge-devops/actions/workflows/ci.yml/badge.svg)](https://github.com/forgeplatform/forge-devops/actions/workflows/ci.yml)
+[![CI](https://github.com/forail-platform/forail-devops/actions/workflows/ci.yml/badge.svg)](https://github.com/forail-platform/forail-devops/actions/workflows/ci.yml)
 
-Deployment, infrastructure, and CI/CD for the Forge platform.
+Deployment, infrastructure, and CI/CD for the Forail platform.
 
 ## Overview
 
-This repo contains everything needed to deploy the Forge platform:
+This repo contains everything needed to deploy the Forail platform:
 - Docker Compose configuration (production + development)
 - Nginx reverse proxy
 - SSL/TLS (Let's Encrypt)
@@ -19,8 +19,8 @@ This repo contains everything needed to deploy the Forge platform:
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/forgeplatform/forge-devops.git
-cd forge-devops
+git clone https://github.com/forail-platform/forail-devops.git
+cd forail-devops
 
 # 2. Configure environment
 cp .env.example .env
@@ -37,7 +37,7 @@ docker compose up -d
 
 ```
 ┌──────────────┐     ┌───────────────┐
-│ forge-backend│     │ forge-frontend│
+│ forail-backend│     │ forail-frontend│
 │   (Django)   │     │   (React)     │
 └──────┬───────┘     └──────┬────────┘
        │                     │
@@ -48,7 +48,7 @@ docker compose up -d
                   │
                   ▼
        ┌─────────────────┐
-       │   forge-devops   │
+       │   forail-devops   │
        │ docker-compose   │
        └────────┬────────┘
                 │
@@ -64,15 +64,15 @@ docker compose up -d
 | Service | Image | Port | Description |
 |---------|-------|------|-------------|
 | nginx | nginx:latest | 443, 80 | Reverse proxy, SSL termination |
-| forge-web | ghcr.io/forgeplatform/forge-backend | 8013 | Django API + uWSGI |
-| forge-task | ghcr.io/forgeplatform/forge-backend | - | Celery worker + Dispatcher |
+| forail-web | ghcr.io/forail-platform/forail-backend | 8013 | Django API + uWSGI |
+| forail-task | ghcr.io/forail-platform/forail-backend | - | Celery worker + Dispatcher |
 | postgres | postgres:15 | 5432 | Database |
 | redis | redis:7 | 6379 | Cache + message broker |
 
 ## Structure
 
 ```
-forge-devops/
+forail-devops/
 ├── docker-compose.yml       # Production stack
 ├── docker-compose.dev.yml   # Development stack
 ├── docker/                  # Dockerfile templates
@@ -118,12 +118,12 @@ forge-devops/
 
 ## Related Repositories
 
-- [forge-backend](https://github.com/forgeplatform/forge-backend) — Django API + Task Engine
-- [forge-frontend](https://github.com/forgeplatform/forge-frontend) — React UI
+- [forail-backend](https://github.com/forail-platform/forail-backend) — Django API + Task Engine
+- [forail-frontend](https://github.com/forail-platform/forail-frontend) — React UI
 
 ## Project History
 
-The Forge platform is a modernized fork of [Ansible AWX](https://github.com/ansible/awx), licensed under the Apache License 2.0. See [forge-backend/NOTICE](https://github.com/forgeplatform/forge-backend/blob/main/NOTICE) for full attribution.
+The Forail platform is a modernized fork of [Ansible AWX](https://github.com/ansible/awx), licensed under the Apache License 2.0. See [forail-backend/NOTICE](https://github.com/forail-platform/forail-backend/blob/main/NOTICE) for full attribution.
 
 ## License
 

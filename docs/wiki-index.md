@@ -1,10 +1,10 @@
-# Forge Platform — Developer Wiki
+# Forail Platform — Developer Wiki
 
-Welcome to the Forge Platform developer wiki. This documentation covers practical
+Welcome to the Forail Platform developer wiki. This documentation covers practical
 usage, architecture decisions, deployment, and operational knowledge for contributors
 and operators.
 
-Forge is an infrastructure automation platform based on AWX 24.6.1, licensed under
+Forail is an infrastructure automation platform based on AWX 24.6.1, licensed under
 Apache License 2.0. It provides a web UI and REST API for managing Ansible playbooks,
 inventories, credentials, and scheduled automation at scale.
 
@@ -35,9 +35,9 @@ inventories, credentials, and scheduled automation at scale.
 | 18 | [OIDC + WebAuthn](18-oidc-webauthn.md) | Modern SSO via OIDC and FIDO2 passwordless / MFA |
 | 19 | [Policy-as-Code (OPA)](19-policy-as-code.md) | Open Policy Agent rules evaluated before every launch |
 | 20 | [IaC Scanning & Supply Chain Security](20-iac-scanning.md) | ansible-lint / checkov / pip-audit run over playbooks and requirements at launch time, with severity threshold + enforcement per scanner |
-| 21 | [Observability (OpenTelemetry)](../../forge-backend/docs/21-observability.md) | OTel traces + metrics emitted from Django and Celery, OTLP Collector sidecar, Grafana dashboard, k8s manifest stubs |
-| 22 | [Multi-Tenancy (v1)](../../forge-backend/docs/22-multi-tenancy.md) | Soft multi-tenancy layered on Organization: per-tenant quotas (concurrent jobs, daily launches, hosts, storage), tenant branding with public lookup endpoint, automated provisioning API, cross-tenant audit |
-| 23 | [Recommendations Engine](../../forge-backend/docs/23-recommendations.md) | Rule-based engine that surfaces actionable platform-health hints (no scanners, default admin password, tenant near quota, …) on the Dashboard and inside wizards, with a single `GET /api/v2/recommendations/` endpoint |
+| 21 | [Observability (OpenTelemetry)](../../forail-backend/docs/21-observability.md) | OTel traces + metrics emitted from Django and Celery, OTLP Collector sidecar, Grafana dashboard, k8s manifest stubs |
+| 22 | [Multi-Tenancy (v1)](../../forail-backend/docs/22-multi-tenancy.md) | Soft multi-tenancy layered on Organization: per-tenant quotas (concurrent jobs, daily launches, hosts, storage), tenant branding with public lookup endpoint, automated provisioning API, cross-tenant audit |
+| 23 | [Recommendations Engine](../../forail-backend/docs/23-recommendations.md) | Rule-based engine that surfaces actionable platform-health hints (no scanners, default admin password, tenant near quota, …) on the Dashboard and inside wizards, with a single `GET /api/v2/recommendations/` endpoint |
 
 ---
 
@@ -52,7 +52,7 @@ inventories, credentials, and scheduled automation at scale.
 
 ## Quick Links
 
-- **Source code:** `forge/` (Python backend), `forge/ui_next/` (React frontend)
+- **Source code:** `forail/` (Python backend), `forail/ui_next/` (React frontend)
 - **Deployment:** `tools/docker-compose-prod/`
 - **Dockerfile template:** `tools/ansible/roles/dockerfile/templates/Dockerfile.j2`
 - **Requirements:** `requirements/requirements.txt`

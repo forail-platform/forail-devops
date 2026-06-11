@@ -2,10 +2,10 @@
 
 This directory contains the legacy AWX development environment configuration inherited from the upstream AWX project.
 
-**This is NOT the recommended development setup for Forge.** For Forge development, use the Vagrant-based environment:
+**This is NOT the recommended development setup for Forail.** For Forail development, use the Vagrant-based environment:
 
 ```bash
-cd forge-deploy
+cd forail-deploy
 vagrant up
 vagrant ssh
 ```
@@ -20,4 +20,4 @@ These files are retained for reference but are not maintained:
 - Keycloak, LDAP, Splunk integration examples
 - HAProxy and custom virtual environment configs
 
-For current Forge-specific development workflows, see [Contributing Guide](../docs/10-contributing-guide.md).
+For current Forail-specific development workflows, see [Contributing Guide](../docs/10-contributing-guide.md).

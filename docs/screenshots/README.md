@@ -1,20 +1,20 @@
-# Forge Handbook Screenshot Generator
+# Forail Handbook Screenshot Generator
 
 A small Playwright tool that captures annotated screenshots of every page in
-the Forge UI and saves them to `../img/handbook/`. The output is consumed by
+the Forail UI and saves them to `../img/handbook/`. The output is consumed by
 [`HANDBOOK.md`](../HANDBOOK.md).
 
 This tool is **documentation tooling only** — it is intentionally outside
-`forge-frontend` and `forge-backend` because it has no role in the
+`forail-frontend` and `forail-backend` because it has no role in the
 application's build, test, or runtime.
 
 ## How it annotates
 
 Each shot is captured with two CSS injections:
 
-1. A red outline + glow on the targeted element (`data-forge-highlight`).
+1. A red outline + glow on the targeted element (`data-forail-highlight`).
 2. A numbered red badge (1, 2, 3 …) anchored to its top-left corner
-   (`data-forge-callout`).
+   (`data-forail-callout`).
 
 The numbers correspond to a list under the image in `HANDBOOK.md` that
 explains what each highlighted element does.
@@ -22,14 +22,14 @@ explains what each highlighted element does.
 ## One-time setup
 
 ```bash
-cd forge-deploy/docs/screenshots
+cd forail-deploy/docs/screenshots
 npm install
 npx playwright install chromium
 ```
 
 ## Usage
 
-Make sure the Forge stack is up and reachable at `FORGE_URL`
+Make sure the Forail stack is up and reachable at `FORAIL_URL`
 (default `https://localhost`). Then:
 
 ```bash
@@ -46,9 +46,9 @@ Override via environment variables:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `FORGE_URL` | `https://localhost` | Base URL of the running Forge stack |
-| `FORGE_USER` | `admin` | Login username |
-| `FORGE_PASS` | `ForgeAdmin2026!` | Login password |
+| `FORAIL_URL` | `https://localhost` | Base URL of the running Forail stack |
+| `FORAIL_USER` | `admin` | Login username |
+| `FORAIL_PASS` | `ForailAdmin2026!` | Login password |
 
 ## Adding a new shot
 

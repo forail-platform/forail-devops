@@ -1,8 +1,8 @@
-# Forge Platform - Project Overview
+# Forail Platform - Project Overview
 
 ## About the Project
 
-**Forge** is an infrastructure automation platform based on the AWX project (version 24.6.1).
+**Forail** is an infrastructure automation platform based on the AWX project (version 24.6.1).
 The project is licensed under Apache License 2.0, based on the original work by the Red Hat team.
 
 The goal is a complete refactoring of the code - both backend and frontend - to make it clean, readable, and maintainable.
@@ -12,13 +12,13 @@ Modernization for running on newer systems (Ubuntu 24.04+, Python 3.12+).
 
 ## Architecture
 
-Forge Platform is split into three independent repositories:
+Forail Platform is split into three independent repositories:
 
 | Repository       | Description                              | Registry                               |
 | ---------------- | ---------------------------------------- | -------------------------------------- |
-| `forge-backend`  | Django REST API, task engine, receptor   | `ghcr.io/forgeplatform/forge-backend`  |
-| `forge-frontend` | React UI (Vite + TypeScript)             | `ghcr.io/forgeplatform/forge-frontend` |
-| `forge-deploy`   | Docker Compose, nginx, settings, scripts | —                                      |
+| `forail-backend`  | Django REST API, task engine, receptor   | `ghcr.io/forail-platform/forail-backend`  |
+| `forail-frontend` | React UI (Vite + TypeScript)             | `ghcr.io/forail-platform/forail-frontend` |
+| `forail-deploy`   | Docker Compose, nginx, settings, scripts | —                                      |
 
 ### Service Architecture
 
@@ -33,7 +33,7 @@ Forge Platform is split into three independent repositories:
                     /api/login/          │               │
                            │              │               │
                     ┌──────▼──────┐       │        ┌──────▼──────┐
-                    │  forge-web  │◄──────┘        │forge-frontend│
+                    │  forail-web  │◄──────┘        │forail-frontend│
                     │ (uwsgi +   │                 │ (nginx +     │
                     │  daphne +   │                 │  React SPA)  │
                     │  nginx-int) │                 └──────────────┘
@@ -41,7 +41,7 @@ Forge Platform is split into three independent repositories:
                     └──────┬──────┘
                            │
                     ┌──────▼──────┐
-                    │ forge-task  │
+                    │ forail-task  │
                     │ (dispatcher,│
                     │  callback,  │
                     │  wsrelay,   │
@@ -64,59 +64,59 @@ Forge Platform is split into three independent repositories:
 
 The monolithic AWX codebase was separated into three independent repos:
 
-- **forge-backend**: Python package (`forge/`), Dockerfile (Ubuntu 24.04 multi-stage),
+- **forail-backend**: Python package (`forail/`), Dockerfile (Ubuntu 24.04 multi-stage),
   supervisor configs, settings, all Django management commands
-- **forge-frontend**: React/Vite/TypeScript SPA with its own Dockerfile (Node 20 build + nginx serve)
-- **forge-deploy**: Production Docker Compose stack, nginx TLS config, init/healthcheck/backup scripts
+- **forail-frontend**: React/Vite/TypeScript SPA with its own Dockerfile (Node 20 build + nginx serve)
+- **forail-deploy**: Production Docker Compose stack, nginx TLS config, init/healthcheck/backup scripts
 
 ### Docker Images on Harbor
 
-- `ghcr.io/forgeplatform/forge-backend:latest` — Ubuntu 24.04, Python 3.12, receptor, supervisor
-- `ghcr.io/forgeplatform/forge-frontend:latest` — nginx 1.27-alpine serving built React assets
+- `ghcr.io/forail-platform/forail-backend:latest` — Ubuntu 24.04, Python 3.12, receptor, supervisor
+- `ghcr.io/forail-platform/forail-frontend:latest` — nginx 1.27-alpine serving built React assets
 
 ### Production Deployment (VERIFIED 2026-03-17)
 
 Full production stack deployed and verified in Vagrant VM (Ubuntu 24.04):
 
-- **6 services**: postgres, redis, forge-init, forge-web, forge-task, forge-frontend, nginx
+- **6 services**: postgres, redis, forail-init, forail-web, forail-task, forail-frontend, nginx
 - **HTTPS**: self-signed SSL with nginx TLS termination (port 443)
 - **HTTP→HTTPS redirect**: automatic
 - **API**: `/api/v2/ping/` returns version 2026.3.0
 - **Auth**: admin login verified
-- **Frontend**: React SPA served via forge-frontend container, proxied by nginx
+- **Frontend**: React SPA served via forail-frontend container, proxied by nginx
 - **252 Django migrations** applied successfully
 
-### AWX→Forge File Rename (COMPLETED 2026-03-17)
+### AWX→Forail File Rename (COMPLETED 2026-03-17)
 
-All remaining `awx*` files renamed to `forge*` across all repositories:
+All remaining `awx*` files renamed to `forail*` across all repositories:
 
-- `awx-python` → `forge-python` (Python venv wrapper script)
-- `awx_settings.py` → `forge_settings.py` (Django settings module)
+- `awx-python` → `forail-python` (Python venv wrapper script)
+- `awx_settings.py` → `forail_settings.py` (Django settings module)
 - `awx-spud-reading.svg` → removed (old AWX mascot icon)
-- `awx-autoreload` → `forge-autoreload` (dev file watcher)
-- `awx-manage` (dev wrapper) → `forge-manage`
-- All `awx-manage` references in scripts → `forge-manage`
+- `awx-autoreload` → `forail-autoreload` (dev file watcher)
+- `awx-manage` (dev wrapper) → `forail-manage`
+- All `awx-manage` references in scripts → `forail-manage`
 - Backward compatibility: `awx-manage` and `awx-python` symlinks preserved in Docker image
 
-**Result**: Zero `awx*` files remaining in any repository. `forge-manage` is the primary
+**Result**: Zero `awx*` files remaining in any repository. `forail-manage` is the primary
 management command. `awx-manage` still works via symlink for backward compatibility.
 
 ### Previous Work (from monolithic phase)
 
 - AWX 24.6.1 cloned, `modernization` branch created
-- Full rebranding AWX → Forge (Level 1 user-facing + Level 2 package rename)
-- **2882 files changed** — `awx/` → `forge/` with all imports updated
+- Full rebranding AWX → Forail (Level 1 user-facing + Level 2 package rename)
+- **2882 files changed** — `awx/` → `forail/` with all imports updated
 - Python unit tests: **1083 passed**, 0 failed
 - CI/CD: GitHub Actions workflow with Lint → Test → Build → Security → Release stages
 - Version: `2026.03.0` (CalVer format)
 
 ### Bugs Fixed During Deployment
 
-1. `forge/devonly.py` present in sdist → forced development mode in production
-2. Missing `import logging.handlers` in `forge/main/utils/handlers.py`
+1. `forail/devonly.py` present in sdist → forced development mode in production
+2. Missing `import logging.handlers` in `forail/main/utils/handlers.py`
 3. Missing SSL cert path symlink for Ubuntu (`/etc/pki/tls/certs/ca-bundle.crt`)
 4. Missing `curl` in runtime image (needed for healthcheck)
-5. Missing `forge/ui_next/` stub module (needed by `forge/urls.py`)
+5. Missing `forail/ui_next/` stub module (needed by `forail/urls.py`)
 6. Missing `collectstatic` in headless build (DRF/Django admin static files)
 
 ---
@@ -126,7 +126,7 @@ management command. `awx-manage` still works via symlink for backward compatibil
 | Phase | Description                     | Status        |
 | ----- | ------------------------------- | ------------- |
 | 1     | Build Stabilization             | **COMPLETED** |
-| 2     | Rebranding (Forge)              | **COMPLETED** |
+| 2     | Rebranding (Forail)              | **COMPLETED** |
 | 3     | Dependency Modernization        | **COMPLETED** |
 | 4     | Backend Refactoring             | **COMPLETED** |
 | 5     | Frontend Refactoring            | **COMPLETED** |
@@ -135,9 +135,9 @@ management command. `awx-manage` still works via symlink for backward compatibil
 | 8     | Testing and QA                  | **COMPLETED** |
 | 9     | Release                         | **COMPLETED** |
 | L1    | User-Facing Rebranding          | **COMPLETED** |
-| L2    | Full Package Rename (awx→forge) | **COMPLETED** |
+| L2    | Full Package Rename (awx→forail) | **COMPLETED** |
 | 10    | Repository Separation           | **COMPLETED** |
-| 11    | AWX→Forge File Rename           | **COMPLETED** |
+| 11    | AWX→Forail File Rename           | **COMPLETED** |
 | 12    | Centralized CI/CD Pipeline      | **COMPLETED** |
 
 ### CI/CD Pipeline (GitHub Actions)
@@ -153,7 +153,7 @@ Checkout → Lint → Test → Build → Security → Release
 - Tests: pytest (backend / assistant) + vitest (frontend)
 - Build: docker build with version tag derived from CalVer git tag
 - Security: pip-audit + Trivy container scan
-- Release: pushes versioned images to `ghcr.io/forgeplatform/*` on `main` branch or version tag
+- Release: pushes versioned images to `ghcr.io/forail-platform/*` on `main` branch or version tag
 
 No external secrets are required — releases use the built-in `GITHUB_TOKEN` with `packages: write` permission.
 
@@ -170,38 +170,38 @@ No external secrets are required — releases use the built-in `GITHUB_TOKEN` wi
 ### Quick Start
 
 ```bash
-git clone <forge-deploy-repo>
-cd forge-deploy
+git clone <forail-deploy-repo>
+cd forail-deploy
 
 # 1. Create .env from template
 cp .env.example .env
-# Edit .env — set POSTGRES_PASSWORD, FORGE_SECRET_KEY, FORGE_ADMIN_PASSWORD, etc.
+# Edit .env — set POSTGRES_PASSWORD, FORAIL_SECRET_KEY, FORAIL_ADMIN_PASSWORD, etc.
 
 # 2. SSL certificates (self-signed for testing)
 mkdir -p nginx/ssl
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout nginx/ssl/privkey.pem -out nginx/ssl/fullchain.pem \
-  -subj "/CN=forge.local"
+  -subj "/CN=forail.local"
 
 # 3. Deploy
 docker compose up -d
 
 # 4. Watch initialization
-docker compose logs -f forge-init
+docker compose logs -f forail-init
 
 # 5. Access
 # HTTPS: https://<your-ip>/
 # API:   https://<your-ip>/api/v2/ping/
-# Login: admin / <FORGE_ADMIN_PASSWORD from .env>
+# Login: admin / <FORAIL_ADMIN_PASSWORD from .env>
 ```
 
 ### Deploy in Vagrant (for testing)
 
 ```bash
-cd forge-deploy
+cd forail-deploy
 vagrant up          # Starts Ubuntu 24.04 VM with Docker
 vagrant ssh
-cd /forge-deploy
+cd /forail-deploy
 docker compose up -d
 
 # Access from host browser: https://192.168.56.22/
@@ -214,17 +214,17 @@ docker compose up -d
 ### Backend
 
 ```bash
-cd forge-backend
-docker build -t ghcr.io/forgeplatform/forge-backend:latest .
-docker push ghcr.io/forgeplatform/forge-backend:latest
+cd forail-backend
+docker build -t ghcr.io/forail-platform/forail-backend:latest .
+docker push ghcr.io/forail-platform/forail-backend:latest
 ```
 
 ### Frontend
 
 ```bash
-cd forge-frontend
-docker build -t ghcr.io/forgeplatform/forge-frontend:latest .
-docker push ghcr.io/forgeplatform/forge-frontend:latest
+cd forail-frontend
+docker build -t ghcr.io/forail-platform/forail-frontend:latest .
+docker push ghcr.io/forail-platform/forail-frontend:latest
 ```
 
 ---
@@ -235,22 +235,22 @@ Each repo includes a Vagrantfile with Ubuntu 24.04 and Docker/Compose pre-instal
 
 | Repo           | VM IP         | RAM | Ports                   |
 | -------------- | ------------- | --- | ----------------------- |
-| forge-backend  | 192.168.56.20 | 8GB | 8043, 8013, 8080, 5433  |
-| forge-frontend | 192.168.56.21 | 4GB | 3000, 4173              |
-| forge-deploy   | 192.168.56.22 | 8GB | 80→8080, 443→8443, 8013 |
+| forail-backend  | 192.168.56.20 | 8GB | 8043, 8013, 8080, 5433  |
+| forail-frontend | 192.168.56.21 | 4GB | 3000, 4173              |
+| forail-deploy   | 192.168.56.22 | 8GB | 80→8080, 443→8443, 8013 |
 
 ---
 
 ## File Structure
 
 ```
-forge-platform/
-├── forge-backend/              # Python backend
+forail-platform/
+├── forail-backend/              # Python backend
 │   ├── Dockerfile              # Production multi-stage build (Ubuntu 24.04)
 │   ├── Vagrantfile             # Dev VM
 │   ├── Makefile                # Build targets
 │   ├── _build/                 # Rendered supervisor configs
-│   ├── forge/                  # Main Python package
+│   ├── forail/                  # Main Python package
 │   │   ├── api/                # REST API
 │   │   ├── main/               # Core models, tasks, migrations
 │   │   ├── settings/           # Django settings
@@ -258,14 +258,14 @@ forge-platform/
 │   │   └── sso/                # SSO/LDAP/SAML
 │   └── requirements/           # Python dependencies
 │
-├── forge-frontend/             # React UI
+├── forail-frontend/             # React UI
 │   ├── Dockerfile              # Multi-stage (Node 20 + nginx)
 │   ├── Vagrantfile             # Dev VM
 │   ├── nginx.conf              # SPA nginx config
 │   ├── src/                    # React/TypeScript source
 │   └── package.json            # Node dependencies
 │
-└── forge-deploy/               # Deployment
+└── forail-deploy/               # Deployment
     ├── docker-compose.yml      # 7 services (postgres, redis, init, web, task, frontend, nginx)
     ├── .env.example            # Environment template
     ├── Vagrantfile             # Deployment test VM
@@ -295,5 +295,5 @@ Types: `refactor`, `fix`, `feat`, `docs`, `test`, `chore`
 
 ## License
 
-Forge is licensed under Apache License 2.0.
+Forail is licensed under Apache License 2.0.
 Based on the AWX project (<https://github.com/ansible/awx>).

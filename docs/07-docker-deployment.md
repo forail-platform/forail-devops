@@ -1,19 +1,19 @@
 # 07 — Docker & Deployment
 
-How to build, configure, and deploy Forge Platform to production.
+How to build, configure, and deploy Forail Platform to production.
 
 ---
 
 ## Architecture
 
-Forge Platform uses a separated architecture with independent Docker images:
+Forail Platform uses a separated architecture with independent Docker images:
 
 | Service        | Image                                  | Purpose                                         |
 | -------------- | -------------------------------------- | ----------------------------------------------- |
-| forge-web      | `ghcr.io/forgeplatform/forge-backend`  | Django API (uwsgi + daphne + nginx-internal)    |
-| forge-task     | `ghcr.io/forgeplatform/forge-backend`  | Task execution (dispatcher, callback, receptor) |
-| forge-init     | `ghcr.io/forgeplatform/forge-backend`  | One-shot: migrations, admin user, provisioning  |
-| forge-frontend | `ghcr.io/forgeplatform/forge-frontend` | React SPA served by nginx                       |
+| forail-web      | `ghcr.io/forail-platform/forail-backend`  | Django API (uwsgi + daphne + nginx-internal)    |
+| forail-task     | `ghcr.io/forail-platform/forail-backend`  | Task execution (dispatcher, callback, receptor) |
+| forail-init     | `ghcr.io/forail-platform/forail-backend`  | One-shot: migrations, admin user, provisioning  |
+| forail-frontend | `ghcr.io/forail-platform/forail-frontend` | React SPA served by nginx                       |
 | postgres       | `postgres:15-alpine`                   | Database                                        |
 | redis          | `redis:7-alpine`                       | Cache and message broker                        |
 | nginx          | `nginx:1.27-alpine`                    | TLS termination, routing                        |
@@ -21,8 +21,8 @@ Forge Platform uses a separated architecture with independent Docker images:
 ### Startup Order
 
 ```
-postgres ──► redis ──► forge-init ──► forge-web ──► forge-task ──► nginx
-                                                     forge-frontend ──┘
+postgres ──► redis ──► forail-init ──► forail-web ──► forail-task ──► nginx
+                                                     forail-frontend ──┘
 ```
 
 Each service waits for the previous one to be healthy before starting.
@@ -31,11 +31,11 @@ Each service waits for the previous one to be healthy before starting.
 
 | Path                   | Destination       | Description          |
 | ---------------------- | ----------------- | -------------------- |
-| `/api/*`               | forge-web:8013    | REST API             |
-| `/sso/*`               | forge-web:8013    | SSO/SAML/LDAP        |
-| `/api/login/`          | forge-web:8013    | Login (rate-limited) |
-| `/(api/)?websocket/`   | forge-web:8013    | WebSocket (upgrade)  |
-| `/*` (everything else) | forge-frontend:80 | React SPA            |
+| `/api/*`               | forail-web:8013    | REST API             |
+| `/sso/*`               | forail-web:8013    | SSO/SAML/LDAP        |
+| `/api/login/`          | forail-web:8013    | Login (rate-limited) |
+| `/(api/)?websocket/`   | forail-web:8013    | WebSocket (upgrade)  |
+| `/*` (everything else) | forail-frontend:80 | React SPA            |
 
 ---
 
@@ -44,9 +44,9 @@ Each service waits for the previous one to be healthy before starting.
 ### Backend
 
 ```bash
-cd forge-backend
-docker build -t ghcr.io/forgeplatform/forge-backend:latest .
-docker push ghcr.io/forgeplatform/forge-backend:latest
+cd forail-backend
+docker build -t ghcr.io/forail-platform/forail-backend:latest .
+docker push ghcr.io/forail-platform/forail-backend:latest
 ```
 
 The Dockerfile is a multi-stage build:
@@ -57,9 +57,9 @@ The Dockerfile is a multi-stage build:
 ### Frontend
 
 ```bash
-cd forge-frontend
-docker build -t ghcr.io/forgeplatform/forge-frontend:latest .
-docker push ghcr.io/forgeplatform/forge-frontend:latest
+cd forail-frontend
+docker build -t ghcr.io/forail-platform/forail-frontend:latest .
+docker push ghcr.io/forail-platform/forail-frontend:latest
 ```
 
 The Dockerfile is a multi-stage build:
@@ -80,7 +80,7 @@ The Dockerfile is a multi-stage build:
 ### Quick Start
 
 ```bash
-cd forge-deploy
+cd forail-deploy
 
 # 1. Create configuration
 cp .env.example .env
@@ -90,32 +90,32 @@ cp .env.example .env
 mkdir -p nginx/ssl
 
 # Let's Encrypt (production):
-certbot certonly --standalone -d forge.example.com
-cp /etc/letsencrypt/live/forge.example.com/fullchain.pem nginx/ssl/
-cp /etc/letsencrypt/live/forge.example.com/privkey.pem nginx/ssl/
+certbot certonly --standalone -d forail.example.com
+cp /etc/letsencrypt/live/forail.example.com/fullchain.pem nginx/ssl/
+cp /etc/letsencrypt/live/forail.example.com/privkey.pem nginx/ssl/
 
 # Or self-signed (testing):
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout nginx/ssl/privkey.pem -out nginx/ssl/fullchain.pem \
-  -subj "/CN=forge.example.com"
+  -subj "/CN=forail.example.com"
 
 # 3. Deploy
 docker compose up -d
 
 # 4. Watch initialization
-docker compose logs -f forge-init
+docker compose logs -f forail-init
 
 # 5. Verify
-curl -k https://forge.example.com/api/v2/ping/
+curl -k https://forail.example.com/api/v2/ping/
 ```
 
 ### Deploy in Vagrant (testing)
 
 ```bash
-cd forge-deploy
+cd forail-deploy
 vagrant up          # Ubuntu 24.04 VM + Docker + Compose + SSL + .env auto-generated
 vagrant ssh
-cd /forge-deploy
+cd /forail-deploy
 docker compose up -d
 
 # Access from host: https://192.168.56.22/
@@ -130,32 +130,32 @@ docker compose up -d
 | Variable                           | Description       | Generate with...            |
 | ---------------------------------- | ----------------- | --------------------------- |
 | `POSTGRES_PASSWORD`                | DB password       | `openssl rand -hex 16`      |
-| `FORGE_SECRET_KEY`                 | Django crypto key | `openssl rand -hex 32`      |
-| `FORGE_BROADCAST_WEBSOCKET_SECRET` | WS auth secret    | `openssl rand -hex 32`      |
-| `FORGE_ADMIN_PASSWORD`             | Admin password    | Strong password             |
-| `FORGE_CSRF_TRUSTED_ORIGINS`       | CSRF origins      | `https://forge.example.com` |
+| `FORAIL_SECRET_KEY`                 | Django crypto key | `openssl rand -hex 32`      |
+| `FORAIL_BROADCAST_WEBSOCKET_SECRET` | WS auth secret    | `openssl rand -hex 32`      |
+| `FORAIL_ADMIN_PASSWORD`             | Admin password    | Strong password             |
+| `FORAIL_CSRF_TRUSTED_ORIGINS`       | CSRF origins      | `https://forail.example.com` |
 
 ### Optional
 
 | Variable               | Default                                | Description                         |
 | ---------------------- | -------------------------------------- | ----------------------------------- |
-| `FORGE_ALLOWED_HOSTS`  | `*`                                    | Allowed HTTP hosts                  |
-| `FORGE_ADMIN_USER`     | `admin`                                | Admin username                      |
-| `FORGE_ADMIN_EMAIL`    | `admin@example.com`                    | Admin email                         |
-| `FORGE_NODE_NAME`      | `forge-node`                           | Instance hostname                   |
-| `FORGE_NODE_TYPE`      | `hybrid`                               | `hybrid`, `control`, or `execution` |
-| `FORGE_BACKEND_IMAGE`  | `ghcr.io/forgeplatform/forge-backend`  | Backend Docker image                |
-| `FORGE_FRONTEND_IMAGE` | `ghcr.io/forgeplatform/forge-frontend` | Frontend Docker image               |
-| `FORGE_TAG`            | `latest`                               | Image tag                           |
+| `FORAIL_ALLOWED_HOSTS`  | `*`                                    | Allowed HTTP hosts                  |
+| `FORAIL_ADMIN_USER`     | `admin`                                | Admin username                      |
+| `FORAIL_ADMIN_EMAIL`    | `admin@example.com`                    | Admin email                         |
+| `FORAIL_NODE_NAME`      | `forail-node`                           | Instance hostname                   |
+| `FORAIL_NODE_TYPE`      | `hybrid`                               | `hybrid`, `control`, or `execution` |
+| `FORAIL_BACKEND_IMAGE`  | `ghcr.io/forail-platform/forail-backend`  | Backend Docker image                |
+| `FORAIL_FRONTEND_IMAGE` | `ghcr.io/forail-platform/forail-frontend` | Frontend Docker image               |
+| `FORAIL_TAG`            | `latest`                               | Image tag                           |
 | `NGINX_HTTP_PORT`      | `80`                                   | External HTTP port                  |
 | `NGINX_HTTPS_PORT`     | `443`                                  | External HTTPS port                 |
 
 ### Watch out
 
-- **`FORGE_SECRET_KEY` MUST REMAIN THE SAME** between upgrades. If you change it,
+- **`FORAIL_SECRET_KEY` MUST REMAIN THE SAME** between upgrades. If you change it,
   all sessions, tokens, and encrypted credentials become invalid.
 
-- **`FORGE_CSRF_TRUSTED_ORIGINS` must include the full URL** with `https://`. Without
+- **`FORAIL_CSRF_TRUSTED_ORIGINS` must include the full URL** with `https://`. Without
   it, the login form won't work (403 CSRF error).
 
 ---
@@ -165,14 +165,14 @@ docker compose up -d
 ### Let's Encrypt (recommended for production)
 
 ```bash
-certbot certonly --standalone -d forge.example.com
-cp /etc/letsencrypt/live/forge.example.com/{fullchain,privkey}.pem nginx/ssl/
+certbot certonly --standalone -d forail.example.com
+cp /etc/letsencrypt/live/forail.example.com/{fullchain,privkey}.pem nginx/ssl/
 ```
 
 Auto-renewal (crontab):
 
 ```bash
-0 0 1 * * certbot renew && cp /etc/letsencrypt/live/forge.example.com/*.pem /path/to/nginx/ssl/ && docker compose restart nginx
+0 0 1 * * certbot renew && cp /etc/letsencrypt/live/forail.example.com/*.pem /path/to/nginx/ssl/ && docker compose restart nginx
 ```
 
 ### Security Notes
@@ -189,24 +189,24 @@ Auto-renewal (crontab):
 ### Backup
 
 ```bash
-docker compose exec forge-task bash /etc/forge/backup.sh
+docker compose exec forail-task bash /etc/forail/backup.sh
 
 # With custom retention (30 days)
-docker compose exec forge-task bash /etc/forge/backup.sh 30
+docker compose exec forail-task bash /etc/forail/backup.sh 30
 ```
 
 ### Scheduled backup (crontab)
 
 ```bash
-0 2 * * * cd /path/to/forge-deploy && docker compose exec -T forge-task bash /etc/forge/backup.sh
+0 2 * * * cd /path/to/forail-deploy && docker compose exec -T forail-task bash /etc/forail/backup.sh
 ```
 
 ### Restore
 
 ```bash
-docker compose stop forge-web forge-task
-gunzip -c forge_backup_20260317.sql.gz | docker compose exec -T postgres psql -U forge forge
-docker compose start forge-web forge-task
+docker compose stop forail-web forail-task
+gunzip -c forail_backup_20260317.sql.gz | docker compose exec -T postgres psql -U forail forail
+docker compose start forail-web forail-task
 ```
 
 ---
@@ -215,17 +215,17 @@ docker compose start forge-web forge-task
 
 ```bash
 # API ping (no auth)
-curl -k https://forge.example.com/api/v2/ping/
+curl -k https://forail.example.com/api/v2/ping/
 
 # Instance capacity (auth required)
-curl -k -u admin:password https://forge.example.com/api/v2/instances/
+curl -k -u admin:password https://forail.example.com/api/v2/instances/
 
 # Service status
 docker compose ps
 
 # Supervisor processes
-docker compose exec forge-web supervisorctl status
-docker compose exec forge-task supervisorctl status
+docker compose exec forail-web supervisorctl status
+docker compose exec forail-task supervisorctl status
 ```
 
 ---
@@ -235,7 +235,7 @@ docker compose exec forge-task supervisorctl status
 ### Container won't start
 
 ```bash
-docker compose logs forge-init    # Check migrations and init
+docker compose logs forail-init    # Check migrations and init
 # "database does not exist" → POSTGRES_DB mismatch
 # "authentication failed" → POSTGRES_PASSWORD mismatch
 ```
@@ -243,7 +243,7 @@ docker compose logs forge-init    # Check migrations and init
 ### Can't log in (403 CSRF)
 
 ```bash
-# Check FORGE_CSRF_TRUSTED_ORIGINS in .env
+# Check FORAIL_CSRF_TRUSTED_ORIGINS in .env
 # Must be full URL with https:// (e.g., https://192.168.56.22)
 ```
 
@@ -251,7 +251,7 @@ docker compose logs forge-init    # Check migrations and init
 
 ```bash
 # Check if frontend container is running
-docker compose ps forge-frontend
+docker compose ps forail-frontend
 # Must be healthy
 
 # Check nginx routing
@@ -261,16 +261,16 @@ docker compose logs nginx
 ### Jobs not running
 
 ```bash
-docker compose exec forge-task supervisorctl status
+docker compose exec forail-task supervisorctl status
 # All 4 must be RUNNING: receptor, dispatcher, callback-receiver, wsrelay
 
-docker compose exec forge-web forge-manage list_instances
+docker compose exec forail-web forail-manage list_instances
 ```
 
 ### Forgotten admin password
 
 ```bash
-docker compose exec forge-web forge-manage update_password --username=admin --password=NewPass123!
+docker compose exec forail-web forail-manage update_password --username=admin --password=NewPass123!
 ```
 
 ---
@@ -278,17 +278,17 @@ docker compose exec forge-web forge-manage update_password --username=admin --pa
 ## Upgrading
 
 ```bash
-cd forge-deploy
+cd forail-deploy
 
 # 1. Pull new images
 docker compose pull
 
-# 2. Recreate containers (migrations run automatically via forge-init)
+# 2. Recreate containers (migrations run automatically via forail-init)
 docker compose up -d
 
 # 3. Verify
 docker compose ps
-curl -k https://forge.example.com/api/v2/ping/
+curl -k https://forail.example.com/api/v2/ping/
 ```
 
 ---
@@ -299,16 +299,16 @@ curl -k https://forge.example.com/api/v2/ping/
 
 ```bash
 # On the execution node:
-docker run -d --name forge-task \
+docker run -d --name forail-task \
   -e DATABASE_HOST=db.example.com \
   -e REDIS_HOST=redis.example.com \
-  -e FORGE_NODE_TYPE=execution \
-  -e FORGE_NODE_NAME=exec-node-1 \
-  ghcr.io/forgeplatform/forge-backend:latest launch_awx_task.sh
+  -e FORAIL_NODE_TYPE=execution \
+  -e FORAIL_NODE_NAME=exec-node-1 \
+  ghcr.io/forail-platform/forail-backend:latest launch_awx_task.sh
 
 # On the control node:
-docker compose exec forge-web forge-manage provision_instance --hostname=exec-node-1 --node-type=execution
-docker compose exec forge-web forge-manage register_queue --queuename=default --hostnames=exec-node-1
+docker compose exec forail-web forail-manage provision_instance --hostname=exec-node-1 --node-type=execution
+docker compose exec forail-web forail-manage register_queue --queuename=default --hostnames=exec-node-1
 ```
 
 ### Recommended Hardware

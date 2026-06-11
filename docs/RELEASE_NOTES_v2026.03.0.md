@@ -1,4 +1,4 @@
-# Forge 2026.03.0 — Release Notes
+# Forail 2026.03.0 — Release Notes
 
 **Release date:** 2026-03-11
 **Based on:** AWX 24.6.1
@@ -8,7 +8,7 @@
 
 ## Overview
 
-Forge 2026.03.0 is the first official release — a complete modernization of AWX 24.6.1 across 9 development phases spanning 25 weeks. Every layer has been upgraded: dependencies, backend, frontend, Docker images, deployment stack, and CI/CD.
+Forail 2026.03.0 is the first official release — a complete modernization of AWX 24.6.1 across 9 development phases spanning 25 weeks. Every layer has been upgraded: dependencies, backend, frontend, Docker images, deployment stack, and CI/CD.
 
 ---
 
@@ -19,10 +19,10 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 - **Python 3.12** (from 3.11)
 - **Node.js 20** (from 18)
 - **Django 4.2.17** with 40+ upgraded packages
-- **React 18 + TypeScript + Vite + Tailwind CSS** (new Forge UI)
+- **React 18 + TypeScript + Vite + Tailwind CSS** (new Forail UI)
 - **Channels 4 / Daphne 4 / Cython 3** migration completed
 
-### New Forge UI
+### New Forail UI
 
 - Complete rewrite in React 18 with TypeScript
 - Vite build system (replaces CRA/react-scripts)
@@ -47,8 +47,8 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 
 ### Dual Docker Images
 
-- **CentOS Stream 9** — 882MB (`forge:2026.03.0-centos`)
-- **Ubuntu 24.04** — 932MB (`forge:2026.03.0-ubuntu`)
+- **CentOS Stream 9** — 882MB (`forail:2026.03.0-centos`)
+- **Ubuntu 24.04** — 932MB (`forail:2026.03.0-ubuntu`)
 
 ### CI/CD Pipelines
 
@@ -81,7 +81,7 @@ Forge 2026.03.0 is the first official release — a complete modernization of AW
 - **CalVer versioning**: version scheme changed from SemVer (`24.6.x`) to CalVer (`2026.03.0`)
 - **aioredis removed**: replaced by redis-py (channels 4 migration)
 - **async-timeout removed**: Python 3.12 has `asyncio.timeout` built-in
-- **Frontend**: new Forge UI at `/`, legacy AWX UI moved to `/ui_legacy/`
+- **Frontend**: new Forail UI at `/`, legacy AWX UI moved to `/ui_legacy/`
 
 ---
 
@@ -131,10 +131,10 @@ docker compose up -d
 
 ```bash
 # CentOS (default)
-docker pull forge:2026.03.0
+docker pull forail:2026.03.0
 
 # Ubuntu
-docker pull forge:2026.03.0-ubuntu
+docker pull forail:2026.03.0-ubuntu
 ```
 
 ---

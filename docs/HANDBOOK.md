@@ -1,6 +1,6 @@
-# Forge Platform — User Handbook
+# Forail Platform — User Handbook
 
-A step-by-step guide for everyday use of the Forge Platform UI. Each section follows the left sidebar of the application. Click any item in the table of contents to jump straight to it.
+A step-by-step guide for everyday use of the Forail Platform UI. Each section follows the left sidebar of the application. Click any item in the table of contents to jump straight to it.
 
 ---
 
@@ -85,7 +85,7 @@ The Dashboard is the landing page after login. It shows the overall health of th
 
 **Step by step**
 
-1. Log in to Forge.
+1. Log in to Forail.
 2. You will land on the Dashboard automatically. If not, click **Dashboard** in the left sidebar.
 3. Read the four top tiles: _Total Hosts_, _Total Jobs_, _Active Schedules_, _Recent Failures_.
 4. Use the time-range selector (top-right) to switch between **Last 24h**, **Last 7d**, **Last 30d**.
@@ -712,7 +712,7 @@ Policy-as-Code rules (OPA / Rego) that gate job execution and approvals.
 **Example Rego**
 
 ```rego
-package forge.prejob
+package forail.prejob
 
 deny[msg] {
   input.template.name == "Drop Database"
@@ -827,7 +827,7 @@ Live OpenTelemetry view of the platform itself: traces, metrics, logs.
 
 **Example**
 
-> Tab: Traces → search `service=forge-web` → click the slowest span → open in Grafana.
+> Tab: Traces → search `service=forail-web` → click the slowest span → open in Grafana.
 
 ---
 
@@ -1239,7 +1239,7 @@ Container images that hold the runtime (Python, collections, binaries) used to r
 
 ```yaml
 name: ee-aws-2026.04
-image: registry.example.com/forge/ee-aws:2026.04
+image: registry.example.com/forail/ee-aws:2026.04
 pull: always
 credential: harbor-pull
 ```
@@ -1254,7 +1254,7 @@ credential: harbor-pull
 
 1. **Create** — opens the form below.
 
-Channels Forge can send messages to (email, Slack, PagerDuty, MS Teams, webhooks).
+Channels Forail can send messages to (email, Slack, PagerDuty, MS Teams, webhooks).
 
 **Create Notification Template**
 
@@ -1338,7 +1338,7 @@ Global platform configuration: auth, system, jobs, UI, logging, license.
 1. [Catalog Admin](#catalog-admin) — admin publishes the _New Dev VM_ item.
 2. End user opens [Service Portal](#service-portal) → submits the form.
 3. Item appears in [Approvals](#approvals) → approver approves.
-4. Forge launches the [Templates](#templates) job behind the item.
+4. Forail launches the [Templates](#templates) job behind the item.
 5. End user watches it under [My Requests](#my-requests) and [Jobs](#jobs).
 
 ### B) Catch and fix configuration drift

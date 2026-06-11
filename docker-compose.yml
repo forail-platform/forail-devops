@@ -1,30 +1,30 @@
-x-forge-common: &forge-common
-  image: ${FORGE_BACKEND_IMAGE:-ghcr.io/forgeplatform/forge-backend}:${FORGE_TAG:-latest}
+x-forail-common: &forail-common
+  image: ${FORAIL_BACKEND_IMAGE:-ghcr.io/forail-platform/forail-backend}:${FORAIL_TAG:-latest}
   env_file: .env
-  environment: &forge-env
+  environment: &forail-env
     DATABASE_HOST: postgres
     DATABASE_PORT: "5432"
-    DATABASE_USER: ${POSTGRES_USER:-forge}
+    DATABASE_USER: ${POSTGRES_USER:-forail}
     DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-    DATABASE_NAME: ${POSTGRES_DB:-forge}
+    DATABASE_NAME: ${POSTGRES_DB:-forail}
     REDIS_HOST: redis
     REDIS_PORT: "6379"
-    FORGE_SECRET_KEY: ${FORGE_SECRET_KEY}
-    FORGE_BROADCAST_WEBSOCKET_SECRET: ${FORGE_BROADCAST_WEBSOCKET_SECRET}
-    FORGE_ADMIN_USER: ${FORGE_ADMIN_USER:-admin}
-    FORGE_ADMIN_PASSWORD: ${FORGE_ADMIN_PASSWORD}
-    FORGE_ADMIN_EMAIL: ${FORGE_ADMIN_EMAIL:-admin@example.com}
-    FORGE_ALLOWED_HOSTS: ${FORGE_ALLOWED_HOSTS:-*}
-    FORGE_CSRF_TRUSTED_ORIGINS: ${FORGE_CSRF_TRUSTED_ORIGINS:-}
-    FORGE_NODE_NAME: ${FORGE_NODE_NAME:-forge-node}
-    FORGE_NODE_TYPE: ${FORGE_NODE_TYPE:-hybrid}
+    FORAIL_SECRET_KEY: ${FORAIL_SECRET_KEY}
+    FORAIL_BROADCAST_WEBSOCKET_SECRET: ${FORAIL_BROADCAST_WEBSOCKET_SECRET}
+    FORAIL_ADMIN_USER: ${FORAIL_ADMIN_USER:-admin}
+    FORAIL_ADMIN_PASSWORD: ${FORAIL_ADMIN_PASSWORD}
+    FORAIL_ADMIN_EMAIL: ${FORAIL_ADMIN_EMAIL:-admin@example.com}
+    FORAIL_ALLOWED_HOSTS: ${FORAIL_ALLOWED_HOSTS:-*}
+    FORAIL_CSRF_TRUSTED_ORIGINS: ${FORAIL_CSRF_TRUSTED_ORIGINS:-}
+    FORAIL_NODE_NAME: ${FORAIL_NODE_NAME:-forail-node}
+    FORAIL_NODE_TYPE: ${FORAIL_NODE_TYPE:-hybrid}
     OTEL_ENABLED: ${OTEL_ENABLED:-true}
-    OTEL_EXPORTER_ENDPOINT: ${OTEL_EXPORTER_ENDPOINT:-http://forge-otel-collector:4317}
-    OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-forge}
+    OTEL_EXPORTER_ENDPOINT: ${OTEL_EXPORTER_ENDPOINT:-http://forail-otel-collector:4317}
+    OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-forail}
     OTEL_TRACES_SAMPLER: ${OTEL_TRACES_SAMPLER:-parentbased_traceidratio}
     OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
     TENANCY_ENABLED: ${TENANCY_ENABLED:-false}
-  volumes: &forge-volumes
+  volumes: &forail-volumes
     - ./settings/settings.py:/etc/tower/settings.py:ro
     - ./settings/database.py:/etc/tower/conf.d/database.py:ro
     - ./settings/redis_settings.py:/etc/tower/conf.d/redis_settings.py:ro
@@ -32,25 +32,25 @@ x-forge-common: &forge-common
     - ./settings/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py:ro
     - ./settings/custom_settings.py:/etc/tower/conf.d/custom_settings.py:ro
     - ./receptor/receptor.conf:/etc/receptor/receptor.conf:ro
-    - forge_projects:/var/lib/awx/projects
-    - forge_receptor:/var/run/awx-receptor
+    - forail_projects:/var/lib/awx/projects
+    - forail_receptor:/var/run/awx-receptor
   networks:
-    - forge
+    - forail
 
 services:
   # ── Database ───────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-forge}
+      POSTGRES_USER: ${POSTGRES_USER:-forail}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-forge}
+      POSTGRES_DB: ${POSTGRES_DB:-forail}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - forge
+      - forail
     healthcheck:
-      test: pg_isready -U ${POSTGRES_USER:-forge} -d ${POSTGRES_DB:-forge}
+      test: pg_isready -U ${POSTGRES_USER:-forail} -d ${POSTGRES_DB:-forail}
       interval: 10s
       timeout: 5s
       retries: 5
@@ -63,7 +63,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - forge
+      - forail
     healthcheck:
       test: redis-cli ping | grep -q PONG
       interval: 10s
@@ -72,20 +72,20 @@ services:
     restart: unless-stopped
 
   # ── OPA sidecar (Policy-as-Code) ───────────────────────
-  forge-opa:
+  forail-opa:
     image: openpolicyagent/opa:latest-rootless
     command: ["run", "--server", "--addr", ":8181", "--log-level", "error"]
     networks:
-      - forge
+      - forail
     # OPA rootless image has no shell utilities; rely on the built-in
     # /health endpoint via the docker network rather than an in-container
     # healthcheck.
     restart: unless-stopped
 
   # ── One-shot init (migrations, admin, provision) ───────
-  forge-init:
-    <<: *forge-common
-    command: /bin/bash /etc/forge/init.sh
+  forail-init:
+    <<: *forail-common
+    command: /bin/bash /etc/forail/init.sh
     volumes:
       - ./settings/settings.py:/etc/tower/settings.py:ro
       - ./settings/database.py:/etc/tower/conf.d/database.py:ro
@@ -94,9 +94,9 @@ services:
       - ./settings/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py:ro
       - ./settings/custom_settings.py:/etc/tower/conf.d/custom_settings.py:ro
       - ./receptor/receptor.conf:/etc/receptor/receptor.conf:ro
-      - ./scripts/init.sh:/etc/forge/init.sh:ro
-      - forge_projects:/var/lib/awx/projects
-      - forge_receptor:/var/run/awx-receptor
+      - ./scripts/init.sh:/etc/forail/init.sh:ro
+      - forail_projects:/var/lib/awx/projects
+      - forail_receptor:/var/run/awx-receptor
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,8 +105,8 @@ services:
     restart: "no"
 
   # ── Web (nginx + uwsgi + daphne) ──────────────────────
-  forge-web:
-    <<: *forge-common
+  forail-web:
+    <<: *forail-common
     command: launch_awx_web.sh
     volumes:
       - ./settings/settings.py:/etc/tower/settings.py:ro
@@ -117,14 +117,14 @@ services:
       - ./settings/custom_settings.py:/etc/tower/conf.d/custom_settings.py:ro
       - ./settings/nginx-internal.conf:/etc/nginx/nginx.conf:ro
       - ./receptor/receptor.conf:/etc/receptor/receptor.conf:ro
-      - ./scripts/healthcheck-web.sh:/etc/forge/healthcheck-web.sh:ro
-      - forge_projects:/var/lib/awx/projects
-      - forge_receptor:/var/run/awx-receptor
+      - ./scripts/healthcheck-web.sh:/etc/forail/healthcheck-web.sh:ro
+      - forail_projects:/var/lib/awx/projects
+      - forail_receptor:/var/run/awx-receptor
     depends_on:
-      forge-init:
+      forail-init:
         condition: service_completed_successfully
     healthcheck:
-      test: bash /etc/forge/healthcheck-web.sh
+      test: bash /etc/forail/healthcheck-web.sh
       interval: 30s
       timeout: 10s
       retries: 10
@@ -132,8 +132,8 @@ services:
     restart: unless-stopped
 
   # ── Task (dispatcher + callback receiver + wsrelay) ────
-  forge-task:
-    <<: *forge-common
+  forail-task:
+    <<: *forail-common
     command: launch_awx_task.sh
     # podman (used by ansible-runner for EE process isolation) needs
     # cgroup, user-namespace and mount capabilities that are not granted
@@ -155,17 +155,17 @@ services:
       - ./settings/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py:ro
       - ./settings/custom_settings.py:/etc/tower/conf.d/custom_settings.py:ro
       - ./receptor/receptor.conf:/etc/receptor/receptor.conf:ro
-      - ./scripts/healthcheck-task.sh:/etc/forge/healthcheck-task.sh:ro
-      - ./scripts/backup.sh:/etc/forge/backup.sh:ro
-      - ./scripts/restore.sh:/etc/forge/restore.sh:ro
-      - forge_projects:/var/lib/awx/projects
-      - forge_receptor:/var/run/awx-receptor
-      - forge_backups:/var/lib/awx/backups
+      - ./scripts/healthcheck-task.sh:/etc/forail/healthcheck-task.sh:ro
+      - ./scripts/backup.sh:/etc/forail/backup.sh:ro
+      - ./scripts/restore.sh:/etc/forail/restore.sh:ro
+      - forail_projects:/var/lib/awx/projects
+      - forail_receptor:/var/run/awx-receptor
+      - forail_backups:/var/lib/awx/backups
     depends_on:
-      forge-web:
+      forail-web:
         condition: service_healthy
     healthcheck:
-      test: bash /etc/forge/healthcheck-task.sh
+      test: bash /etc/forail/healthcheck-task.sh
       interval: 30s
       timeout: 10s
       retries: 5
@@ -173,10 +173,10 @@ services:
     restart: unless-stopped
 
   # ── Frontend (React UI served by nginx) ────────────────
-  forge-frontend:
-    image: ${FORGE_FRONTEND_IMAGE:-ghcr.io/forgeplatform/forge-frontend}:${FORGE_TAG:-latest}
+  forail-frontend:
+    image: ${FORAIL_FRONTEND_IMAGE:-ghcr.io/forail-platform/forail-frontend}:${FORAIL_TAG:-latest}
     networks:
-      - forge
+      - forail
     healthcheck:
       test: wget -qO /dev/null http://127.0.0.1:80/health || exit 1
       interval: 30s
@@ -185,7 +185,7 @@ services:
     restart: unless-stopped
 
   # ── OpenTelemetry Collector (Tier 3.6 Observability) ──
-  forge-otel-collector:
+  forail-otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/otel/config.yaml"]
     volumes:
@@ -194,7 +194,7 @@ services:
       - "4317:4317"
       - "4318:4318"
     networks:
-      - forge
+      - forail
     restart: unless-stopped
 
   # ── External nginx (TLS termination + routing) ─────────
@@ -207,11 +207,11 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
     networks:
-      - forge
+      - forail
     depends_on:
-      forge-web:
+      forail-web:
         condition: service_healthy
-      forge-frontend:
+      forail-frontend:
         condition: service_healthy
     healthcheck:
       test: wget -qO /dev/null http://127.0.0.1:80/ || true
@@ -223,10 +223,10 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  forge_projects:
-  forge_receptor:
-  forge_backups:
+  forail_projects:
+  forail_receptor:
+  forail_backups:
 
 networks:
-  forge:
+  forail:
     driver: bridge
