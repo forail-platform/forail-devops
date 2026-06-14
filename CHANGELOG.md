@@ -8,6 +8,13 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 
 ## [Unreleased]
 
+## [2026.06.0] - 2026-06-14
+
+### Changed
+- **Renamed `forge` → `forail`** across the entire project (organization `forgeplatform` → `forail-platform`): Compose stack and install scripts, image references (`ghcr.io/forail-platform/forail-*`), CLI, and all documentation/URLs. The GitHub organization and repositories were renamed to match.
+- Versioning unified across all platform components to CalVer `2026.06.0`.
+
+
 ## [2026.05.0] - 2026-05-22
 
 ### Added
