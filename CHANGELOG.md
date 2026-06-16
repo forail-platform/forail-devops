@@ -8,6 +8,17 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 
 ## [Unreleased]
 
+### Added
+- AWX → Forail migration importer (`forail-manage import_from_awx`) — see the
+  backend changelog and `forail-deploy/docs/RELEASE_NOTES_v2026.07.0.md`.
+
+### Security
+- Backend security hardening: SAML signing + SHA-256 enforced by default
+  (**breaking** for unsigned/SHA-1 IdPs), SAML role-attribute grants require an
+  explicit value (**breaking**), hashed audit session IDs, trusted-proxy
+  `X-Forwarded-For`, superuser-change auditing, OAuth `refresh_token` redaction.
+  Upgrade guidance in `docs/RELEASE_NOTES_v2026.07.0.md`.
+
 ## [2026.06.0] - 2026-06-14
 
 ### Changed
