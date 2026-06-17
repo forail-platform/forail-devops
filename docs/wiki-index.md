@@ -38,6 +38,7 @@ inventories, credentials, and scheduled automation at scale.
 | 21 | [Observability (OpenTelemetry)](../../forail-backend/docs/21-observability.md) | OTel traces + metrics emitted from Django and Celery, OTLP Collector sidecar, Grafana dashboard, k8s manifest stubs |
 | 22 | [Multi-Tenancy (v1)](../../forail-backend/docs/22-multi-tenancy.md) | Soft multi-tenancy layered on Organization: per-tenant quotas (concurrent jobs, daily launches, hosts, storage), tenant branding with public lookup endpoint, automated provisioning API, cross-tenant audit |
 | 23 | [Recommendations Engine](../../forail-backend/docs/23-recommendations.md) | Rule-based engine that surfaces actionable platform-health hints (no scanners, default admin password, tenant near quota, …) on the Dashboard and inside wizards, with a single `GET /api/v2/recommendations/` endpoint |
+| 24 | [AWX → Forail Importer](../../forail-backend/docs/24-awx-import.md) | One-shot idempotent `forail-manage import_from_awx` command that migrates orgs, users, teams, credentials, projects, inventories and job templates from an existing AWX/AAP install via its REST API (secrets re-entered manually) |
 
 ---
 

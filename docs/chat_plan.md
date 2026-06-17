@@ -1,5 +1,9 @@
 # Forail AI Assistant — Ollama RAG Chat
 
+> **Status: DELIVERED in v2026.04.0** (shipped as `forail-assistant`; all-in-one
+> image with Ollama + ChromaDB + FastAPI consolidated in v2026.05.0). This
+> document is retained as the historical design record — it is not pending work.
+
 Plan for an integrated AI assistant within the Forail platform that uses a local Ollama LLM with RAG (Retrieval Augmented Generation) for fast answers about the platform.
 
 ---
