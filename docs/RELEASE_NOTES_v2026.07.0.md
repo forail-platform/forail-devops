@@ -87,8 +87,29 @@ SHA-1, logins will be rejected after upgrade.
 **Action:**
 - Preferred: reconfigure your IdP to sign responses and assertions with SHA-256.
 - Temporary fallback: explicitly set `SOCIAL_AUTH_SAML_SECURITY_CONFIG` via
-  `PATCH /api/v2/settings/saml/` to relax the relevant keys for a legacy IdP
-  (not recommended for production).
+  `PATCH /api/v2/settings/saml/` for a legacy IdP (not recommended for
+  production).
+
+  > ⚠️ **Setting this replaces the whole dict — it does not merge with the
+  > secure defaults.** When the setting is unset, Forail's hardened defaults
+  > apply; the moment you set it, your value is used verbatim and any key you
+  > omit falls back to the **weak** python-saml/OneLogin default (unsigned
+  > assertions, SHA-1). So to relax a single key you must re-specify the full
+  > secure dict with only that key changed, e.g. to accept unsigned assertions
+  > from one legacy IdP while keeping every other protection:
+  >
+  > ```json
+  > {
+  >   "requestedAuthnContext": false,
+  >   "wantMessagesSigned": true,
+  >   "wantAssertionsSigned": false,
+  >   "rejectUnsolicitedResponsesWithInResponseTo": true,
+  >   "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+  >   "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256"
+  > }
+  > ```
+  >
+  > Clearing the setting (back to null) restores the full hardened defaults.
 
 ### 2. SAML role-attribute grants require an explicit value
 
