@@ -33,8 +33,9 @@ forail-manage import_from_awx \
 ```
 
 - Imports Organizations, Users, Teams, Credential Types, Credentials, Projects,
-  Inventories (with group hierarchy and host membership) and Job Templates, in
-  dependency order.
+  Inventories (with group hierarchy and host membership), Inventory Sources,
+  Job Templates, Workflow Job Templates (with their node DAG), Schedules,
+  Notification Templates, and RBAC role assignments, in dependency order.
 - **Idempotent** — re-running matches existing objects by natural key (name
   within organization; username for users) and updates rather than duplicating.
 - `--dry-run` previews all changes inside a rolled-back transaction.
@@ -46,10 +47,12 @@ forail-manage import_from_awx \
 (it sends `$encrypted$`), and user passwords are not exported. The importer
 brings over credential *structure* and non-secret inputs, creates users with an
 unusable password, and reports exactly how many secret fields need manual
-re-entry afterwards.
+re-entry afterwards. Notification-template secrets are stripped the same way.
 
-Planned follow-ups: Workflow Job Templates, Schedules, Notification Templates,
-Inventory Sources, and RBAC role-assignment import.
+RBAC role assignments are migrated where the target framework allows it: user
+grants and team→object-role grants are applied; organization-member grants to
+teams (rejected by the access framework) are skipped with a warning rather than
+aborting the run.
 
 ## Security hardening
 
@@ -124,6 +127,14 @@ That now fails safe (no grant) and logs a warning.
 
 ## Fixed
 
+- **RBAC role assignment was broken in 2026.06.0.** `ScanFinding` and
+  `TenantIsolationEvent` were registered with the default
+  `parent_field_name='organization'`, but neither model has an `organization`
+  field. The resulting `FieldDoesNotExist` aborted **every** role-assignment
+  operation across the platform. They are now registered against their real
+  parents (`scan_result` and `accessed_organization` respectively). Anyone on
+  2026.06.0 who relies on role assignment should upgrade. No data migration is
+  required — the fix is in model registration only.
 - `pytest.ini` referenced the pre-rename `awx.main.tests.settings_for_test`
   (no longer exists), which prevented the backend test suite from starting.
 - Tenant queue router referenced pre-rename `awx.main.tasks.*` task names.
