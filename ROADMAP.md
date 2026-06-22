@@ -40,8 +40,7 @@ Items in active consideration. Order roughly reflects priority, but is not fixed
 - Per-CR status conditions polish (more granular `Reason` strings; `lastReconcileTime`).
 
 ### Documentation
-- **Developer / contributor wiki** (10-section plan in [`docs/future_development_plan.md` § Wiki Documentation](docs/future_development_plan.md)): architecture overview, backend module-by-module, frontend, task engine, auth+RBAC, DB schema, Docker, CI/CD, testing, contributing.
-- **End-user / operator wiki on GitHub Wiki** — install, upgrade, day-2 ops, troubleshooting.
+- Documentation is maintained on the **[forail-platform.github.io](https://forail-platform.github.io) site** (built from per-repo `docs/*.md` via `build-docs.sh`). Keep it current as features land — architecture, per-feature guides, API reference, handbooks, and release notes.
 
 ### Community
 - ROADMAP discussion thread / GitHub Discussions enabled across repos.
