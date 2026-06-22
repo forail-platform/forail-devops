@@ -31,12 +31,12 @@ Initial extracted release: Docker Compose stack, single-VM Vagrant, React 18 / V
 
 Items in active consideration. Order roughly reflects priority, but is not fixed.
 
-### Backend hardening
-- Address the top 5 security-sensitive tech-debt spots flagged in earlier reviews (`forail/main/access.py`, `forail/sso/conf.py`, `forail/main/models/activity_stream.py`, `forail/main/signals.py`, `forail/main/constants.py`).
-- AWX → Forail migration tool (one-shot importer for orgs, teams, inventories, credentials, templates from an existing AWX install).
+### Backend hardening — shipped in 2026.07.0
+- ✅ Audited the top 5 security-sensitive tech-debt spots flagged in earlier reviews (`forail/main/access.py`, `forail/sso/conf.py`, `forail/main/models/activity_stream.py`, `forail/main/signals.py`, `forail/main/constants.py`). SSO signing + SHA-256 defaults, session-key hashing, trusted-proxy `X-Forwarded-For`, superuser-grant audit logging and refresh-token redaction landed; `access.py` and the `ENV_BLOCKLIST` were confirmed clean (no change needed). See [`docs/RELEASE_NOTES_v2026.07.0.md`](docs/RELEASE_NOTES_v2026.07.0.md).
+- ✅ AWX → Forail migration tool — one-shot importer covering orgs, teams, inventories (+ sources), credentials, projects, job & workflow templates, schedules, notification templates and RBAC. Shipped in 2026.07.0.
 
 ### Operator follow-ups
-- **OperatorHub.io submission** — OLM bundle already validates clean; needs a PR to `community-operators-prod`.
+- ✅ **OperatorHub.io submission** — `forail-operator` is live on OperatorHub.io (listed 2026.6.0; icon fix 2026.6.1; orphaned `forge-operator` package removed 2026-06-22).
 - Per-CR status conditions polish (more granular `Reason` strings; `lastReconcileTime`).
 
 ### Documentation
