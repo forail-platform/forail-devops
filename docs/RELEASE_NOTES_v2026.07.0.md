@@ -1,11 +1,8 @@
-# Forail 2026.07.0 — Release Notes (DRAFT / Unreleased)
+# Forail 2026.07.0 — Release Notes
 
-**Release date:** TBD
+**Release date:** 2026-06-24
 **Based on:** Forail 2026.06.0
 **License:** Apache License 2.0
-
-> This document is a working draft for the next release. Dates and the final
-> feature set may change.
 
 ---
 
