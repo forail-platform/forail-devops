@@ -1,5 +1,5 @@
 x-forail-common: &forail-common
-  image: ${FORAIL_BACKEND_IMAGE:-ghcr.io/forail-platform/forail-backend}:${FORAIL_TAG:-latest}
+  image: ${FORAIL_BACKEND_IMAGE:-ghcr.io/forail-platform/forail-backend}:${FORAIL_TAG:-2026.07.0}
   env_file: .env
   environment: &forail-env
     DATABASE_HOST: postgres
@@ -14,7 +14,8 @@ x-forail-common: &forail-common
     FORAIL_ADMIN_USER: ${FORAIL_ADMIN_USER:-admin}
     FORAIL_ADMIN_PASSWORD: ${FORAIL_ADMIN_PASSWORD}
     FORAIL_ADMIN_EMAIL: ${FORAIL_ADMIN_EMAIL:-admin@example.com}
-    FORAIL_ALLOWED_HOSTS: ${FORAIL_ALLOWED_HOSTS:-*}
+    # needtofix M9: no wildcard default (Host-header injection). Set to your host.
+    FORAIL_ALLOWED_HOSTS: ${FORAIL_ALLOWED_HOSTS:-localhost,127.0.0.1}
     FORAIL_CSRF_TRUSTED_ORIGINS: ${FORAIL_CSRF_TRUSTED_ORIGINS:-}
     FORAIL_NODE_NAME: ${FORAIL_NODE_NAME:-forail-node}
     FORAIL_NODE_TYPE: ${FORAIL_NODE_TYPE:-hybrid}
@@ -135,18 +136,15 @@ services:
   forail-task:
     <<: *forail-common
     command: launch_awx_task.sh
-    # podman (used by ansible-runner for EE process isolation) needs
-    # cgroup, user-namespace and mount capabilities that are not granted
-    # to an ordinary Docker container. Running privileged is the simplest
-    # working setup; a tighter cap_add/security_opt list is possible but
-    # fragile across kernels and not worth the complexity here.
-    privileged: true
-    # cgroup v2 hosts delegate controllers per cgroup namespace. The
-    # default Docker cgroupns is "private", which blocks podman/crun from
-    # reaching the pids / memory / cpu controllers and produces
-    # "requested cgroup controller pids is not available". Sharing the
-    # host cgroup namespace fixes it.
-    cgroup: host
+    # needtofix H4: podman (used by ansible-runner for EE process isolation)
+    # needs cgroup/user-namespace/mount capabilities, for which privileged +
+    # host cgroup is the simplest working setup. That is also a trivial
+    # container escape to host-root, so both default OFF and must be turned on
+    # explicitly for the job-execution path:
+    #   FORAIL_TASK_PRIVILEGED=true FORAIL_TASK_CGROUP=host docker compose up -d
+    # Prefer running this host as a dedicated, isolated job runner when enabled.
+    privileged: ${FORAIL_TASK_PRIVILEGED:-false}
+    cgroup: ${FORAIL_TASK_CGROUP:-private}
     volumes:
       - ./settings/settings.py:/etc/tower/settings.py:ro
       - ./settings/database.py:/etc/tower/conf.d/database.py:ro
@@ -174,7 +172,7 @@ services:
 
   # ── Frontend (React UI served by nginx) ────────────────
   forail-frontend:
-    image: ${FORAIL_FRONTEND_IMAGE:-ghcr.io/forail-platform/forail-frontend}:${FORAIL_TAG:-latest}
+    image: ${FORAIL_FRONTEND_IMAGE:-ghcr.io/forail-platform/forail-frontend}:${FORAIL_TAG:-2026.07.0}
     networks:
       - forail
     healthcheck:

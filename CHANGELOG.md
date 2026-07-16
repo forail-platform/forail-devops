@@ -18,6 +18,11 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
   explicit value (**breaking**), hashed audit session IDs, trusted-proxy
   `X-Forwarded-For`, superuser-change auditing, OAuth `refresh_token` redaction.
   Upgrade guidance in `docs/RELEASE_NOTES_v2026.07.0.md`.
+- **Compose hardening**: `forail-task` privileged / host cgroup are now env-gated
+  and default **off** — enable the job-execution path explicitly with
+  `FORAIL_TASK_PRIVILEGED=true FORAIL_TASK_CGROUP=host`. `FORAIL_ALLOWED_HOSTS`
+  no longer defaults to `*` (defaults to `localhost,127.0.0.1`), and `FORAIL_TAG`
+  pins to `2026.07.0` instead of `:latest`.
 
 ## [2026.06.0] - 2026-06-14
 
