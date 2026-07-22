@@ -23,6 +23,11 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
   `FORAIL_TASK_PRIVILEGED=true FORAIL_TASK_CGROUP=host`. `FORAIL_ALLOWED_HOSTS`
   no longer defaults to `*` (defaults to `localhost,127.0.0.1`), and `FORAIL_TAG`
   pins to `2026.07.0` instead of `:latest`.
+- **`.env.example` no longer re-opens what the compose defaults closed**: it
+  shipped `FORAIL_ALLOWED_HOSTS=*`, so every install that started from the sample
+  file (the documented path) overrode the hardened default back to a wildcard. It
+  now carries `localhost,127.0.0.1`, pins `FORAIL_TAG=2026.07.0`, and documents
+  `FORAIL_TASK_PRIVILEGED` / `FORAIL_TASK_CGROUP` as commented-out opt-ins.
 
 ## [2026.06.0] - 2026-06-14
 

@@ -139,14 +139,16 @@ docker compose up -d
 
 | Variable               | Default                                | Description                         |
 | ---------------------- | -------------------------------------- | ----------------------------------- |
-| `FORAIL_ALLOWED_HOSTS`  | `*`                                    | Allowed HTTP hosts                  |
+| `FORAIL_ALLOWED_HOSTS`  | `localhost,127.0.0.1`                  | Allowed HTTP hosts — list your real hostnames; `*` disables the Host check |
 | `FORAIL_ADMIN_USER`     | `admin`                                | Admin username                      |
 | `FORAIL_ADMIN_EMAIL`    | `admin@example.com`                    | Admin email                         |
 | `FORAIL_NODE_NAME`      | `forail-node`                           | Instance hostname                   |
 | `FORAIL_NODE_TYPE`      | `hybrid`                               | `hybrid`, `control`, or `execution` |
 | `FORAIL_BACKEND_IMAGE`  | `ghcr.io/forail-platform/forail-backend`  | Backend Docker image                |
 | `FORAIL_FRONTEND_IMAGE` | `ghcr.io/forail-platform/forail-frontend` | Frontend Docker image               |
-| `FORAIL_TAG`            | `latest`                               | Image tag                           |
+| `FORAIL_TAG`            | `2026.07.0`                            | Image tag — pinned to a release, not `latest` |
+| `FORAIL_TASK_PRIVILEGED` | `false`                               | Run `forail-task` privileged. Required for the podman-in-container job path |
+| `FORAIL_TASK_CGROUP`    | `private`                              | Set to `host` together with `FORAIL_TASK_PRIVILEGED=true` for job execution |
 | `NGINX_HTTP_PORT`      | `80`                                   | External HTTP port                  |
 | `NGINX_HTTPS_PORT`     | `443`                                  | External HTTPS port                 |
 

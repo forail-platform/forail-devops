@@ -230,6 +230,17 @@ Things every new install should do on day one.
 4. Create at least two named admin users so no single account is the only way in.
 5. Configure a [backup cron](#backup) before importing real data.
 6. Configure at least one [Notification](HANDBOOK.md#notifications) channel for failure alerts.
+7. Set `FORAIL_ALLOWED_HOSTS` to the hostnames you actually serve. The default is
+   loopback-only; `*` turns off Django's Host-header check entirely.
+8. Leave `FORAIL_TASK_PRIVILEGED` / `FORAIL_TASK_CGROUP` unset unless you need the
+   podman-in-container job path. A privileged container with the host cgroup
+   namespace is a trivial escape to the host — if you do enable it, treat that
+   host as part of your automation trust boundary and keep it off the public
+   internet.
+9. If you authenticate via SAML, re-check the IdP against the signed-assertion and
+   role-attribute requirements introduced in 2026.07.0
+   (`docs/RELEASE_NOTES_v2026.07.0.md`) — unsigned or SHA-1 assertions are now
+   rejected by default.
 
 ---
 
@@ -880,12 +891,14 @@ Symptom: browser shows nginx 502 Bad Gateway.
 | `FORAIL_ADMIN_PASSWORD`             | yes      | —                                      | Bootstrap admin password                     |
 | `FORAIL_ADMIN_EMAIL`                | no       | `admin@example.com`                    | Bootstrap admin email                        |
 | `FORAIL_CSRF_TRUSTED_ORIGINS`       | yes      | —                                      | Comma-separated `https://...` origins        |
-| `FORAIL_ALLOWED_HOSTS`              | no       | `*`                                    | Django ALLOWED_HOSTS                         |
+| `FORAIL_ALLOWED_HOSTS`              | no       | `localhost,127.0.0.1`                  | Django ALLOWED_HOSTS — list your real hostnames |
 | `FORAIL_NODE_NAME`                  | no       | `forail-node`                           | This node's name in mesh                     |
 | `FORAIL_NODE_TYPE`                  | no       | `hybrid`                               | `control` / `execution` / `hybrid`           |
 | `FORAIL_BACKEND_IMAGE`              | no       | `ghcr.io/forail-platform/forail-backend`  | Backend image                                |
 | `FORAIL_FRONTEND_IMAGE`             | no       | `ghcr.io/forail-platform/forail-frontend` | Frontend image                               |
-| `FORAIL_TAG`                        | no       | `latest`                               | Image tag (use a real version, not `latest`) |
+| `FORAIL_TAG`                        | no       | `2026.07.0`                            | Image tag (pin a real version, never `latest`) |
+| `FORAIL_TASK_PRIVILEGED`            | no       | `false`                                | Privileged `forail-task` — needed for the podman job path |
+| `FORAIL_TASK_CGROUP`                | no       | `private`                              | Set `host` with `FORAIL_TASK_PRIVILEGED=true` for job execution |
 | `BACKUP_RETENTION_DAYS`            | no       | `7`                                    | Days of backups to keep                      |
 
 ---
