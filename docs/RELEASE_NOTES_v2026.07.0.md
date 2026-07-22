@@ -264,9 +264,19 @@ required/secure defaults have to be supplied:
 helm upgrade forail oci://ghcr.io/forail-platform/forail-helm \
     --version 2026.7.0 -n forail \
     --set secrets.forailAdminPassword='<strong-password>' \
-    --set forail.allowedHosts='forail.example.com,127.0.0.1,localhost' \
+    --set 'forail.allowedHosts=forail.example.com\,127.0.0.1\,localhost' \
     --set task.privileged=true --set task.hostCgroup=true   # only if you run jobs in-pod
 ```
+
+> **Escape the commas.** Helm's `--set` splits unescaped commas into a list, so
+> `--set forail.allowedHosts='a,b,c'` fails to parse. Either escape them as above
+> (`a\,b\,c`, inside single quotes so the shell keeps the backslashes) or put the
+> value in a values file, where no escaping is needed:
+>
+> ```yaml
+> forail:
+>   allowedHosts: "forail.example.com,127.0.0.1,localhost"
+> ```
 
 Before upgrading:
 
