@@ -1,6 +1,6 @@
 # Forail 2026.07.0 — Release Notes
 
-**Release date:** 2026-06-24
+**Release date:** 2026-07-25
 **Based on:** Forail 2026.06.0
 **License:** Apache License 2.0
 
@@ -220,8 +220,15 @@ front of the ingress, or set `forail.cookieSecure: "false"` for a lab install.
 
 ## Fixed
 
-- **In-cluster job execution now works out of the box.** Two pieces were missing
-  from the chart, and each failed a launch on its own:
+- **In-cluster job execution.** Two pieces were missing from the chart, and each
+  failed a launch on its own. Note this is not "out of the box": project updates
+  and control-plane jobs still run through podman inside the task pod, so they
+  also need the privileged opt-in from *Breaking changes* #2 above. Without it
+  every job dies moments after launch with `mount
+  /var/lib/containers/storage/overlay: permission denied`, and the only symptom
+  in the UI is a project or job stuck in `Pending`. The chart now prints a
+  warning to that effect at install time when the flags are off. The two chart
+  fixes were:
   - No pod RBAC. Jobs run as pods in a Kubernetes container group, and receptor
     manages them with the task pod's ServiceAccount — which had no pod
     permissions, so every launch failed with
