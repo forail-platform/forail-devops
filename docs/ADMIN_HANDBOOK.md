@@ -553,7 +553,7 @@ The `k8s/` folder contains baseline manifests if you outgrow Docker Compose.
 
 **Step by step**
 
-1. Read [`k8s/`](../k8s/) — it includes Deployments, Services, ConfigMap, Secret, Ingress.
+1. Read [`k8s/`](https://github.com/forail-platform/forail-devops/tree/main/k8s) — it includes Deployments, Services, ConfigMap, Secret, Ingress.
 2. Create a namespace:
 
    ```bash

@@ -141,4 +141,4 @@ docker pull forail:2026.03.0-ubuntu
 
 ## Full Changelog
 
-See [CHANGELOG.md](../CHANGELOG.md) for the complete list of changes across all 9 phases.
+See [CHANGELOG.md](https://github.com/forail-platform/forail-devops/blob/main/CHANGELOG.md) for the complete list of changes across all 9 phases.
