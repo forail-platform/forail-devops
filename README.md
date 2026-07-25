@@ -30,7 +30,15 @@ cp .env.example .env
 docker compose up -d
 
 # 4. Check health
-./scripts/healthcheck-web.sh
+docker compose ps          # every service should report (healthy)
+```
+
+The scripts under `scripts/` are the container health probes — Compose mounts
+them into the containers and runs them there (`bash /etc/forail/healthcheck-web.sh`),
+so they call `forail-manage` and only work inside the image. Run one by hand with:
+
+```bash
+docker compose exec forail-web bash /etc/forail/healthcheck-web.sh && echo healthy
 ```
 
 ## Architecture

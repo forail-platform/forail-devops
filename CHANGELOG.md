@@ -8,6 +8,14 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 
 ## [Unreleased]
 
+### Fixed
+- **Quick Start health check.** Step 4 told you to run `./scripts/healthcheck-web.sh`
+  on the host, where it fails: the file is not executable and calls `forail-manage`,
+  which exists only inside the backend image. Those scripts are the *container*
+  probes Compose mounts at `/etc/forail/`. The README now points at
+  `docker compose ps` and, for a manual run,
+  `docker compose exec forail-web bash /etc/forail/healthcheck-web.sh`.
+
 ### Added
 - AWX → Forail migration importer (`forail-manage import_from_awx`) — see the
   backend changelog and `forail-deploy/docs/RELEASE_NOTES_v2026.07.0.md`.
