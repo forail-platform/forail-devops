@@ -116,6 +116,19 @@ default. That is over:
 - **Operator**: the manager no longer holds cluster-wide `get/list/watch` on
   every Secret — the credential reconciler's access is a namespaced
   `Role`/`RoleBinding` in the operator's own namespace.
+
+  > **Use operator `2026.07.1`.** In `2026.07.0` that narrowing left `Credential`
+  > CRs working only in the operator's own namespace, because a Credential
+  > resolves `spec.inputsFrom` in *its* namespace and the Secret cache covered
+  > only one. `2026.07.1` adds `secretNamespaces` to the operator chart, which
+  > renders both the per-namespace Secret `Role` and the matching cache scope:
+  >
+  > ```sh
+  > helm install forail-operator ... --set 'secretNamespaces={team-a,team-b}'
+  > ```
+  >
+  > Still no cluster-wide secrets grant. Everything else in this release is
+  > unchanged at `2026.07.0`.
 - **Assistant**: a wildcard CORS origin no longer combines with credentials, and
   `/api/v1/chat` accepts an optional shared bearer token
   (`FORAIL_ASSISTANT_CHAT_TOKEN`) with a concurrency cap
