@@ -23,6 +23,32 @@ with the tenancy work; both only drop and re-create PostgreSQL row-level-securit
 policies, so they apply to an existing database without touching table schemas or
 rows.
 
+## Security advisories
+
+**Upgrade from 2026.06.0 or earlier is strongly recommended.** Several of the
+fixes below are exploitable on a default install of an earlier release; the
+detail is in *Security hardening* and *Breaking changes* further down.
+
+Severity is this project's own assessment of impact on a default deployment. It
+is not CVSS, and no CVE identifiers have been requested. "Affected" means every
+release up to and including 2026.06.0.
+
+| Issue | Severity | Who is exposed | What to do |
+|---|---|---|---|
+| Deployment artifacts shipped working default credentials | **Critical** | Any install that did not override the shipped secrets | Upgrade; rotate `forailAdminPassword`, `postgresPassword`, `forailSecretKey` and the websocket secret |
+| SSO account takeover — accounts associated by email address, not provider UID | **Critical** | Installs using SAML/OIDC/social auth where an IdP can assert an arbitrary email | Upgrade; audit existing SSO-linked accounts for unexpected associations |
+| Tenant isolation gate could essentially never fire; RLS failures degraded to global row visibility | **High** | Multi-tenant installs | Upgrade; review `TenantIsolationEvent` records and cross-tenant access in the audit trail |
+| `forail-task` ran privileged with a host cgroup mount by default — a container escape to node-root | **High** | Kubernetes and Compose installs using shipped defaults | Upgrade; job execution now needs an explicit opt-in, ideally on dedicated tainted nodes |
+| `ALLOWED_HOSTS` defaulted to `*` and session cookies were not `Secure` | **Medium** | Internet-reachable installs | Upgrade; set your real ingress host(s) and terminate TLS |
+| Audit records stored the raw session key; `X-Forwarded-For` was trusted unconditionally for the audit source IP | **Medium** | Any install; higher where audit logs are broadly readable | Upgrade; configure `PROXY_IP_ALLOWED_LIST`; treat historical audit rows as sensitive |
+| IaC scanner could be pointed outside the project checkout via a job template's `playbook` field | **Medium** | Installs where non-admins can edit job templates | Upgrade |
+| Operator held cluster-wide `get/list/watch` on every Secret | **Medium** | Kubernetes installs running the operator | Upgrade the operator to **2026.07.1**; its Secret access is now a namespaced `Role` |
+| OAuth `refresh_token` was recorded in activity-stream entries; superuser grant/revoke was not separately audited | **Low** | Any install | Upgrade; consider rotating OAuth tokens that appear in historical activity entries |
+
+Upgrading does not retroactively clean data written by an earlier release —
+rotate the credentials above, and treat pre-upgrade audit and activity rows as
+potentially containing secrets.
+
 ## Added
 
 ### AWX → Forail migration importer
