@@ -316,6 +316,18 @@ front of the ingress, or set `forail.cookieSecure: "false"` for a lab install.
 
 ## Fixed
 
+- **The task dispatcher crash-looped on 2026.06.0, so no job could finish.**
+  The periodic schedule runs `update_active_jobs_gauge_task` every 30 seconds
+  unconditionally, but in 2026.06.0 that function carried Celery's
+  `@shared_task` instead of Forail's own `@task()`. Dispatching it raised
+  `ValueError: ... is not decorated with @task()`, the dispatcher exited, and
+  whatever was running died with *"Task was canceled due to receiving a
+  shutdown signal"* — typically surfacing as a failed project update and a job
+  in `error`. Measured on a fresh 2026.06.0 install: the dispatcher restarted
+  roughly every 50 seconds, indefinitely. **Anyone still on 2026.06.0 should
+  upgrade**; there is no configuration that avoids this, since the schedule
+  entry is not conditional. Fixed by registering the task properly
+  (`@task(queue=get_task_queuename)`).
 - **In-cluster job execution.** Two pieces were missing from the chart, and each
   failed a launch on its own. Note this is not "out of the box": project updates
   and control-plane jobs still run through podman inside the task pod, so they
