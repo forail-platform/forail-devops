@@ -23,6 +23,66 @@ with the tenancy work; both only drop and re-create PostgreSQL row-level-securit
 policies, so they apply to an existing database without touching table schemas or
 rows.
 
+## ⚠️ Known issue — upgrading breaks job execution
+
+> **Fixed in 2026.07.1.** Upgrade to it instead of applying the workaround
+> below — see the [2026.07.1 release notes](RELEASE_NOTES_v2026.07.1.md). The
+> rest of this section describes what happens if you stay on 2026.07.0.
+
+**If you upgrade an existing 2026.06.0 install, jobs stop running: they are
+accepted and then stay in `pending` indefinitely.** The only hint is the job's
+`job_explanation`, *"This job is not ready to start because there is not enough
+available capacity"* — accurate, but it does not point at the cause. Fresh
+installs are unaffected. The workaround below is verified on a live cluster.
+
+The `default` instance group has to satisfy two conditions at once for a job to
+run locally, and an upgrade breaks both:
+
+1. **It must contain an instance.** The chart's init Job calls `register_queue
+   --queuename=default`, which on an upgrade finds the group already there,
+   prints `Instance Group already registered default` and assigns nothing.
+2. **That instance must be able to execute.** The task pod re-registers itself
+   as `node_type=control` on every start, and a control node only orchestrates.
+
+Either one alone is enough to hang every launch — both were measured
+individually, holding the other fixed.
+
+Project updates keep working, because they run in `controlplane`, which does
+have the instance. The install therefore looks healthy right up until someone
+launches a job.
+
+**Workaround, after `helm upgrade` completes:**
+
+```bash
+kubectl -n forail exec deploy/forail-web -- forail-manage shell -c "
+from forail.main.models import Instance, InstanceGroup
+i = Instance.objects.get(hostname='forail-node')
+i.node_type='hybrid'; i.save(update_fields=['node_type'])
+InstanceGroup.objects.get(name='default').instances.add(i)"
+```
+
+Substitute your own instance hostname if you did not install with the chart
+defaults. Any job already sitting in `pending` starts on its own within about a
+minute; a fresh short job should return a normal `PLAY RECAP` in a few seconds.
+
+> **The workaround does not survive a restart of `forail-task`.** That pod
+> re-runs `provision_instance` every time it starts — after a node reboot, an
+> eviction, or the next `helm upgrade` — and that call resets both `node_type`
+> and the group's execution mode. Re-apply it, and re-check job execution, after
+> any task-pod restart until the fix ships.
+
+**Also re-apply your role assignments after upgrading.** Any role assignment
+attempted on 2026.06.0 failed silently (the `ScanFinding` /
+`TenantIsolationEvent` `FieldDoesNotExist` bug fixed in this release, see
+*Fixed*). The upgrade fixes the cause but does not recreate the assignments that
+were lost, and *Fixed* saying "no data migration is required" refers to the
+schema only. Check the members of every role you rely on and re-grant what is
+missing.
+
+What the upgrade does do correctly: it succeeds, migrations `0209` and `0210`
+apply cleanly, and no data is lost — object counts and names are identical
+before and after.
+
 ## Security advisories
 
 **Upgrade from 2026.06.0 or earlier is strongly recommended.** Several of the
@@ -259,6 +319,18 @@ front of the ingress, or set `forail.cookieSecure: "false"` for a lab install.
 
 ## Fixed
 
+- **The task dispatcher crash-looped on 2026.06.0, so no job could finish.**
+  The periodic schedule runs `update_active_jobs_gauge_task` every 30 seconds
+  unconditionally, but in 2026.06.0 that function carried Celery's
+  `@shared_task` instead of Forail's own `@task()`. Dispatching it raised
+  `ValueError: ... is not decorated with @task()`, the dispatcher exited, and
+  whatever was running died with *"Task was canceled due to receiving a
+  shutdown signal"* — typically surfacing as a failed project update and a job
+  in `error`. Measured on a fresh 2026.06.0 install: the dispatcher restarted
+  roughly every 50 seconds, indefinitely. **Anyone still on 2026.06.0 should
+  upgrade**; there is no configuration that avoids this, since the schedule
+  entry is not conditional. Fixed by registering the task properly
+  (`@task(queue=get_task_queuename)`).
 - **In-cluster job execution.** Two pieces were missing from the chart, and each
   failed a launch on its own. Note this is not "out of the box": project updates
   and control-plane jobs still run through podman inside the task pod, so they
@@ -326,6 +398,10 @@ helm upgrade forail oci://ghcr.io/forail-platform/forail-helm \
 
 Before upgrading:
 
+- **Any deployment that runs jobs** — read **Known issue — upgrading breaks job
+  execution** at the top of these notes, and plan to apply the workaround (and
+  re-apply role assignments) as part of the upgrade. Without it the platform
+  comes up healthy but executes nothing.
 - **SAML deployments** — review **Breaking changes — SAML** above and reconfigure
   the IdP if needed.
 - **Any deployment** — review **Breaking changes — deployment defaults**; an
