@@ -25,12 +25,15 @@ rows.
 
 ## ⚠️ Known issue — upgrading breaks job execution
 
+> **Fixed in 2026.07.1.** Upgrade to it instead of applying the workaround
+> below — see the [2026.07.1 release notes](RELEASE_NOTES_v2026.07.1.md). The
+> rest of this section describes what happens if you stay on 2026.07.0.
+
 **If you upgrade an existing 2026.06.0 install, jobs stop running: they are
 accepted and then stay in `pending` indefinitely.** The only hint is the job's
 `job_explanation`, *"This job is not ready to start because there is not enough
 available capacity"* — accurate, but it does not point at the cause. Fresh
-installs are unaffected. This is open; the workaround below is verified on a
-live cluster.
+installs are unaffected. The workaround below is verified on a live cluster.
 
 The `default` instance group has to satisfy two conditions at once for a job to
 run locally, and an upgrade breaks both:
