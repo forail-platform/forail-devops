@@ -11,3 +11,7 @@ ssl/certs/
 *.swp
 *.swo
 *~
+
+# Documentation sources live on the host only; the site publishes the generated
+# pages from forail-platform.github.io.
+docs/
