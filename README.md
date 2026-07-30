@@ -88,31 +88,24 @@ forail-devops/
 ├── receptor/                # Receptor mesh configuration
 ├── scripts/                 # Backup, restore, health checks
 ├── settings/                # Django production settings
-├── docs/                    # All documentation
 ├── .env.example             # Environment template
 └── .github/workflows/       # GitHub Actions CI/CD
 ```
 
 ## Documentation
 
-### Deployment
-- [Architecture Overview](docs/01-architecture-overview.md)
-- [Docker Deployment](docs/07-docker-deployment.md)
-- [CI/CD Pipeline](docs/08-ci-cd-pipeline.md)
-- [CI Pipeline Reference](docs/ci-pipeline-reference.md)
-- [Contributing Guide](docs/10-contributing-guide.md)
+Published on the developer and user docs site — the markdown sources are kept
+outside this repository:
 
-### Plans
-- [Separation Plan](docs/plan_separation.md)
-- [Development Plan](docs/plan_development.md)
-- [Detailed Plan](docs/plan_detailed.md)
-- [Future Development](docs/future_development_plan.md)
-- [Chat/AI Assistant Plan](docs/chat_plan.md)
-- [Mobile App Plan](docs/mobile_plan.md)
+- [Architecture Overview](https://forail-platform.github.io/docs/architecture.html)
+- [Docker Deployment](https://forail-platform.github.io/docs/deployment.html)
+- [CI/CD Pipeline](https://forail-platform.github.io/dev/ci-cd.html)
+- [Contributing Guide](https://forail-platform.github.io/dev/contributing.html)
+- [User Handbook](https://forail-platform.github.io/docs/user-handbook.html)
+- [Administrator Handbook](https://forail-platform.github.io/docs/admin-handbook.html)
 
 ### Release
-- [Release Notes v2026.03.0](docs/RELEASE_NOTES_v2026.03.0.md)
-- [Start & Run Guide](docs/startrun.md)
+- [Release notes](https://forail-platform.github.io/docs/) — one page per release
 
 ## Backup & Restore
 
