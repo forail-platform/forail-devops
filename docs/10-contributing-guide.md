@@ -48,15 +48,33 @@ test/inventory-api-tests       # Tests
 chore/update-dependencies      # Maintenance
 ```
 
+### The two long-lived branches
+
+Every Forail repo has exactly two permanent branches:
+
+| Branch    | What it is                                                                 |
+| --------- | -------------------------------------------------------------------------- |
+| `develop` | **The integration branch.** All day-to-day work lands here.                 |
+| `main`    | **Released code only.** It changes when a release is cut, and at no other time. |
+
+Everything else is temporary and gets deleted once it is merged.
+
+```
+feature/x ──┐
+fix/y ──────┼──► develop ──(release)──► main ──► tag v2026.08.0 ──► CI publishes images
+chore/z ────┘                             ▲
+                                          └── hotfix/critical-thing (from main, back into develop too)
+```
+
 ### Standard flow
 
-**`main` is the integration branch.** There is no `devel` branch in any Forail
-repo — branch from `main` and target `main` in the PR.
+**Branch from `develop`, and target `develop` in the PR.** Do not open PRs
+against `main` — the only thing that merges into `main` is a release.
 
 ```bash
-# 1. Create branch from main
-git checkout main
-git pull github main
+# 1. Create branch from develop
+git checkout develop
+git pull github develop
 git checkout -b feature/my-feature
 
 # 2. Make changes, test, commit
@@ -65,17 +83,55 @@ vagrant ssh -c "cd /awx_devel && forail-test"
 git add forail/main/models/my_model.py
 git commit -m "feat(models): add Policy model for governance"
 
-# 3. Push and create PR
+# 3. Push and create PR against develop
 git push github feature/my-feature
-gh pr create --base main
+gh pr create --base develop
 ```
 
 ### Updating the branch
 
 ```bash
-git checkout main && git pull github main
+git checkout develop && git pull github develop
 git checkout feature/my-feature
-git rebase main
+git rebase develop
+```
+
+### Cutting a release
+
+```bash
+# develop is green and validated (see the rc procedure in 08-ci-cd-pipeline.md)
+git checkout main && git pull github main
+git merge --no-ff develop
+git push github main
+
+# The tag is what publishes the images -- always tag on main, never on develop
+git tag -a v2026.08.0 -m "Forail 2026.08.0"
+git push github v2026.08.0
+git push origin main v2026.08.0     # keep the GitLab mirror level
+```
+
+### Hotfixes
+
+A fix that cannot wait for the next release branches from `main`, merges back
+into `main`, and **must also be merged into `develop`** — otherwise the next
+release quietly reverts it.
+
+```bash
+git checkout -b hotfix/token-leak main
+# ... fix, test, PR into main, tag ...
+git checkout develop && git merge --no-ff hotfix/token-leak
+```
+
+### Deleting merged branches
+
+Delete a feature branch as soon as its PR is merged, locally and on both
+remotes. A repo should normally show only `main`, `develop`, and whatever is
+actively in flight.
+
+```bash
+git branch -d feature/my-feature
+git push github --delete feature/my-feature
+git push origin --delete feature/my-feature
 ```
 
 ### Remotes
@@ -153,7 +209,7 @@ cd forail/ui_next && npx tsc --noEmit
 - [ ] All tests pass
 - [ ] No lint errors
 - [ ] Commit messages follow conventions
-- [ ] Branch is rebased on latest `main`
+- [ ] Branch is rebased on latest `develop`
 - [ ] Changes are minimal and focused
 
 ### PR guidelines
@@ -161,7 +217,7 @@ cd forail/ui_next && npx tsc --noEmit
 - **Keep PRs small** — ideally under 500 lines. Large PRs are harder to review.
 - **One concern per PR** — don't mix a bug fix with refactoring.
 - **Include tests** — new features need tests, bug fixes need a regression test.
-- **Target `main`** — all PRs merge into `main`.
+- **Target `develop`** — all PRs merge into `develop`. `main` receives releases only.
 
 ### Review Checklist
 

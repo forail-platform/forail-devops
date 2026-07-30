@@ -34,10 +34,11 @@ The jobs differ per repo. What each one actually runs:
 | Lint, Test   | Every push and every PR                                            |
 | `publish`    | **Only** when the ref is a tag matching `v*` — `if: startsWith(github.ref, 'refs/tags/v')` |
 
-> **A merge to `main` does not produce an image.** It runs lint and tests only.
-> The image on `ghcr.io` changes when, and only when, someone pushes a `v*` tag.
-> This is the single most common source of confusion: `main` can be many commits
-> ahead of the newest published image, and that is by design.
+> **No merge produces an image — not into `develop`, not into `main`.** A merge
+> runs lint and tests only. The image on `ghcr.io` changes when, and only when,
+> someone pushes a `v*` tag. This is the single most common source of confusion:
+> both branches can sit many commits ahead of the newest published image, and
+> that is by design.
 
 ### Known gaps
 
@@ -156,27 +157,39 @@ docker build -t ghcr.io/forail-platform/forail-frontend:2026.05.0 .
 
 ## Release Process
 
-1. Ensure GitHub Actions is green on `main` for every repo being released
+Work is integrated on `develop`; `main` holds released code only, and the tag
+that publishes an image is always cut **on `main`**. See the git-flow section in
+[10 — Contributing Guide](10-contributing-guide.md).
+
+1. Ensure GitHub Actions is green on `develop` for every repo being released
 2. Bump `VERSION` in the repos that ship a version, and the Helm chart's
    `version` / `appVersion` so it pins the images you are about to publish
 3. Write the release notes (`forail-deploy/docs/RELEASE_NOTES_v<version>.md`) and
    the docs-site release page
-4. Tag each changed repo and push the tag — this is what builds and publishes:
-   `git tag -a v2026.05.0 -m "Forail 2026.05.0" && git push github v2026.05.0`
-5. Install the published chart and images into a clean cluster and run the full
+4. Validate a release candidate first — see below
+5. Merge `develop` into `main` (`git merge --no-ff develop`) and push it
+6. Tag each changed repo **on `main`** and push the tag — this is what builds
+   and publishes: `git tag -a v2026.05.0 -m "Forail 2026.05.0" && git push github v2026.05.0`
+7. Install the published chart and images into a clean cluster and run the full
    regression before announcing anything
-6. Create the GitHub Release
+8. Push `main` and the tags to `origin` as well, so the GitLab mirror keeps up
+9. Create the GitHub Release
 
 ### Validate before you release
 
-Cut an rc tag first (`v2026.05.0-rc1`). It publishes a real image through the
-same job, so the release candidate can be installed into a clean cluster and put
-through the full Cypress suite. Only then cut the real tag. Rc images stay on
-`ghcr.io` — harmless, but do not point a chart at one.
+Cut an rc tag first (`v2026.05.0-rc1`) from the commit you intend to release. It
+publishes a real image through the same `publish` job, so the candidate can be
+installed into a clean cluster and put through the full Cypress suite. Only then
+merge to `main` and cut the real tag.
+
+An rc tag is the one case where tagging off `develop` is fine — it is a
+throwaway build, not a release. Rc images stay on `ghcr.io`; harmless, but never
+point a chart at one.
 
 ### Watch out
 
 - **Never release without passing tests.**
 - **Tag format must have `v` prefix:** `v2026.05.0`, not `2026.05.0`.
-- **Merging to `main` publishes nothing** — only a `v*` tag does.
+- **Merging publishes nothing** — into `develop` or `main`, only a `v*` tag does.
+- **Tag on `main`**, not on `develop` — the sole exception is a throwaway rc tag.
 - **Image visibility** — when a new package is first pushed to `ghcr.io`, GitHub creates it as **private** by default. You must manually flip it to public via the Packages settings (`https://github.com/orgs/forail-platform/packages`).
