@@ -10,6 +10,28 @@ Git workflow, commit conventions, coding standards, and the PR process.
 2. **Every change must be understood** — if you can't explain why, don't commit it
 3. **Author of all commits is Krstan Vjestica** — never attribute tools as authors
 4. **Review the diff before committing** — always
+5. **Everything must pass before you commit** — not `vagrant validate`, not a syntax
+   check: the actual thing running. A change to the dev environment is proven by
+   destroying the VM and building it again; a change to the platform is proven by
+   a clean install plus the full Cypress regression
+
+---
+
+## Development environment
+
+- **VirtualBox is the only supported provider.** libvirt/KVM must not be running
+  on the same host — one hypervisor owns AMD-V per boot, and the loser's guests
+  die with `Guru Meditation VERR_SVM_IN_USE` or wedge mid-boot. Keep `libvirtd`
+  masked; `forail-dev-cluster/scripts/up.sh` refuses to start if it is active.
+  Full root-cause writeup: `forail-dev-cluster/docs/TROUBLESHOOTING-vagrant.md`.
+- **Bring the cluster up with `scripts/up.sh`**, not bare `vagrant up` — it goes
+  node by node in dependency order and recreates any node whose boot wedges.
+- **Start from a clean state when you are testing.** `vagrant up` on an existing
+  VM only boots it; it does **not** re-provision. Mixing a freshly created node
+  with previously provisioned ones gives two different cluster CAs and a control
+  plane that never reaches quorum. Use `vagrant destroy -f` first.
+- **The dev VMs collide on host ports.** `forail-backend` and `forail-deploy`
+  both forward `8013` and `8080`, so only one of them can run at a time.
 
 ---
 
@@ -28,10 +50,13 @@ chore/update-dependencies      # Maintenance
 
 ### Standard flow
 
+**`main` is the integration branch.** There is no `devel` branch in any Forail
+repo — branch from `main` and target `main` in the PR.
+
 ```bash
-# 1. Create branch from devel
-git checkout devel
-git pull origin devel
+# 1. Create branch from main
+git checkout main
+git pull github main
 git checkout -b feature/my-feature
 
 # 2. Make changes, test, commit
@@ -41,16 +66,23 @@ git add forail/main/models/my_model.py
 git commit -m "feat(models): add Policy model for governance"
 
 # 3. Push and create PR
-git push origin feature/my-feature
+git push github feature/my-feature
+gh pr create --base main
 ```
 
 ### Updating the branch
 
 ```bash
-git checkout devel && git pull origin devel
+git checkout main && git pull github main
 git checkout feature/my-feature
-git rebase devel
+git rebase main
 ```
+
+### Remotes
+
+Most repos have two: `github` (github.com/forail-platform, the canonical one,
+where CI and releases run) and `origin` (the GitLab mirror). Push branches and
+tags to **both** when you are done, or the mirror silently falls behind.
 
 ---
 
@@ -121,7 +153,7 @@ cd forail/ui_next && npx tsc --noEmit
 - [ ] All tests pass
 - [ ] No lint errors
 - [ ] Commit messages follow conventions
-- [ ] Branch is rebased on latest `devel`
+- [ ] Branch is rebased on latest `main`
 - [ ] Changes are minimal and focused
 
 ### PR guidelines
@@ -129,7 +161,7 @@ cd forail/ui_next && npx tsc --noEmit
 - **Keep PRs small** — ideally under 500 lines. Large PRs are harder to review.
 - **One concern per PR** — don't mix a bug fix with refactoring.
 - **Include tests** — new features need tests, bug fixes need a regression test.
-- **Target `devel` branch** — all PRs merge into `devel`.
+- **Target `main`** — all PRs merge into `main`.
 
 ### Review Checklist
 
