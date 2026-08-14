@@ -1,6 +1,6 @@
 # Forail Platform — Roadmap
 
-This document tracks the public direction of Forail Platform. For shipped features see [`docs/RELEASE_NOTES_v2026.05.0.md`](docs/RELEASE_NOTES_v2026.05.0.md), [`docs/RELEASE_NOTES_v2026.04.0.md`](docs/RELEASE_NOTES_v2026.04.0.md), and [`docs/RELEASE_NOTES_v2026.03.0.md`](docs/RELEASE_NOTES_v2026.03.0.md). The internal long-form plan lives in [`docs/future_development_plan.md`](docs/future_development_plan.md).
+This document tracks the public direction of Forail Platform. For shipped features see [`docs/RELEASE_NOTES_v2026.05.0.md`](docs/RELEASE_NOTES_v2026.05.0.md), [`docs/RELEASE_NOTES_v2026.04.0.md`](docs/RELEASE_NOTES_v2026.04.0.md), and [`docs/RELEASE_NOTES_v2026.03.0.md`](docs/RELEASE_NOTES_v2026.03.0.md). The internal long-form plan is maintained outside this repository and is not published.
 
 Roadmap entries are **directional**, not commitments. We may reorder, defer, or drop items based on feedback and discovered constraints.
 
