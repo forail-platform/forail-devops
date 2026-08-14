@@ -1,6 +1,6 @@
 # Forail Platform — Roadmap
 
-This document tracks the public direction of Forail Platform. For shipped features see [`docs/RELEASE_NOTES_v2026.05.0.md`](docs/RELEASE_NOTES_v2026.05.0.md), [`docs/RELEASE_NOTES_v2026.04.0.md`](docs/RELEASE_NOTES_v2026.04.0.md), and [`docs/RELEASE_NOTES_v2026.03.0.md`](docs/RELEASE_NOTES_v2026.03.0.md). The internal long-form plan is maintained outside this repository and is not published.
+This document tracks the public direction of Forail Platform. For shipped features see the release notes for [2026.05.0](https://forail-platform.github.io/docs/release-2026.05.0.html), [2026.04.0](https://forail-platform.github.io/docs/release-2026.04.0.html), and [2026.03.0](https://forail-platform.github.io/docs/release-2026.03.0.html). The internal long-form plan is maintained outside this repository and is not published.
 
 Roadmap entries are **directional**, not commitments. We may reorder, defer, or drop items based on feedback and discovered constraints.
 
@@ -32,7 +32,7 @@ Initial extracted release: Docker Compose stack, single-VM Vagrant, React 18 / V
 Items in active consideration. Order roughly reflects priority, but is not fixed.
 
 ### Backend hardening — shipped in 2026.07.0
-- ✅ Audited the top 5 security-sensitive tech-debt spots flagged in earlier reviews (`forail/main/access.py`, `forail/sso/conf.py`, `forail/main/models/activity_stream.py`, `forail/main/signals.py`, `forail/main/constants.py`). SSO signing + SHA-256 defaults, session-key hashing, trusted-proxy `X-Forwarded-For`, superuser-grant audit logging and refresh-token redaction landed; `access.py` and the `ENV_BLOCKLIST` were confirmed clean (no change needed). See [`docs/RELEASE_NOTES_v2026.07.0.md`](docs/RELEASE_NOTES_v2026.07.0.md).
+- ✅ Audited the top 5 security-sensitive tech-debt spots flagged in earlier reviews (`forail/main/access.py`, `forail/sso/conf.py`, `forail/main/models/activity_stream.py`, `forail/main/signals.py`, `forail/main/constants.py`). SSO signing + SHA-256 defaults, session-key hashing, trusted-proxy `X-Forwarded-For`, superuser-grant audit logging and refresh-token redaction landed; `access.py` and the `ENV_BLOCKLIST` were confirmed clean (no change needed). See the [2026.07.0 release notes](https://forail-platform.github.io/docs/release-2026.07.0.html).
 - ✅ AWX → Forail migration tool — one-shot importer covering orgs, teams, inventories (+ sources), credentials, projects, job & workflow templates, schedules, notification templates and RBAC. Shipped in 2026.07.0.
 
 ### Operator follow-ups
@@ -51,7 +51,7 @@ Items in active consideration. Order roughly reflects priority, but is not fixed
 ## Later (2026 H2 / 2027)
 
 ### Multi-Tenancy v2
-The v1 ([2026.04.0](docs/RELEASE_NOTES_v2026.04.0.md)) shipped quota enforcement + branding + soft isolation. v2 will add:
+The v1 ([2026.04.0](https://forail-platform.github.io/docs/release-2026.04.0.html)) shipped quota enforcement + branding + soft isolation. v2 will add:
 - Postgres row-level security policies (DB-level cross-tenant blocking).
 - Strict-mode enforcement (currently audit-only).
 - Per-tenant API rate limiting + Celery queues.
