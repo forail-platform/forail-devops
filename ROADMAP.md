@@ -63,7 +63,7 @@ The v1 ([2026.04.0](docs/RELEASE_NOTES_v2026.04.0.md)) shipped quota enforcement
 Microkernel design — core handles jobs / scheduling / inventory; everything else (credential backends, notification channels, inventory sources, SCM providers) loads as a plugin via a documented SDK. Plugin registry with install/update/remove via UI. Sandboxed execution.
 
 ### Mobile application (Tier 3.5)
-Detailed plan in [`docs/mobile_plan.md`](docs/mobile_plan.md): deployment approval with biometric verification, real-time server monitoring, live log streaming, push alerts, AI assistant chat.
+Detailed plan in the `forail-mobile` repo (`docs/mobile_plan.md`): deployment approval with biometric verification, real-time server monitoring, live log streaming, push alerts, and an AI assistant that tells an admin what is happening on their servers — helping them resolve an incident faster rather than resolving it for them.
 
 ### IaC Scanning v2
 Collection / role provenance verification (sigstore, checksums). Live CVE feed for non-Python EE packages. In-line annotations on the playbook source viewer. Custom rule authoring UI.
