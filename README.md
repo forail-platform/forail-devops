@@ -24,7 +24,8 @@ cd forail-devops
 
 # 2. Configure environment
 cp .env.example .env
-# Edit .env with real values
+# Set the four `changeme` values in .env -- the stack will not come up without
+# them. The rest has working defaults.
 
 # 3. Start
 docker compose up -d
@@ -32,6 +33,29 @@ docker compose up -d
 # 4. Check health
 docker compose ps          # every service should report (healthy)
 ```
+
+The UI is then on <https://localhost>; `http://` redirects to it. Log in with
+`FORAIL_ADMIN_USER` / `FORAIL_ADMIN_PASSWORD` from your `.env`.
+
+On first start, when `nginx/ssl/` is empty, a **self-signed** certificate is
+generated so nginx has something to serve — your browser will warn about it.
+Drop a real certificate into `nginx/ssl/` and it is left alone; see
+[README-prod.md](README-prod.md).
+
+### Running jobs
+
+The stack above serves the API and the UI, but it **cannot execute anything** —
+projects will not sync and every job stays in `pending`. Job execution runs
+playbooks through podman inside the task container, which needs cgroup, mount
+and user-namespace privileges:
+
+```bash
+FORAIL_TASK_PRIVILEGED=true FORAIL_TASK_CGROUP=host docker compose up -d
+```
+
+This is **off by default on purpose**: a privileged container is a trivial
+escape to host root. Turn it on only on a host you are willing to treat as a
+dedicated job runner. This is tracked as H4 in the security notes.
 
 The scripts under `scripts/` are the container health probes — Compose mounts
 them into the containers and runs them there (`bash /etc/forail/healthcheck-web.sh`),

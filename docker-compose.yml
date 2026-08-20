@@ -196,6 +196,33 @@ services:
     restart: unless-stopped
 
   # ── External nginx (TLS termination + routing) ─────────
+  # ── TLS certificate bootstrap ─────────────────────────
+  # nginx terminates TLS and refuses to start without a certificate, so a
+  # clean `docker compose up -d` used to leave it in a restart loop with
+  # nothing serving on 80 or 443. Generate a self-signed pair when none is
+  # present; an operator-supplied certificate in nginx/ssl is never touched.
+  # Self-signed is for getting started only -- see README-prod.md for the
+  # real thing.
+  nginx-cert-init:
+    image: alpine:3.20
+    command:
+      - sh
+      - -c
+      - |
+        if [ -f /ssl/fullchain.pem ] && [ -f /ssl/privkey.pem ]; then
+          echo "TLS certificate present, leaving it alone."
+          exit 0
+        fi
+        apk add --no-cache openssl >/dev/null
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+          -keyout /ssl/privkey.pem -out /ssl/fullchain.pem \
+          -subj "/CN=${FORAIL_TLS_CN:-localhost}" >/dev/null 2>&1
+        echo "WARNING: generated a self-signed TLS certificate for ${FORAIL_TLS_CN:-localhost}."
+        echo "WARNING: browsers will not trust it. Replace nginx/ssl/ before production."
+    volumes:
+      - ./nginx/ssl:/ssl
+    restart: "no"
+
   nginx:
     image: nginx:1.27-alpine
     ports:
@@ -207,6 +234,8 @@ services:
     networks:
       - forail
     depends_on:
+      nginx-cert-init:
+        condition: service_completed_successfully
       forail-web:
         condition: service_healthy
       forail-frontend:
