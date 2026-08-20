@@ -1,14 +1,15 @@
 # Contributing to Forail Platform
 
-This repository is the canonical home of the **full contributing guide** for the whole Forail Platform project — git workflow, commit conventions, coding standards, PR process across all repos.
+The **full contributing guide** — git workflow, commit conventions, coding standards, PR process across all repos — is published on the developer docs site.
 
-**Read first:** [docs/10-contributing-guide.md](./docs/10-contributing-guide.md)
+**Read first:** <https://forail-platform.github.io/dev/contributing.html>
+
+The markdown sources for that site are kept outside this repository.
 
 ## What lives here
 
 - Docker Compose deployment stack (production and development overlays)
 - Install scripts and bootstrap
-- Cross-repo documentation (architecture, deployment, ops, contributing)
 - Release notes for the platform as a whole
 
 ## Quick start (deploy stack)
@@ -20,7 +21,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-See [README.md](./README.md) and `docs/` for full setup.
+See [README.md](./README.md) for full setup.
 
 ## Reporting bugs
 
