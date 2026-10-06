@@ -1,5 +1,5 @@
 x-forail-common: &forail-common
-  image: ${FORAIL_BACKEND_IMAGE:-ghcr.io/forail-platform/forail-backend}:${FORAIL_TAG:-2026.07.0}
+  image: ${FORAIL_BACKEND_IMAGE:-ghcr.io/forail-platform/forail-backend}:${FORAIL_TAG:-2026.10.0}
   env_file: .env
   environment: &forail-env
     DATABASE_HOST: postgres
@@ -172,7 +172,7 @@ services:
 
   # ── Frontend (React UI served by nginx) ────────────────
   forail-frontend:
-    image: ${FORAIL_FRONTEND_IMAGE:-ghcr.io/forail-platform/forail-frontend}:${FORAIL_TAG:-2026.07.0}
+    image: ${FORAIL_FRONTEND_IMAGE:-ghcr.io/forail-platform/forail-frontend}:${FORAIL_TAG:-2026.10.0}
     networks:
       - forail
     healthcheck:
