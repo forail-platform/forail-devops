@@ -134,12 +134,16 @@ outside this repository:
 ## Backup & Restore
 
 ```bash
-# Backup
-./scripts/backup.sh
+# Backup (writes to the forail_backups volume)
+docker compose exec -T forail-task bash /etc/forail/backup.sh
 
-# Restore
-./scripts/restore.sh /path/to/backup.sql.gz
+# Restore: stop the writers, restore in a one-off container, start again
+docker compose stop forail-web forail-task
+docker compose run --rm --no-deps forail-task bash /etc/forail/restore.sh --yes
+docker compose up -d
 ```
+
+Keep `.env` -- at least `FORAIL_SECRET_KEY` -- with your backups: without it, a restored database cannot decrypt any stored credential. Details, upgrade and rollback: the [Administrator Handbook](https://forail-platform.github.io/docs/admin-handbook.html#backup).
 
 ## Related Repositories
 
