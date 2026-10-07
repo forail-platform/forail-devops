@@ -8,7 +8,22 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 
 ## [Unreleased]
 
+## [2026.10.0] - date set when tagged
+
+Collects everything since 2026.06.0: the 2026.07.x backend releases were
+shipped without a deployment release of their own.
+
 ### Fixed
+- **Backup and restore.** The documented backup command could not run (the
+  scripts live in `forail-task`, not `postgres`); `backup.sh` reported success on
+  a failed dump; `restore.sh` replaced nothing, exited 0, and moved the database
+  sequences backwards so later inserts failed. `backup.sh` now writes a
+  custom-format dump plus a `.meta` with the secret-key fingerprint; `restore.sh`
+  refuses while the stack is writing or under a different `FORAIL_SECRET_KEY`,
+  restores into a new database and swaps it in, keeping the old one.
+  `scripts/test-backup-restore.sh` checks the round trip.
+- **Quick start on a clean machine.** nginx never started because nothing
+  generated a certificate; the pinned image tag could not run a job.
 - **Quick Start health check.** Step 4 told you to run `./scripts/healthcheck-web.sh`
   on the host, where it fails: the file is not executable and calls `forail-manage`,
   which exists only inside the backend image. Those scripts are the *container*
@@ -30,7 +45,7 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
   and default **off** — enable the job-execution path explicitly with
   `FORAIL_TASK_PRIVILEGED=true FORAIL_TASK_CGROUP=host`. `FORAIL_ALLOWED_HOSTS`
   no longer defaults to `*` (defaults to `localhost,127.0.0.1`), and `FORAIL_TAG`
-  pins to `2026.07.0` instead of `:latest`.
+  pins to a release (`2026.10.0`) instead of `:latest`.
 - **`.env.example` no longer re-opens what the compose defaults closed**: it
   shipped `FORAIL_ALLOWED_HOSTS=*`, so every install that started from the sample
   file (the documented path) overrode the hardened default back to a wildcard. It
