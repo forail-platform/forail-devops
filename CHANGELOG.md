@@ -8,6 +8,16 @@ and the project adheres to CalVer (`YYYY.MM.PATCH`).
 
 ## [Unreleased]
 
+## [2026.11.0] - 2026-11-19
+
+Coordinated platform release alongside backend/frontend/helm 2026.11.0
+(monitored servers epic #52). Compose and `.env.example` default to the
+2026.11.0 images.
+
+### Changed
+- `FORAIL_TAG` default and the compose image fallbacks now pin
+  `2026.11.0`.
+
 ## [2026.10.0] - date set when tagged
 
 Collects everything since 2026.06.0: the 2026.07.x backend releases were
